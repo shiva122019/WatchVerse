@@ -22,7 +22,10 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-[85vh] items-center justify-center px-6" data-testid="login-page">
+    <div
+      className="relative flex min-h-[85vh] items-center justify-center px-6"
+      data-testid="login-page"
+    >
       <div
         className="pointer-events-none absolute inset-0 opacity-40"
         style={{
