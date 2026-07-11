@@ -192,10 +192,7 @@ npm run dev
 
 ---
 
-## Contributors
 
-* Shiva Malekar
-* Contributors are welcome through pull requests.
 
 ---
 
