@@ -34,7 +34,10 @@ export default function MediaCard({ item, width = "w-44 md:w-52" }) {
         {/* Type badge */}
         <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 backdrop-blur">
           <Icon className="h-3 w-3 text-[#00F0FF]" />
-          <span className="label-caps text-[9px]" style={{ letterSpacing: "0.2em" }}>
+          <span
+            className="label-caps text-[9px]"
+            style={{ letterSpacing: "0.2em" }}
+          >
             {item.type}
           </span>
         </div>
@@ -67,7 +70,16 @@ export default function MediaCard({ item, width = "w-44 md:w-52" }) {
         <div className="flex items-center gap-2 text-xs text-neutral-400">
           <span>{item.release_year}</span>
           <span className="text-neutral-700">·</span>
-          <span className="line-clamp-1">{item.genres?.[0] || item.language}</span>
+          <div className="flex items-center gap-1">
+            {item.genres?.slice(0, 3).map((genre, index) => (
+              <span key={index} className="line-clamp-1">
+                {genre}
+                {index < Math.min(item.genres.length, 3) - 1 && (
+                  <span className="text-neutral-700"> · </span>
+                )}
+              </span>
+            )) || <span>{item.language}</span>}
+          </div>
         </div>
       </div>
     </Link>

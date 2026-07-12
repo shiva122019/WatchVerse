@@ -12,8 +12,20 @@ const TYPES = [
 ];
 
 const GENRES = [
-  "Drama", "Sci-Fi", "Thriller", "Mystery", "Action", "Comedy",
-  "Romance", "Horror", "Fantasy", "Synthwave", "Indie", "Pop", "Jazz", "Folk",
+  "Drama",
+  "Sci-Fi",
+  "Thriller",
+  "Mystery",
+  "Action",
+  "Comedy",
+  "Romance",
+  "Horror",
+  "Fantasy",
+  "Synthwave",
+  "Indie",
+  "Pop",
+  "Jazz",
+  "Folk",
 ];
 
 export default function Browse() {
@@ -30,7 +42,7 @@ export default function Browse() {
   useEffect(() => {
     setLoading(true);
     api
-      .get("/content", {
+      .get("/home/queryContent", {
         params: {
           ...(type ? { type } : {}),
           ...(genre ? { genre } : {}),
@@ -55,7 +67,10 @@ export default function Browse() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 md:px-10" data-testid="browse-page">
+    <div
+      className="mx-auto max-w-7xl px-6 py-12 md:px-10"
+      data-testid="browse-page"
+    >
       <div className="mb-8 flex flex-col gap-2">
         <span className="label-caps text-cyan">Catalog</span>
         <h1 className="font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">

@@ -34,24 +34,17 @@ const demoData = [
   },
 ];
 
-const api = {
-  get: async (url) => {
-    if (url === "/content") {
-      return { data: demoData };
-    }
+import axios from "axios";
 
-    return { data: [] };
-  },
+const api = axios.create({
+  baseURL: "http://localhost:5001", // your backend URL
+  withCredentials: true,
+});
 
-  post: async () => ({ data: {} }),
-  put: async () => ({ data: {} }),
-  delete: async () => ({ data: {} }),
-};
-
-export function formatApiError() {
-  return "Backend not connected";
+export function formatApiError(message) {
+  return message || "backend";
 }
 
-export const API = "";
+export const API = "http://localhost:3000";
 
 export default api;

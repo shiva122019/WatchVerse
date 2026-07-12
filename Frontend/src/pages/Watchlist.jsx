@@ -19,16 +19,22 @@ export default function Watchlist() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await api.get("/watchlist");
-    setItems(data);
-    setLoading(false);
+    try {
+      const res = await api.get("/watchlist/content");
+      setItems(res.data);
+    } catch (error) {
+      console.error("Failed to load data", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     load();
   }, []);
 
-  const filtered = tab === "all" ? items : items.filter((i) => i.status === tab);
+  const filtered =
+    tab === "all" ? items : items.filter((i) => i.status === tab);
 
   const remove = async (content_id) => {
     await api.delete(`/watchlist/${content_id}`);
@@ -37,7 +43,10 @@ export default function Watchlist() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 md:px-10" data-testid="watchlist-page">
+    <div
+      className="mx-auto max-w-7xl px-6 py-12 md:px-10"
+      data-testid="watchlist-page"
+    >
       <div className="mb-8">
         <span className="label-caps text-cyan">Personal</span>
         <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">

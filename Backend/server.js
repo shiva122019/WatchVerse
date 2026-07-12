@@ -5,6 +5,7 @@ const { MongoStore } = require("connect-mongo");
 const passport = require("passport");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
+const errorHandler = require("./lib/errorHandler.js");
 require("dotenv").config();
 
 const routes = require("./routes");
@@ -17,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "http://localhost:5001",
+    origin: "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -55,9 +56,7 @@ app.use((req, res, next) => {
 
 app.use("/", routes);
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+app.use(errorHandler);
 
 app.listen(5001, () => {
   console.log("Server started on port 5001");

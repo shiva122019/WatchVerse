@@ -1,30 +1,31 @@
 const passport = require("passport");
 const localStrategy = require("passport-local").Strategy;
-const connectdb = require("./db.js");
 const User = require("../Models/User.js");
 const validPassword = require("../lib/passportUtils.js").validPassword;
-connectdb();
 
 const customFields = {
-  usernameField: "username",
+  usernameField: "email",
   passwordField: "password",
 };
 
 //done(error-401 invalid, )
 
-const verifyCallBack = (username, password, done) => {
-  console.log("username:", username);
-  console.log("password:", password);
+const verifyCallBack = (email, password, done) => {
+  //console.log("Email received:", email);
 
-  User.findOne({ username: username })
+  User.findOne({ email: email.trim() })
     .then((user) => {
+      //console.log("User found:", user);
+
       if (!user) {
         return done(null, false, {
           message: "Invalid username or password",
         });
       }
+
       validPassword(password, user.hash).then((isValid) => {
-        console.log(isValid);
+        //console.log("Password valid:", isValid);
+
         if (isValid) {
           return done(null, user);
         } else {
@@ -35,6 +36,7 @@ const verifyCallBack = (username, password, done) => {
       });
     })
     .catch((e) => {
+      //console.error(e);
       done(e);
     });
 };
