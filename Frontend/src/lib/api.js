@@ -42,9 +42,9 @@ const api = axios.create({
 });
 
 export function formatApiError(message) {
-  return message || "backend";
+  return message || "internal server error";
 }
 
-export const API = "http://localhost:3000";
+export const API = "http://localhost:5001";
 
 export default api;

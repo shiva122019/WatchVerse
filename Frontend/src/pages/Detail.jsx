@@ -9,7 +9,7 @@ import { toast } from "sonner";
 const typeIcon = { movie: Film, series: Tv, song: Music2 };
 
 export default function Detail() {
-  const { id } = useParams();
+  const { id, type } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [content, setContent] = useState(null);
@@ -22,7 +22,7 @@ export default function Detail() {
 
   const loadAll = async () => {
     const [c, r] = await Promise.all([
-      api.get(`/content/${id}`),
+      api.get(`/content/${type}/${id}`),
       api.get("/reviews", { params: { content_id: id } }),
     ]);
     setContent(c.data);
@@ -49,11 +49,15 @@ export default function Detail() {
   const setStatus = async (status) => {
     if (!user) return navigate("/login");
     try {
-      await api.post("/watchlist", { content_id: id, status });
+      await api.post("/watchlist", {
+        tmdbId: id,
+        status,
+        mediaType: type === "series" ? "tv" : "movie",
+      });
       setWatchStatus(status);
       toast.success(`Added to ${status.replace("_", " ")}`);
     } catch (e) {
-      toast.error(formatApiError(e.response?.data?.detail) || "Failed");
+      toast.error(formatApiError(e.response?.data?.error) || "Failed");
     }
   };
 
@@ -82,7 +86,7 @@ export default function Detail() {
       toast.success("Review posted");
       await loadAll();
     } catch (e2) {
-      setError(formatApiError(e2.response?.data?.detail) || "Failed to submit");
+      setError(formatApiError(e2.response?.data?.error) || "Failed to submit");
     } finally {
       setSubmitting(false);
     }
@@ -163,7 +167,10 @@ export default function Detail() {
             <div className="mt-5 flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <StarRating value={content.avg_rating} size={20} />
-                <span className="font-mono-alt text-lg text-white" data-testid="detail-avg-rating">
+                <span
+                  className="font-mono-alt text-lg text-white"
+                  data-testid="detail-avg-rating"
+                >
                   {content.avg_rating > 0 ? content.avg_rating.toFixed(1) : "—"}
                 </span>
                 <span className="text-xs text-neutral-500">
@@ -198,7 +205,9 @@ export default function Detail() {
             {content.cast?.length > 0 && (
               <p className="mt-2 text-sm text-neutral-400">
                 <span className="label-caps mr-2">Cast</span>
-                <span className="text-neutral-300">{content.cast.join(", ")}</span>
+                <span className="text-neutral-300">
+                  {content.cast.join(", ")}
+                </span>
               </p>
             )}
 
@@ -264,7 +273,10 @@ export default function Detail() {
                   {reviewText.length}/1000
                 </span>
                 {error && (
-                  <span className="text-xs text-[#FF0055]" data-testid="review-error">
+                  <span
+                    className="text-xs text-[#FF0055]"
+                    data-testid="review-error"
+                  >
                     {error}
                   </span>
                 )}
@@ -313,7 +325,9 @@ export default function Detail() {
                     </div>
                     <StarRating value={r.rating} />
                   </div>
-                  <p className="mt-2 leading-relaxed text-neutral-300">{r.text}</p>
+                  <p className="mt-2 leading-relaxed text-neutral-300">
+                    {r.text}
+                  </p>
                 </div>
               ))
             )}
