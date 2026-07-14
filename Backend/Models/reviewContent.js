@@ -3,7 +3,7 @@ mongoose = require("mongoose");
 // The thing being reviewed (movie, show, etc.) — reviews point back to this via itemId
 const contentSchema = new mongoose.Schema(
   {
-    tmdbid: {
+    tmdbId: {
       type: Number,
     },
     // cached values so we don't recalculate from all reviews every page load

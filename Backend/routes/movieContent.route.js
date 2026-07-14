@@ -24,7 +24,7 @@ router.get("/:type/:id", async (req, res) => {
   try {
     const { type, id } = req.params;
 
-    if (!["movie", "series"].includes(type)) {
+    if (!["movie", "series", "tv"].includes(type)) {
       return res.status(400).json({
         error: "Invalid content type",
       });

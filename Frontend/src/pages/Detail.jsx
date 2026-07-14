@@ -29,8 +29,8 @@ export default function Detail() {
     setReviews(r.data);
     if (user) {
       try {
-        const wl = await api.get("/watchlist");
-        const mine = wl.data.find((w) => w.content_id === id);
+        const wl = await api.get("/watchlist/content");
+        const mine = wl.data.find((w) => Number(w.content_id) === Number(id));
         setWatchStatus(mine ? mine.status : null);
       } catch {}
       const mineReview = r.data.find((rv) => rv.user_id === user.id);

@@ -20,6 +20,7 @@ tmdb.defaults.raxConfig = {
 };
 
 rax.attach(tmdb);
+
 //to display all movies in the watchlist
 router.get("/content", async (req, res) => {
   try {
@@ -191,19 +192,20 @@ router.get("/:contentId", async (req, res) => {
   }
 });
 
-router.delete("/content/:tmdbid", async (req, res) => {
+router.delete("/:tmdbId", async (req, res) => {
   try {
+    let tmdbId = Number(req.params.tmdbId);
     // mabe if the cookie expires? then the user is not logged in??
-    if (!req.isAuthenticated()) {
+    if (!req.user) {
       return res.status(401).json({
         success: false,
         message: "Please log in first.",
       });
     }
 
-    const deletedMovie = await Watchlist.findOneAndDelete({
+    const deletedMovie = await WatchList.findOneAndDelete({
       user: req.user._id,
-      tmdbId: Number(req.params.tmdbId),
+      tmdbId,
     });
 
     res.status(200).json({
