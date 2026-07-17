@@ -9,7 +9,7 @@ const tmdb = axios.create({
     accept: "application/json",
     Authorization: `Bearer ${process.env.TMDB_BEARER_TOKEN}`,
   },
-  timeout: 10000,
+  timeout: 100000,
 });
 
 tmdb.defaults.raxConfig = {

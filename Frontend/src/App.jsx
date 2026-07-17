@@ -11,9 +11,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Watchlist from "./pages/Watchlist";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AudioVisualizer from "./components/MediaAssistantChatbot";
 import "./App.css";
 
-function AppShell() {
+function AppShell({ splashDone }) {
   return (
     <>
       <Navbar />
@@ -34,6 +35,12 @@ function AppShell() {
           />
         </Routes>
       </main>
+      {splashDone &&
+      <AudioVisualizer
+      siteName="WatchVerse"
+      chatUrl="http://localhost:5001/chat"
+      />}
+
       <footer className="border-t border-white/5 py-10 text-center text-xs uppercase tracking-[0.3em] text-neutral-600">
         Prismo · Movies · Series · Music
       </footer>
@@ -62,7 +69,7 @@ export default function App() {
       )}
       <AuthProvider>
         <BrowserRouter>
-          <AppShell />
+          <AppShell splashDone={splashDone} />
         </BrowserRouter>
       </AuthProvider>
       <Toaster theme="dark" position="bottom-right" />
