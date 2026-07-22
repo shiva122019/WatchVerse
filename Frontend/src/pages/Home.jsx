@@ -167,31 +167,83 @@ export default function Home() {
       )}
 
       <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <Row title="Trending Now" items={home.trending} testid="row-trending" />
-
         <Row
-          title="Popular Movies"
-          items={home.popularMovies}
-          testid="row-popular-movies"
+          title="Top 10 Trending"
+          items={home.trending}
+          testid="row-trending"
         />
 
-        <Row
-          title="Top Rated Movies"
-          items={home.topRatedMovies}
-          testid="row-top-rated-movies"
-        />
+        <Row title="Upcoming" items={home.upcoming} testid="row-upcoming" />
 
-        <Row
-          title="Popular Series"
-          items={home.popularSeries}
-          testid="row-popular-series"
-        />
+        {home.continueWatching?.length > 0 && (
+          <Row
+            title="Continue Watching"
+            items={home.continueWatching}
+            testid="row-continue-watching"
+          />
+        )}
 
-        <Row
-          title="Top Rated Series"
-          items={home.topRatedSeries}
-          testid="row-top-rated-series"
-        />
+        {home.genreRows?.Action?.length > 0 && (
+          <Row
+            title="Action"
+            items={home.genreRows.Action}
+            testid="row-action"
+          />
+        )}
+
+        {home.genreRows?.Comedy?.length > 0 && (
+          <Row
+            title="Comedy"
+            items={home.genreRows.Comedy}
+            testid="row-comedy"
+          />
+        )}
+
+        {home.genreRows?.Drama?.length > 0 && (
+          <Row title="Drama" items={home.genreRows.Drama} testid="row-drama" />
+        )}
+
+        {home.genreRows?.["Science Fiction"]?.length > 0 && (
+          <Row
+            title="Science Fiction"
+            items={home.genreRows["Science Fiction"]}
+            testid="row-scifi"
+          />
+        )}
+
+        {home.genreRows?.Horror?.length > 0 && (
+          <Row
+            title="Horror"
+            items={home.genreRows.Horror}
+            testid="row-horror"
+          />
+        )}
+
+        {home.genreRows?.Romance?.length > 0 && (
+          <Row
+            title="Romance"
+            items={home.genreRows.Romance}
+            testid="row-romance"
+          />
+        )}
+
+        <Row title="TV Shows" items={home.tvShows} testid="row-tv-shows" />
+
+        {home.recommended?.length > 0 && (
+          <Row
+            title="Recommended For You"
+            items={home.recommended}
+            testid="row-recommended"
+          />
+        )}
+
+        {home.becauseYouWatched?.items?.length > 0 && (
+          <Row
+            title={`Because You Watched ${home.becauseYouWatched.source.title}`}
+            items={home.becauseYouWatched.items}
+            testid="row-because-you-watched"
+          />
+        )}
       </div>
     </div>
   );

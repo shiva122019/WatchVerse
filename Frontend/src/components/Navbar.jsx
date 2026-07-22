@@ -3,6 +3,7 @@ import { PrismoLogoMark, PrismoWordmark } from "@/components/PrismoLogo";
 import { useAuth } from "@/context/AuthContext";
 import { Search, LogOut } from "lucide-react";
 import { useState } from "react";
+import api from "@/lib/api";
 
 const linkClass = ({ isActive }) =>
   `text-sm font-medium tracking-wide transition-colors ${
@@ -18,12 +19,13 @@ export default function Navbar() {
     e.preventDefault();
     if (q.trim()) navigate(`/browse?q=${encodeURIComponent(q.trim())}`);
   };
+  async function onboardingstatus() {
+    const res = await api.get("/onboarding/status");
 
+    return res.data.onboardingCompleted;
+  }
   return (
-    <header
-      data-testid="app-navbar"
-      className="glass sticky top-0 z-50 w-full"
-    >
+    <header data-testid="app-navbar" className="glass sticky top-0 z-50 w-full">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
         <Link
           to="/"
@@ -66,6 +68,15 @@ export default function Navbar() {
               data-testid="nav-watchlist"
             >
               My List
+            </NavLink>
+          )}
+          {!onboardingstatus() && (
+            <NavLink
+              to="/onBoarding"
+              className={linkClass}
+              data-testid="nav-onBoarding"
+            >
+              Get to Know you
             </NavLink>
           )}
         </nav>

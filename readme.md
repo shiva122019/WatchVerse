@@ -1,11 +1,16 @@
 # WatchVerse
 
+<<<<<<< HEAD
 WatchVerse is a full-stack MERN media discovery platform that enables users to discover movies and TV series, explore detailed information, write reviews, and manage personalized watchlists. Powered by **The Movie Database (TMDB)**, WatchVerse combines rich media metadata with user-generated content to create a modern entertainment discovery experience.
+=======
+A modern media discovery platform where users can explore movies and TV series, search for content, manage personal watchlists, and discover trending entertainment. The application integrates with **The Movie Database (TMDB)** to provide up-to-date content and metadata.
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 
 ---
 
 ## Features
 
+<<<<<<< HEAD
 ### Authentication
 
 - User registration and login
@@ -93,6 +98,50 @@ Users can:
 - Update watch status
 - Remove content
 - View all saved titles
+=======
+### User Authentication
+
+* Secure user registration and login
+* Password hashing with bcrypt
+* Session-based authentication using Passport.js
+* Persistent login sessions
+
+### Browse Content
+
+* Browse trending movies and TV series
+* Filter by media type
+* Filter by genre
+* Search by title
+* Search by actor or creator
+* Responsive browsing interface
+
+### Home Page
+
+* Featured media banner
+* Trending content
+* Popular movies
+* Popular TV series
+* Curated content sections
+
+### Watchlist
+
+* Add content to a personal watchlist
+* Track watching status:
+
+  * Want to Watch
+  * Watching
+  * Watched
+* Remove items from the watchlist
+
+### Media Details
+
+* Movie and TV metadata
+* Release year
+* Ratings
+* Genres
+* Posters and backdrop images
+* Descriptions
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 
 ---
 
@@ -100,6 +149,7 @@ Users can:
 
 ### Frontend
 
+<<<<<<< HEAD
 - React (Vite)
 - React Router
 - Tailwind CSS
@@ -123,11 +173,34 @@ Users can:
 ### External APIs
 
 - TMDB (The Movie Database)
+=======
+* React
+* React Router
+* Axios
+* Tailwind CSS
+* Framer Motion
+
+### Backend
+
+* Node.js
+* Express.js
+* MongoDB
+* Mongoose
+* Passport.js
+* Express Session
+* bcrypt
+
+### External APIs
+
+* TMDB API
+
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 
 ---
 
 ## Project Structure
 
+<<<<<<< HEAD
 ```text
 WatchVerse/
 │
@@ -163,6 +236,22 @@ WatchVerse/
 │   │   └── errorHandler.js
 │   │
 │   └── server.js
+=======
+```
+Movie-app/
+│
+├── Frontend/
+│   ├── src/
+│   ├── public/
+│   └── ...
+│
+├── Backend/
+│   ├── Models/
+│   ├── Routes/
+│   ├── Config/
+│   ├── Lib/
+│   └── ...
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 │
 └── README.md
 ```
@@ -171,6 +260,7 @@ WatchVerse/
 
 ## Installation
 
+<<<<<<< HEAD
 ### Clone the Repository
 
 ```bash
@@ -181,12 +271,23 @@ cd WatchVerse
 ---
 
 ### Backend Setup
+=======
+### Clone the repository
+
+```bash
+git clone <repository-url>
+cd Movie-app
+```
+
+### Backend
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 
 ```bash
 cd Backend
 npm install
 ```
 
+<<<<<<< HEAD
 Create a `.env` file:
 
 ```env
@@ -197,6 +298,15 @@ MONGO_URL=your_mongodb_connection_string
 SESSION_SECRET=your_session_secret
 
 TMDB_BEARER_TOKEN=your_tmdb_bearer_token
+=======
+Create a `.env` file containing:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+SESSION_SECRET=your_session_secret
+TMDB_BEARER_TOKEN=your_tmdb_api_token
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 ```
 
 Start the backend:
@@ -205,6 +315,7 @@ Start the backend:
 npm start
 ```
 
+<<<<<<< HEAD
 or
 
 ```bash
@@ -216,6 +327,11 @@ npm run dev
 ---
 
 ### Frontend Setup
+=======
+---
+
+### Frontend
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 
 ```bash
 cd Frontend
@@ -229,6 +345,7 @@ npm run dev
 
 ### Authentication
 
+<<<<<<< HEAD
 | Method | Endpoint       | Description                    |
 | ------ | -------------- | ------------------------------ |
 | POST   | `/register`    | Register a new user            |
@@ -265,11 +382,30 @@ npm run dev
 | GET    | `/watchlist/content`    | Retrieve user's watchlist      |
 | GET    | `/watchlist/:contentId` | Get watch status for a title   |
 | DELETE | `/watchlist/:contentId` | Remove from watchlist          |
+=======
+* `POST /register`
+* `POST /login`
+* `POST /logout`
+* `GET /currentUser`
+
+### Content
+
+* `GET /home`
+* `GET /queryContent`
+
+### Watchlist
+
+* `POST /watchlist/add`
+* `GET /watchlist`
+* `PATCH /watchlist/:id`
+* `DELETE /watchlist/:id`
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 
 ---
 
 ## Performance Optimizations
 
+<<<<<<< HEAD
 - Shared Axios client for TMDB requests
 - Automatic retry using retry-axios with exponential backoff
 - NodeCache integration
@@ -317,9 +453,40 @@ Implemented:
 - Spotify integration
 - Dark mode
 - Deployment and CI/CD
+=======
+* Cached homepage data to reduce API calls
+* Cached genre lists for 24 hours
+* Cached trending and discover results
+* Automatic retry for failed TMDB requests
+* Connection reuse using HTTP Keep-Alive
+* Duplicate removal from aggregated search results
+
+---
+
+## Future Improvements
+
+* User reviews and ratings
+* AI-powered recommendations
+* Recommendation engine based on watch history
+* Friend system and social activity feed
+* Shared watch rooms
+* Infinite scrolling
+* Notifications
+* Dark mode customization
+* Spotify integration for music
+* Review sentiment analysis using AI
+
+---
+
+
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0
 
 ---
 
 ## License
 
+<<<<<<< HEAD
 This project is intended for educational purposes, portfolio development, and software engineering interviews.
+=======
+This project is intended for educational and portfolio purposes.
+>>>>>>> cce3f5c2450bf544e73f90b4cff1df557032d5a0

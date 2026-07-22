@@ -1,100 +1,175 @@
 const router = require("express").Router();
-const NodeCache = require("node-cache");
-const axios = require("axios");
-const rax = require("retry-axios");
+const tmdb = require("../lib/tmdb");
+const {
+  homeCache,
+  browseCache,
+  genreCache,
+  mapTMDBItem,
+  tmdbFetch,
+  getRecommendedForUser,
+  getBecauseYouWatched,
+  getTVShows,
+  getUpcoming,
+  getGenreRows,
+  getTrending,
+  getContinueWatching,
+} = require("../services/home.service");
 
-const tmdb = axios.create({
-  baseURL: "https://api.themoviedb.org/3",
-  headers: {
-    accept: "application/json",
-    Authorization: `Bearer ${process.env.TMDB_BEARER_TOKEN}`,
-  },
-  timeout: 10000,
-});
+// router.get("/", async (req, res) => {
+//   try {
+//     //---------------------------------------------------
+//     // Cache
+//     //---------------------------------------------------
 
-tmdb.defaults.raxConfig = {
-  retry: 10,
-  backoffType: "exponential",
-  retryDelay: 100,
-};
+//     const cached = homeCache.get("homepage");
 
-rax.attach(tmdb);
+//     if (cached) {
+//       return res.json(cached);
+//     }
 
-const homeCache = new NodeCache({
-  stdTTL: 900,
-  checkperiod: 120,
-});
+//     //---------------------------------------------------
+//     // Genre Maps
+//     //---------------------------------------------------
 
-const browseCache = new NodeCache({
-  stdTTL: 900,
-  checkperiod: 120,
-});
+//     const [movieGenresRes, tvGenresRes] = await Promise.all([
+//       tmdb.get("/genre/movie/list"),
+//       tmdb.get("/genre/tv/list"),
+//     ]);
 
-const genreCache = new NodeCache({
-  stdTTL: 86400,
-  checkperiod: 3600,
-});
+//     const movieGenreMap = {};
+//     const tvGenreMap = {};
 
-function mapTMDBItem(item, mediaType, genreMap) {
-  return {
-    id: item.id,
+//     movieGenresRes.data.genres.forEach((g) => {
+//       movieGenreMap[g.id] = g.name;
+//     });
 
-    title: item.title || item.name,
+//     tvGenresRes.data.genres.forEach((g) => {
+//       tvGenreMap[g.id] = g.name;
+//     });
 
-    type: mediaType === "tv" ? "series" : "movie",
+//     //---------------------------------------------------
+//     // Homepage Requests
+//     //---------------------------------------------------
 
-    avg_rating: Number((item.vote_average / 2).toFixed(1)),
+//     const responses = await Promise.allSettled([
+//       tmdb.get("/trending/all/week"),
+//       tmdb.get("/movie/popular"),
+//       tmdb.get("/movie/top_rated"),
+//       tmdb.get("/tv/popular"),
+//       tmdb.get("/tv/top_rated"),
+//     ]);
 
-    release_year: item.release_date
-      ? Number(item.release_date.substring(0, 4))
-      : item.first_air_date
-        ? Number(item.first_air_date.substring(0, 4))
-        : null,
+//     const getData = (index) =>
+//       responses[index].status === "fulfilled"
+//         ? responses[index].value.data.results
+//         : [];
 
-    genres: (item.genre_ids || []).map((id) => genreMap[id]).filter(Boolean),
+//     //---------------------------------------------------
+//     // Trending
+//     //---------------------------------------------------
 
-    description: item.overview,
+//     const trending = getData(0)
+//       .filter((item) => item.media_type === "movie" || item.media_type === "tv")
+//       .map((item) =>
+//         mapTMDBItem(
+//           item,
+//           item.media_type,
+//           item.media_type === "movie" ? movieGenreMap : tvGenreMap,
+//         ),
+//       );
 
-    cover_url: item.poster_path
-      ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-      : null,
+//     //---------------------------------------------------
+//     // Popular Movies
+//     //---------------------------------------------------
 
-    backdrop_url: item.backdrop_path
-      ? `https://image.tmdb.org/t/p/original${item.backdrop_path}`
-      : null,
-  };
-}
+//     const popularMovies = getData(1).map((item) =>
+//       mapTMDBItem(item, "movie", movieGenreMap),
+//     );
 
-async function tmdbFetch(url, config = {}) {
-  try {
-    const { data } = await tmdb.get(url, config);
-    return data;
-  } catch (err) {
-    console.error("TMDB Error:", url);
+//     //---------------------------------------------------
+//     // Top Rated Movies
+//     //---------------------------------------------------
 
-    if (err.response) {
-      console.error(err.response.status);
-      console.error(err.response.data);
-    } else {
-      console.error(err.message);
-    }
+//     const topRatedMovies = getData(2).map((item) =>
+//       mapTMDBItem(item, "movie", movieGenreMap),
+//     );
 
-    throw err;
-  }
-}
+//     //---------------------------------------------------
+//     // Popular Series
+//     //---------------------------------------------------
+
+//     const popularSeries = getData(3).map((item) =>
+//       mapTMDBItem(item, "tv", tvGenreMap),
+//     );
+
+//     //---------------------------------------------------
+//     // Top Rated Series
+//     //---------------------------------------------------
+
+//     const topRatedSeries = getData(4).map((item) =>
+//       mapTMDBItem(item, "tv", tvGenreMap),
+//     );
+
+//     //---------------------------------------------------
+//     // Featured
+//     //---------------------------------------------------
+
+//     const featured =
+//       trending.length > 0
+//         ? trending[0]
+//         : popularMovies[0] || popularSeries[0] || null;
+
+//     //---------------------------------------------------
+//     // Response
+//     //---------------------------------------------------
+
+//     if (req.user) {
+//       const recommended = req.user
+//         ? await getRecommendedForUser(req.user._id)
+//         : [];
+
+//       const becauseYouWatched = req.user
+//         ? await getBecauseYouWatched(req.user._id)
+//         : [];
+//     }
+
+//     const response = {
+//       featured,
+
+//       trending,
+
+//       popularMovies,
+
+//       topRatedMovies,
+
+//       popularSeries,
+
+//       topRatedSeries,
+
+//       recommended,
+
+//       becauseYouWatched,
+//     };
+
+//     //---------------------------------------------------
+//     // Save Cache
+//     //---------------------------------------------------
+
+//     homeCache.set("homepage", response);
+
+//     res.json(response);
+//   } catch (err) {
+//     console.error(err.response?.data || err.message);
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Unable to load homepage.",
+//     });
+//   }
+// });
 
 router.get("/", async (req, res) => {
   try {
-    //---------------------------------------------------
-    // Cache
-    //---------------------------------------------------
-
-    const cached = homeCache.get("homepage");
-
-    if (cached) {
-      return res.json(cached);
-    }
-
     //---------------------------------------------------
     // Genre Maps
     //---------------------------------------------------
@@ -116,102 +191,55 @@ router.get("/", async (req, res) => {
     });
 
     //---------------------------------------------------
-    // Homepage Requests
+    // Public Homepage (Cached)
     //---------------------------------------------------
 
-    const responses = await Promise.allSettled([
-      tmdb.get("/trending/all/week"),
-      tmdb.get("/movie/popular"),
-      tmdb.get("/movie/top_rated"),
-      tmdb.get("/tv/popular"),
-      tmdb.get("/tv/top_rated"),
-    ]);
+    let publicSections = homeCache.get("homepage");
 
-    const getData = (index) =>
-      responses[index].status === "fulfilled"
-        ? responses[index].value.data.results
-        : [];
+    if (!publicSections) {
+      const [trending, upcoming, genreRows, tvShows] = await Promise.all([
+        getTrending(movieGenreMap, tvGenreMap),
+        getUpcoming(movieGenreMap, tvGenreMap),
+        getGenreRows(movieGenreMap),
+        getTVShows(tvGenreMap),
+      ]);
 
-    //---------------------------------------------------
-    // Trending
-    //---------------------------------------------------
+      publicSections = {
+        trending,
+        upcoming,
+        genreRows,
+        tvShows,
+      };
 
-    const trending = getData(0)
-      .filter((item) => item.media_type === "movie" || item.media_type === "tv")
-      .map((item) =>
-        mapTMDBItem(
-          item,
-          item.media_type,
-          item.media_type === "movie" ? movieGenreMap : tvGenreMap,
-        ),
-      );
+      homeCache.set("homepage", publicSections);
+    }
 
     //---------------------------------------------------
-    // Popular Movies
+    // Personalized Sections
     //---------------------------------------------------
 
-    const popularMovies = getData(1).map((item) =>
-      mapTMDBItem(item, "movie", movieGenreMap),
-    );
+    let continueWatching = [];
+    let recommended = [];
+    let becauseYouWatched = [];
 
-    //---------------------------------------------------
-    // Top Rated Movies
-    //---------------------------------------------------
-
-    const topRatedMovies = getData(2).map((item) =>
-      mapTMDBItem(item, "movie", movieGenreMap),
-    );
-
-    //---------------------------------------------------
-    // Popular Series
-    //---------------------------------------------------
-
-    const popularSeries = getData(3).map((item) =>
-      mapTMDBItem(item, "tv", tvGenreMap),
-    );
-
-    //---------------------------------------------------
-    // Top Rated Series
-    //---------------------------------------------------
-
-    const topRatedSeries = getData(4).map((item) =>
-      mapTMDBItem(item, "tv", tvGenreMap),
-    );
-
-    //---------------------------------------------------
-    // Featured
-    //---------------------------------------------------
-
-    const featured =
-      trending.length > 0
-        ? trending[0]
-        : popularMovies[0] || popularSeries[0] || null;
+    if (req.user) {
+      [continueWatching, recommended, becauseYouWatched] = await Promise.all([
+        getContinueWatching(req.user._id),
+        getRecommendedForUser(req.user._id),
+        getBecauseYouWatched(req.user._id),
+      ]);
+    }
 
     //---------------------------------------------------
     // Response
     //---------------------------------------------------
 
-    const response = {
-      featured,
-
-      trending,
-
-      popularMovies,
-
-      topRatedMovies,
-
-      popularSeries,
-
-      topRatedSeries,
-    };
-
-    //---------------------------------------------------
-    // Save Cache
-    //---------------------------------------------------
-
-    homeCache.set("homepage", response);
-
-    res.json(response);
+    res.json({
+      ...publicSections,
+      continueWatching,
+      recommended,
+      becauseYouWatched,
+    });
   } catch (err) {
     console.error(err.response?.data || err.message);
 

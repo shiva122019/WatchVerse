@@ -5,6 +5,7 @@ import { StarRating, StarInput } from "@/components/StarRating";
 import { useAuth } from "@/context/AuthContext";
 import { Plus, Check, Play, Clock, Film, Tv, Music2 } from "lucide-react";
 import { toast } from "sonner";
+import ReviewComments from "@/components/ReviewComments";
 
 const typeIcon = { movie: Film, series: Tv, song: Music2 };
 
@@ -18,6 +19,7 @@ export default function Detail() {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('reviews');
   const [error, setError] = useState("");
 
   const loadAll = async () => {
@@ -32,7 +34,7 @@ export default function Detail() {
         const wl = await api.get("/watchlist/content");
         const mine = wl.data.find((w) => Number(w.content_id) === Number(id));
         setWatchStatus(mine ? mine.status : null);
-      } catch {}
+      } catch { }
       const mineReview = r.data.find((rv) => rv.user_id === user.id);
       if (mineReview) {
         setRating(mineReview.rating);
@@ -66,7 +68,7 @@ export default function Detail() {
       await api.delete(`/watchlist/${id}`);
       setWatchStatus(null);
       toast.success("Removed from list");
-    } catch {}
+    } catch { }
   };
 
   const submitReview = async (e) => {
@@ -119,9 +121,8 @@ export default function Detail() {
           {/* Poster */}
           <div className="w-40 shrink-0 sm:w-52 md:w-60">
             <div
-              className={`overflow-hidden rounded-xl border border-white/10 shadow-2xl ${
-                content.type === "song" ? "aspect-square" : "aspect-[2/3]"
-              }`}
+              className={`overflow-hidden rounded-xl border border-white/10 shadow-2xl ${content.type === "song" ? "aspect-square" : "aspect-[2/3]"
+                }`}
             >
               <img
                 src={content.cover_url}
@@ -220,11 +221,10 @@ export default function Detail() {
                     key={s}
                     onClick={() => (active ? removeFromList() : setStatus(s))}
                     data-testid={`watchlist-${s}-btn`}
-                    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                      active
+                    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${active
                         ? "border-[#00F0FF] bg-[#00F0FF] text-black"
                         : "border-white/15 bg-white/5 text-white hover:border-white/40"
-                    }`}
+                      }`}
                   >
                     {active ? (
                       <Check className="h-4 w-4" />
@@ -245,13 +245,26 @@ export default function Detail() {
 
         <div className="divider-line mt-16" />
 
-        {/* Reviews */}
+        {/* Community Section */}
         <section className="mt-12" data-testid="reviews-section">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-white">
-            Reviews
-          </h2>
+          <div className="flex gap-8 border-b border-white/10 pb-4 mb-6">
+            <button 
+              onClick={() => setActiveTab('reviews')}
+              className={`font-display text-3xl font-semibold tracking-tight transition ${activeTab === 'reviews' ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'}`}
+            >
+              Reviews
+            </button>
+            <button 
+              onClick={() => setActiveTab('comments')}
+              className={`font-display text-3xl font-semibold tracking-tight transition ${activeTab === 'comments' ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'}`}
+            >
+              Comments
+            </button>
+          </div>
 
-          {user ? (
+          {activeTab === 'reviews' ? (
+            <>
+              {user ? (
             <form
               onSubmit={submitReview}
               className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6"
@@ -332,6 +345,10 @@ export default function Detail() {
               ))
             )}
           </div>
+          </>
+          ) : (
+            <ReviewComments contentId={id} />
+          )}
         </section>
       </div>
     </div>
