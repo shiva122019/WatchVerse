@@ -93,7 +93,7 @@ export default function Home() {
     );
   }
 
-  const featured = home.featured;
+  const featured = home.trending?.[0];
 
   return (
     <div className="pb-20">
