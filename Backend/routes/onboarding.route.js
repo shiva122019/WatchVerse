@@ -91,7 +91,7 @@ router.post("/preferences", async (req, res, next) => {
       });
     }
 
-    const { liked = [], disliked = [] } = req.body;
+    const { liked = [], disliked = [], superLiked = [] } = req.body;
 
     const genreMap = new Map();
     const actorMap = new Map();
@@ -141,6 +141,7 @@ router.post("/preferences", async (req, res, next) => {
     await Promise.all([
       ...liked.map((item) => processItem(item, 1)),
       ...disliked.map((item) => processItem(item, -1)),
+      ...superLiked.map((item) => processItem(item, 2)),
     ]);
 
     await UserPreference.findOneAndUpdate(
