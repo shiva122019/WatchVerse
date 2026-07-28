@@ -14,7 +14,7 @@ export default function MediaCard({ item, width = "w-44 md:w-52" }) {
 
   return (
     <Link
-      to={`/content/${item.id}`}
+      to={`/content/${item.type}/${item.id}`}
       data-testid={`media-card-${item.id}`}
       className={`group card-hover relative flex ${width} shrink-0 flex-col`}
     >
@@ -71,14 +71,20 @@ export default function MediaCard({ item, width = "w-44 md:w-52" }) {
           <span>{item.release_year}</span>
           <span className="text-neutral-700">·</span>
           <div className="flex items-center gap-1">
-            {item.genres?.slice(0, 3).map((genre, index) => (
-              <span key={index} className="line-clamp-1">
-                {genre}
-                {index < Math.min(item.genres.length, 3) - 1 && (
-                  <span className="text-neutral-700"> · </span>
-                )}
-              </span>
-            )) || <span>{item.language}</span>}
+            {isSong ? (
+              <span className="line-clamp-1">{item.description}</span>
+            ) : item.genres?.length ? (
+              item.genres.slice(0, 3).map((genre, index) => (
+                <span key={index} className="line-clamp-1">
+                  {genre}
+                  {index < Math.min(item.genres.length, 3) - 1 && (
+                    <span className="text-neutral-700"> · </span>
+                  )}
+                </span>
+              ))
+            ) : (
+              <span>{item.language}</span>
+            )}
           </div>
         </div>
       </div>

@@ -20,6 +20,50 @@ tmdb.defaults.raxConfig = {
 
 rax.attach(tmdb);
 
+//---------------------------------------------------
+// Spotify Client (Client Credentials Flow)
+//---------------------------------------------------
+
+let spotifyToken = null;
+let spotifyTokenExpiry = 0;
+
+async function getSpotifyToken() {
+  if (spotifyToken && Date.now() < spotifyTokenExpiry) {
+    return spotifyToken;
+  }
+
+  const res = await axios.post(
+    "https://accounts.spotify.com/api/token",
+    new URLSearchParams({ grant_type: "client_credentials" }),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(
+            `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+          ).toString("base64"),
+      },
+    }
+  );
+
+  spotifyToken = res.data.access_token;
+  spotifyTokenExpiry = Date.now() + res.data.expires_in * 1000 - 60000;
+
+  return spotifyToken;
+}
+
+const spotify = axios.create({
+  baseURL: "https://api.spotify.com/v1",
+  timeout: 10000,
+});
+
+spotify.interceptors.request.use(async (config) => {
+  const token = await getSpotifyToken();
+  config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 const homeCache = new NodeCache({
   stdTTL: 900,
   checkperiod: 120,
@@ -33,6 +77,11 @@ const browseCache = new NodeCache({
 const genreCache = new NodeCache({
   stdTTL: 86400,
   checkperiod: 3600,
+});
+
+const musicCache = new NodeCache({
+  stdTTL: 900,
+  checkperiod: 120,
 });
 
 function mapTMDBItem(item, mediaType, genreMap) {
@@ -63,6 +112,46 @@ function mapTMDBItem(item, mediaType, genreMap) {
       ? `https://image.tmdb.org/t/p/original${item.backdrop_path}`
       : null,
   };
+}
+
+//---------------------------------------------------
+// Spotify Helpers
+//---------------------------------------------------
+
+function mapSpotifyTrack(track) {
+  const cover =
+    track.album?.images?.[0]?.url || track.album?.images?.[1]?.url || null;
+
+  return {
+    id: track.id,
+
+    title: track.name,
+
+    type: "song",
+
+    // Spotify removed the `popularity` field in Feb 2026 — no rating data available
+    avg_rating: 0,
+
+    release_year: track.album?.release_date
+      ? Number(track.album.release_date.substring(0, 4))
+      : null,
+
+    genres: [],
+
+    description: (track.artists || []).map((a) => a.name).join(", "),
+
+    cover_url: cover,
+
+    backdrop_url: cover,
+  };
+}
+
+async function spotifySearchTracks(query, limit = 10) {
+  const { data } = await spotify.get("/search", {
+    params: { q: query, type: "track", limit },
+  });
+
+  return (data.tracks?.items || []).filter(Boolean).map(mapSpotifyTrack);
 }
 
 async function tmdbFetch(url, config = {}) {
@@ -125,7 +214,18 @@ router.get("/", async (req, res) => {
       tmdb.get("/movie/top_rated"),
       tmdb.get("/tv/popular"),
       tmdb.get("/tv/top_rated"),
+      spotify.get("/search", {
+        params: { q: "tag:new", type: "track", limit: 10 },
+      }), // index 5 — new music
     ]);
+
+    if (responses[5].status === "rejected") {
+  console.error(
+    "SPOTIFY HOME ERROR:",
+    responses[5].reason?.response?.status,
+    responses[5].reason?.response?.data || responses[5].reason?.message
+  );
+}
 
     const getData = (index) =>
       responses[index].status === "fulfilled"
@@ -179,6 +279,17 @@ router.get("/", async (req, res) => {
     );
 
     //---------------------------------------------------
+    // Popular Music (Spotify "tag:new" — /browse/new-releases was removed)
+    //---------------------------------------------------
+
+    const popularMusic =
+      responses[5].status === "fulfilled"
+        ? (responses[5].value.data.tracks?.items || [])
+            .filter(Boolean)
+            .map(mapSpotifyTrack)
+        : [];
+
+    //---------------------------------------------------
     // Featured
     //---------------------------------------------------
 
@@ -203,6 +314,8 @@ router.get("/", async (req, res) => {
       popularSeries,
 
       topRatedSeries,
+
+      popularMusic,
     };
 
     //---------------------------------------------------
@@ -226,8 +339,42 @@ router.get("/queryContent", async (req, res) => {
   try {
     const { type = "", genre = "", q = "", limit = 100 } = req.query;
 
+    //--------------------------------------------------
+    // Music (Spotify)
+    //--------------------------------------------------
+
     if (type === "song") {
-      return res.json([]);
+      try {
+        const cacheKey = `song-${q || genre || "default"}`;
+        const cached = musicCache.get(cacheKey);
+
+        if (cached) {
+          return res.json(cached.slice(0, Number(limit)));
+        }
+
+        let query;
+
+        if (q) {
+          query = q;
+        } else if (genre) {
+          query = `genre:"${genre.toLowerCase()}"`;
+        } else {
+          query = "tag:new";
+        }
+
+        const results = await spotifySearchTracks(query, 10);
+
+        musicCache.set(cacheKey, results);
+
+        return res.json(results.slice(0, Number(limit)));
+      } catch (err) {
+        console.error(err);
+
+        return res.status(500).json({
+          success: false,
+          message: "Failed to fetch music.",
+        });
+      }
     }
 
     //--------------------------------------------------

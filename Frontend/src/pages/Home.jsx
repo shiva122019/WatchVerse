@@ -192,6 +192,12 @@ export default function Home() {
           items={home.topRatedSeries}
           testid="row-top-rated-series"
         />
+
+        <Row
+          title="New in Music"
+          items={home.popularMusic}
+          testid="row-popular-music"
+        />
       </div>
     </div>
   );
