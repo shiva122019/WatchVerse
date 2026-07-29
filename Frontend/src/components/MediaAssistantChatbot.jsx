@@ -1073,7 +1073,7 @@ function formatIntentResult(intentKey, payload) {
   }
 
   if (intent === "similar") {
-    const list = (data || []).map((s) => `${s.title}${s.release_year ? ` (${s.release_year})` : ""}`);
+    const list = (data || []).map((s) => `${s.title}${s.year ? ` (${s.year})` : ""}`);
     return {
       text: list.length ? `You might also like: ${list.join(", ")}.` : "No similar titles found.",
       source: "Source: TMDB",
@@ -1239,6 +1239,8 @@ export default function MediaAssistantChatbot({
             body: text,
             source,
             parentCard: cardOrOption,
+            intent: intentKey,
+            data: payload.data,
           },
         },
       ]);
@@ -1326,6 +1328,8 @@ export default function MediaAssistantChatbot({
               body: bodyText,
               source,
               parentCard: activeCard,
+              intent: payload.intent,
+              data: payload.data,
             },
           },
         ]);
@@ -1759,9 +1763,75 @@ export default function MediaAssistantChatbot({
                         <span style={{ fontSize: 18 }}>{m.categoryResult.emoji}</span>
                         <h4 style={{ margin: 0, fontSize: 15, color: "#fff", fontWeight: "600" }}>{m.categoryResult.title}</h4>
                       </div>
-                      <p style={{ margin: 0, fontSize: 13, color: COLORS.ink, lineHeight: 1.6 }}>
-                        {m.categoryResult.body}
-                      </p>
+                      
+                      {m.categoryResult.intent === "similar" ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+                          <p style={{ margin: "0 0 6px 0", fontSize: 13, color: COLORS.inkDim }}>
+                            Here are some similar recommendations:
+                          </p>
+                          {(m.categoryResult.data || []).map((item) => {
+                            const isSong = m.categoryResult.parentCard?.mediaType === "song";
+                            const option = isSong ? {
+                              deezerId: item.deezerId,
+                              artistId: item.artistId,
+                              mediaType: "song",
+                              title: item.title,
+                              artist: item.artist,
+                              album: item.album,
+                              year: item.year,
+                              poster: item.cover,
+                              overview: `by ${item.artist}${item.album ? ` · ${item.album}` : ""}`,
+                              previewUrl: item.previewUrl,
+                              deezerUrl: item.deezerUrl,
+                              durationMs: item.durationMs,
+                            } : {
+                              tmdbId: item.tmdbId,
+                              mediaType: item.mediaType,
+                              title: item.title,
+                              poster: item.poster,
+                              year: item.year,
+                              overview: item.overview,
+                            };
+
+                            return (
+                              <div
+                                key={isSong ? option.deezerId : option.tmdbId}
+                                className="option-card"
+                                onClick={() => selectOption(option)}
+                              >
+                                {option.poster && (
+                                  <img
+                                    src={option.poster}
+                                    alt={option.title}
+                                    style={{ width: 40, height: 58, borderRadius: 6, objectFit: "cover" }}
+                                  />
+                                )}
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>
+                                    {option.title} {isSong ? `— ${option.artist}` : option.year ? `(${option.year})` : ""}
+                                  </div>
+                                  <div style={{
+                                    fontSize: 11,
+                                    color: COLORS.inkDim,
+                                    marginTop: 2,
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden"
+                                  }}>
+                                    {option.overview}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p style={{ margin: 0, fontSize: 13, color: COLORS.ink, lineHeight: 1.6 }}>
+                          {m.categoryResult.body}
+                        </p>
+                      )}
+
                       <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 11, color: COLORS.inkFaint, fontStyle: "italic" }}>
                           {m.categoryResult.source}

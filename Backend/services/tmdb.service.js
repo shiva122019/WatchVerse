@@ -87,12 +87,14 @@ async function getReviews(tmdbId, mediaType) {
 async function getSimilar(tmdbId, mediaType) {
   const { data } = await tmdb.get(`/${mediaType}/${tmdbId}/similar`);
   return (data.results || []).slice(0, 8).map((r) => ({
-    id: r.id,
+    tmdbId: r.id,
+    mediaType: r.media_type || mediaType,
     title: r.title || r.name,
-    cover_url: r.poster_path
+    poster: r.poster_path
       ? `https://image.tmdb.org/t/p/w500${r.poster_path}`
       : null,
-    release_year: (r.release_date || r.first_air_date || "").slice(0, 4),
+    year: (r.release_date || r.first_air_date || "").slice(0, 4),
+    overview: r.overview,
   }));
 }
 
