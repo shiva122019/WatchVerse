@@ -63,6 +63,10 @@ function Row({ title, items = [], testid }) {
 export default function Home() {
   const [home, setHome] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [exploreItems, setExploreItems] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     api
@@ -76,6 +80,46 @@ export default function Home() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loading || loadingMore || !hasMore) return;
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300) {
+        setPage((prev) => prev + 1);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading, loadingMore, hasMore]);
+
+  useEffect(() => {
+    if (page === 1) return;
+
+    setLoadingMore(true);
+    api
+      .get("/home", { params: { page } })
+      .then((res) => {
+        const newItems = res.data || [];
+        if (newItems.length === 0) {
+          setHasMore(false);
+        } else {
+          setExploreItems((prev) => {
+            const combined = [...prev, ...newItems];
+            const seen = new Set();
+            return combined.filter(it => {
+              const key = `${it.type}-${it.id}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => setLoadingMore(false));
+  }, [page]);
 
   if (loading) {
     return (
@@ -243,6 +287,25 @@ export default function Home() {
             items={home.becauseYouWatched.items}
             testid="row-because-you-watched"
           />
+        )}
+
+        {exploreItems.length > 0 && (
+          <section className="mb-14" data-testid="explore-grid-section">
+            <h2 className="font-display text-2xl font-semibold text-white mb-6">
+              More to Explore
+            </h2>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" data-testid="explore-grid">
+              {exploreItems.map((it) => (
+                <MediaCard key={`${it.type}-${it.id}`} item={it} width="w-full" />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {loadingMore && (
+          <div className="py-10 text-center text-neutral-400">
+            Loading more...
+          </div>
         )}
       </div>
     </div>

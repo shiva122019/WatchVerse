@@ -170,6 +170,8 @@ const {
 
 router.get("/", async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+
     //---------------------------------------------------
     // Genre Maps
     //---------------------------------------------------
@@ -189,6 +191,30 @@ router.get("/", async (req, res) => {
     tvGenresRes.data.genres.forEach((g) => {
       tvGenreMap[g.id] = g.name;
     });
+
+    if (page > 1) {
+      // Fetch trending page
+      const cacheKey = `homepage-trending-${page}`;
+      let data = browseCache.get(cacheKey);
+      if (!data) {
+        data = await tmdbFetch("/trending/all/week", {
+          params: { page },
+        });
+        browseCache.set(cacheKey, data);
+      }
+
+      const results = (data.results || [])
+        .filter((item) => item.media_type === "movie" || item.media_type === "tv")
+        .map((item) =>
+          mapTMDBItem(
+            item,
+            item.media_type,
+            item.media_type === "movie" ? movieGenreMap : tvGenreMap,
+          ),
+        );
+
+      return res.json(results);
+    }
 
     //---------------------------------------------------
     // Public Homepage (Cached)
@@ -253,6 +279,7 @@ router.get("/", async (req, res) => {
 router.get("/queryContent", async (req, res) => {
   try {
     const { type = "", genre = "", q = "", limit = 100 } = req.query;
+    const page = parseInt(req.query.page) || 1;
 
     if (type === "song") {
       return res.json([]);
@@ -329,6 +356,7 @@ router.get("/queryContent", async (req, res) => {
         data = await tmdbFetch(`/search/${mediaType}`, {
           params: {
             query: q,
+            page,
           },
         });
       }
@@ -337,7 +365,7 @@ router.get("/queryContent", async (req, res) => {
       // Discover (15-minute cache)
       //----------------------------------------------
       else if (genreId) {
-        const cacheKey = `discover-${mediaType}-${genreId}`;
+        const cacheKey = `discover-${mediaType}-${genreId}-${page}`;
 
         data = browseCache.get(cacheKey);
 
@@ -345,6 +373,7 @@ router.get("/queryContent", async (req, res) => {
           data = await tmdbFetch(`/discover/${mediaType}`, {
             params: {
               with_genres: genreId,
+              page,
             },
           });
 
@@ -356,18 +385,22 @@ router.get("/queryContent", async (req, res) => {
       // Trending (15-minute cache)
       //----------------------------------------------
       else {
-        const cacheKey = `trending-${mediaType}`;
+        const cacheKey = `trending-${mediaType}-${page}`;
 
         data = browseCache.get(cacheKey);
 
         if (!data) {
-          data = await tmdbFetch(`/trending/${mediaType}/week`);
+          data = await tmdbFetch(`/trending/${mediaType}/week`, {
+            params: {
+              page,
+            },
+          });
 
           browseCache.set(cacheKey, data);
         }
       }
 
-      let mapped = data.results.map((item) =>
+      let mapped = (data.results || []).map((item) =>
         mapTMDBItem(item, mediaType, genreMap),
       );
 
@@ -388,6 +421,7 @@ router.get("/queryContent", async (req, res) => {
       const personData = await tmdbFetch("/search/person", {
         params: {
           query: q,
+          page,
         },
       });
 

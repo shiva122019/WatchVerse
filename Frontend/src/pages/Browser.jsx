@@ -32,6 +32,9 @@ export default function Browse() {
   const [params, setParams] = useSearchParams();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const type = params.get("type") || "";
   const genre = params.get("genre") || "";
@@ -40,19 +43,74 @@ export default function Browse() {
   const [searchInput, setSearchInput] = useState(q);
 
   useEffect(() => {
-    setLoading(true);
+    setPage(1);
+    setHasMore(true);
+  }, [type, genre, q]);
+
+  useEffect(() => {
+    let active = true;
+
+    if (page === 1) {
+      setLoading(true);
+      setItems([]);
+    } else {
+      setLoadingMore(true);
+    }
+
     api
       .get("/home/queryContent", {
         params: {
           ...(type ? { type } : {}),
           ...(genre ? { genre } : {}),
           ...(q ? { q } : {}),
-          limit: 100,
+          page,
         },
       })
-      .then((r) => setItems(r.data))
-      .finally(() => setLoading(false));
-  }, [type, genre, q]);
+      .then((r) => {
+        if (!active) return;
+        const newItems = r.data || [];
+        setItems((prev) => {
+          if (page === 1) {
+            return newItems;
+          }
+          const combined = [...prev, ...newItems];
+          const seen = new Set();
+          return combined.filter(it => {
+            const key = `${it.type}-${it.id}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+        });
+        if (newItems.length === 0) {
+          setHasMore(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [type, genre, q, page]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loading || loadingMore || !hasMore) return;
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300) {
+        setPage((prev) => prev + 1);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading, loadingMore, hasMore]);
 
   const updateParam = (key, value) => {
     const next = new URLSearchParams(params);
@@ -147,7 +205,7 @@ export default function Browse() {
         ))}
       </div>
 
-      {loading ? (
+      {loading && page === 1 ? (
         <div className="py-20 text-center text-neutral-500">Loading…</div>
       ) : items.length === 0 ? (
         <div
@@ -160,14 +218,21 @@ export default function Browse() {
           </p>
         </div>
       ) : (
-        <div
-          className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
-          data-testid="browse-grid"
-        >
-          {items.map((it) => (
-            <MediaCard key={it.id} item={it} width="w-full" />
-          ))}
-        </div>
+        <>
+          <div
+            className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+            data-testid="browse-grid"
+          >
+            {items.map((it) => (
+              <MediaCard key={it.id} item={it} width="w-full" />
+            ))}
+          </div>
+          {loadingMore && (
+            <div className="py-10 text-center text-neutral-500">
+              Loading more…
+            </div>
+          )}
+        </>
       )}
     </div>
   );

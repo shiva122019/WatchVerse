@@ -344,7 +344,8 @@ async function buildMovieCard(tmdbId, mediaType) {
 
   const isAnime =
     (details.genres || []).some((g) => g.id === 16) &&
-    (details.origin_country?.includes("JP") || details.original_language === "ja");
+    (details.origin_country?.includes("JP") ||
+      details.original_language === "ja");
 
   return {
     tmdbId,
@@ -361,7 +362,9 @@ async function buildMovieCard(tmdbId, mediaType) {
       ? `https://image.tmdb.org/t/p/w500${details.poster_path}`
       : null,
     overview: details.overview,
-    rating: details.vote_average ? Number((details.vote_average / 2).toFixed(1)) : null,
+    rating: details.vote_average
+      ? Number((details.vote_average / 2).toFixed(1))
+      : null,
   };
 }
 
@@ -370,14 +373,19 @@ async function searchTitle(req, res) {
     const { sessionId, query, mode } = req.body;
     // mode = "song" | "media" — sent by frontend based on which button the user tapped
     if (!sessionId || !query || !mode) {
-      return res.status(400).json({ error: "sessionId, query, and mode are required" });
+      return res
+        .status(400)
+        .json({ error: "sessionId, query, and mode are required" });
     }
     if (!["song", "media"].includes(mode)) {
       return res.status(400).json({ error: "mode must be 'song' or 'media'" });
     }
 
     const cleanQuery = query
-      .replace(/\b(tell|me|about|storyline|of|the|movie|show|series|anime|song)\b/gi, "")
+      .replace(
+        /\b(tell|me|about|storyline|of|the|movie|show|series|anime|song)\b/gi,
+        "",
+      )
       .trim();
     const searchQuery = cleanQuery || query;
 
@@ -385,26 +393,40 @@ async function searchTitle(req, res) {
     const shouldSearchSpotify = mode === "song";
 
     const [tmdbResult, spotifyResult] = await Promise.allSettled([
-      shouldSearchTmdb ? tmdbService.searchTitle(searchQuery) : Promise.resolve([]),
-      shouldSearchSpotify ? spotifyService.searchTrack(searchQuery, 5) : Promise.resolve([]),
+      shouldSearchTmdb
+        ? tmdbService.searchTitle(searchQuery)
+        : Promise.resolve([]),
+      shouldSearchSpotify
+        ? spotifyService.searchTrack(searchQuery, 5)
+        : Promise.resolve([]),
     ]);
 
     if (shouldSearchTmdb && tmdbResult.status === "rejected") {
-      console.error("searchTitle -> tmdb failed:", tmdbResult.reason?.code || tmdbResult.reason?.message);
+      console.error(
+        "searchTitle -> tmdb failed:",
+        tmdbResult.reason?.code || tmdbResult.reason?.message,
+      );
     }
     if (shouldSearchSpotify && spotifyResult.status === "rejected") {
-      console.error("searchTitle -> spotify failed:", spotifyResult.reason?.code || spotifyResult.reason?.message);
+      console.error(
+        "searchTitle -> spotify failed:",
+        spotifyResult.reason?.code || spotifyResult.reason?.message,
+      );
     }
 
-    const tmdbMatches = tmdbResult.status === "fulfilled" ? tmdbResult.value : [];
-    const songMatches = spotifyResult.status === "fulfilled" ? spotifyResult.value : [];
+    const tmdbMatches =
+      tmdbResult.status === "fulfilled" ? tmdbResult.value : [];
+    const songMatches =
+      spotifyResult.status === "fulfilled" ? spotifyResult.value : [];
 
     const movieOptions = tmdbMatches.map((r) => ({
       tmdbId: r.id,
       mediaType: tagAnime(r) ? "anime" : r.media_type,
       title: r.title || r.name,
       year: (r.release_date || r.first_air_date || "").slice(0, 4),
-      poster: r.poster_path ? `https://image.tmdb.org/t/p/w200${r.poster_path}` : null,
+      poster: r.poster_path
+        ? `https://image.tmdb.org/t/p/w200${r.poster_path}`
+        : null,
       overview: r.overview,
     }));
 
@@ -432,7 +454,8 @@ async function searchTitle(req, res) {
 
       if (searchedSourceFailed) {
         return res.status(502).json({
-          error: "Couldn't reach search providers right now. Please try again in a moment.",
+          error:
+            "Couldn't reach search providers right now. Please try again in a moment.",
         });
       }
       return res.json({
@@ -475,7 +498,9 @@ async function searchTitle(req, res) {
     return res.json({ status: "resolved", card });
   } catch (err) {
     console.error("searchTitle error:", err.message);
-    return res.status(500).json({ error: "Something went wrong while searching." });
+    return res
+      .status(500)
+      .json({ error: "Something went wrong while searching." });
   }
 }
 
@@ -485,17 +510,49 @@ async function selectTitle(req, res) {
     const session = getSession(sessionId);
 
     if (mediaType === "song") {
-      const { title, artist, album, cover, previewUrl, deezerUrl, year, durationMs } = req.body;
-      session.context = { mediaType: "song", deezerId, artistId, title, artist, album };
+      const {
+        title,
+        artist,
+        album,
+        cover,
+        previewUrl,
+        deezerUrl,
+        year,
+        durationMs,
+      } = req.body;
+      session.context = {
+        mediaType: "song",
+        deezerId,
+        artistId,
+        title,
+        artist,
+        album,
+      };
       session.history = [];
       return res.json({
         status: "resolved",
-        card: { deezerId, mediaType: "song", title, artist, album, year, cover, previewUrl, deezerUrl, durationMs },
+        card: {
+          deezerId,
+          mediaType: "song",
+          title,
+          artist,
+          album,
+          year,
+          cover,
+          previewUrl,
+          deezerUrl,
+          durationMs,
+        },
       });
     }
 
     const card = await buildMovieCard(tmdbId, mediaType);
-    session.context = { mediaType: card.mediaType, tmdbId: card.tmdbId, title: card.title, year: card.year };
+    session.context = {
+      mediaType: card.mediaType,
+      tmdbId: card.tmdbId,
+      title: card.title,
+      year: card.year,
+    };
     session.history = [];
     return res.json({ status: "resolved", card });
   } catch (err) {
@@ -510,7 +567,9 @@ async function handleMessage(req, res) {
     const session = getSession(sessionId);
 
     if (!session.context) {
-      return res.status(400).json({ error: "No title selected yet. Search for one first." });
+      return res
+        .status(400)
+        .json({ error: "No title selected yet. Search for one first." });
     }
 
     const ctx = session.context;
@@ -526,8 +585,15 @@ async function handleMessage(req, res) {
       if (intent === "about" && session.history.length === 0) {
         const cached = getCached(cacheKey);
         if (cached) {
-          session.history.push({ role: "user", text: "about" }, { role: "assistant", text: cached.text });
-          return res.json({ intent, source: "gemini-cache", data: { text: cached.text, sources: cached.sources } });
+          session.history.push(
+            { role: "user", text: "about" },
+            { role: "assistant", text: cached.text },
+          );
+          return res.json({
+            intent,
+            source: "gemini-cache",
+            data: { text: cached.text, sources: cached.sources },
+          });
         }
       }
 
@@ -538,9 +604,13 @@ async function handleMessage(req, res) {
           : promptService.buildFollowUpPrompt(message);
 
       session.history.push({ role: "user", text: userText });
-      const { text, sources } = await geminiService.askGemini(session.history, systemContext);
+      const { text, sources } = await geminiService.askGemini(
+        session.history,
+        systemContext,
+      );
       session.history.push({ role: "assistant", text });
-      if (session.history.length > 10) session.history = session.history.slice(-10);
+      if (session.history.length > 10)
+        session.history = session.history.slice(-10);
 
       if (intent === "about" && session.history.length === 2) {
         setCached(cacheKey, text, sources);
@@ -574,21 +644,36 @@ async function handleMessage(req, res) {
     if (intent === "storyline" && session.history.length === 0) {
       const cached = getCached(cacheKey);
       if (cached) {
-        session.history.push({ role: "user", text: "storyline" }, { role: "assistant", text: cached.text });
-        return res.json({ intent, source: "gemini-cache", data: { text: cached.text, sources: cached.sources } });
+        session.history.push(
+          { role: "user", text: "storyline" },
+          { role: "assistant", text: cached.text },
+        );
+        return res.json({
+          intent,
+          source: "gemini-cache",
+          data: { text: cached.text, sources: cached.sources },
+        });
       }
     }
 
-    const systemContext = promptService.buildSystemContext({ title, year, mediaType });
+    const systemContext = promptService.buildSystemContext({
+      title,
+      year,
+      mediaType,
+    });
     const userText =
       intent === "storyline" && session.history.length === 0
         ? promptService.buildStorylinePrompt({ title, year, mediaType })
         : promptService.buildFollowUpPrompt(message);
 
     session.history.push({ role: "user", text: userText });
-    const { text, sources } = await geminiService.askGemini(session.history, systemContext);
+    const { text, sources } = await geminiService.askGemini(
+      session.history,
+      systemContext,
+    );
     session.history.push({ role: "assistant", text });
-    if (session.history.length > 10) session.history = session.history.slice(-10);
+    if (session.history.length > 10)
+      session.history = session.history.slice(-10);
 
     if (intent === "storyline" && session.history.length === 2) {
       setCached(cacheKey, text, sources);
@@ -600,7 +685,9 @@ async function handleMessage(req, res) {
     if (err.isRateLimit) {
       return res.status(429).json({ error: err.message });
     }
-    return res.status(500).json({ error: "Something went wrong answering that." });
+    return res
+      .status(500)
+      .json({ error: "Something went wrong answering that." });
   }
 }
 
