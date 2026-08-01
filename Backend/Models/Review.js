@@ -33,5 +33,5 @@ const reviewSchema = new mongoose.Schema(
 // Prevents the same user from reviewing the same item more than once
 reviewSchema.index({ tmdbId: 1, userId: 1 }, { unique: true });
 
-const Review = mongoose.model("Review", reviewSchema);
+const Review = mongoose.models.Review || mongoose.model("Review", reviewSchema);
 module.exports = Review;

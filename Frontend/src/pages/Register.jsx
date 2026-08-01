@@ -18,9 +18,13 @@ export default function Register() {
     if (username.trim().length < 2) return setErr("Username too short.");
     if (password.length < 6) return setErr("Password must be 6+ characters.");
     setBusy(true);
-    const res = await register(email.trim().toLowerCase(), password, username.trim());
+    const res = await register(
+      email.trim().toLowerCase(),
+      password,
+      username.trim(),
+    );
     setBusy(false);
-    if (res.ok) navigate("/");
+    if (res.ok) navigate("/onBoarding");
     else setErr(res.error);
   };
 
@@ -83,7 +87,10 @@ export default function Register() {
         />
 
         {err && (
-          <p className="mt-2 text-sm text-[#FF0055]" data-testid="register-error">
+          <p
+            className="mt-2 text-sm text-[#FF0055]"
+            data-testid="register-error"
+          >
             {err}
           </p>
         )}

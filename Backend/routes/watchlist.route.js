@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const User = require("../Models/User.js");
 const WatchList = require("../Models/WatchList.js");
+const UserPreference = require("../Models/UserPreference.js");
 const axios = require("axios");
 const rax = require("retry-axios");
 
@@ -142,6 +143,13 @@ router.post("/", async (req, res) => {
       message: "Added to watchlist.",
       watchlist: watchlistEntry,
     });
+
+    // ── Update user preferences in the background ──
+    // Weight: watched = 1.5 (strong signal), want/watching = 1
+    const weight = status === "watched" ? 1.5 : 1;
+    updatePreferencesFromWatchlist(req.user._id, tmdbId, mediaType, weight).catch(
+      (err) => console.error("Preference update failed:", err.message),
+    );
   } catch (err) {
     console.error(err);
 
@@ -222,5 +230,77 @@ router.delete("/:tmdbId", async (req, res) => {
     });
   }
 });
+
+/**
+ * Fetch TMDB details + credits for a single item and incrementally
+ * update the user's genre / actor preference scores.
+ */
+async function updatePreferencesFromWatchlist(userId, tmdbId, mediaType, weight) {
+  const detailsEndpoint = `/${mediaType}/${tmdbId}`;
+  const creditsEndpoint = `/${mediaType}/${tmdbId}/credits`;
+
+  const [detailsRes, creditsRes] = await Promise.all([
+    tmdb.get(detailsEndpoint),
+    tmdb.get(creditsEndpoint),
+  ]);
+
+  const details = detailsRes.data;
+  const credits = creditsRes.data;
+
+  // Build $inc operations for genres
+  const genreUpdates = (details.genres || []).map((genre) => ({
+    genreId: genre.id,
+    genreName: genre.name,
+    weight,
+  }));
+
+  // Build $inc operations for top 5 cast members
+  const actorUpdates = (credits.cast || []).slice(0, 5).map((actor) => ({
+    actorId: actor.id,
+    actorName: actor.name,
+    weight,
+  }));
+
+  // Upsert the preference document
+  let pref = await UserPreference.findOne({ user: userId });
+
+  if (!pref) {
+    pref = new UserPreference({ user: userId });
+  }
+
+  // Merge genre scores
+  for (const g of genreUpdates) {
+    const existing = pref.genrePreferences.find((p) => p.genreId === g.genreId);
+    if (existing) {
+      existing.score = Math.min(100, Math.max(-100, existing.score + g.weight));
+    } else {
+      pref.genrePreferences.push({
+        genreId: g.genreId,
+        genreName: g.genreName,
+        score: g.weight,
+      });
+    }
+  }
+
+  // Merge actor scores
+  for (const a of actorUpdates) {
+    const existing = pref.actorPreferences.find((p) => p.actorId === a.actorId);
+    if (existing) {
+      existing.score = Math.min(100, Math.max(-100, existing.score + a.weight));
+    } else {
+      pref.actorPreferences.push({
+        actorId: a.actorId,
+        actorName: a.actorName,
+        score: a.weight,
+      });
+    }
+  }
+
+  // Sort by score descending and save
+  pref.genrePreferences.sort((a, b) => b.score - a.score);
+  pref.actorPreferences.sort((a, b) => b.score - a.score);
+
+  await pref.save();
+}
 
 module.exports = router;

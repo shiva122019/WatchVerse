@@ -7,7 +7,6 @@ const bcrypt = require("bcrypt");
 const cors = require("cors");
 const errorHandler = require("./lib/errorHandler.js");
 require("dotenv").config();
-
 const routes = require("./routes");
 const connectDb = require("./config/db");
 

@@ -2,7 +2,8 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { PrismoLogoMark, PrismoWordmark } from "@/components/PrismoLogo";
 import { useAuth } from "@/context/AuthContext";
 import { Search, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "@/lib/api";
 
 const linkClass = ({ isActive }) =>
   `text-sm font-medium tracking-wide transition-colors ${
@@ -13,17 +14,29 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [onboardingCompleted, setOnboardingCompleted] = useState(true);
 
   const submitSearch = (e) => {
     e.preventDefault();
     if (q.trim()) navigate(`/browse?q=${encodeURIComponent(q.trim())}`);
   };
 
+  useEffect(() => {
+    if (!user) return;
+
+    async function loadStatus() {
+      try {
+        const res = await api.get("/onboarding/status");
+        setOnboardingCompleted(res.data.onboardingCompleted);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadStatus();
+  }, [user]);
   return (
-    <header
-      data-testid="app-navbar"
-      className="glass sticky top-0 z-50 w-full"
-    >
+    <header data-testid="app-navbar" className="glass sticky top-0 z-50 w-full">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
         <Link
           to="/"
@@ -66,6 +79,15 @@ export default function Navbar() {
               data-testid="nav-watchlist"
             >
               My List
+            </NavLink>
+          )}
+          {user && !onboardingCompleted && (
+            <NavLink
+              to="/onBoarding"
+              className={linkClass}
+              data-testid="nav-onBoarding"
+            >
+              Get to Know you
             </NavLink>
           )}
         </nav>
