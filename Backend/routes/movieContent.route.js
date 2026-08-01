@@ -1,68 +1,11 @@
 router = require("express").Router();
-const axios = require("axios");
-const rax = require("retry-axios");
 reviewContent = require("../Models/reviewContent.js");
-
-const tmdb = axios.create({
-  baseURL: "https://api.themoviedb.org/3",
-  headers: {
-    accept: "application/json",
-    Authorization: `Bearer ${process.env.TMDB_BEARER_TOKEN}`,
-  },
-  timeout: 10000,
-});
-
-tmdb.defaults.raxConfig = {
-  retry: 10,
-  backoffType: "exponential",
-  retryDelay: 100,
-};
-
-rax.attach(tmdb);
-
-//---------------------------------------------------
-// Spotify Client (Client Credentials Flow)
-//---------------------------------------------------
-
-let spotifyToken = null;
-let spotifyTokenExpiry = 0;
-
-async function getSpotifyToken() {
-  if (spotifyToken && Date.now() < spotifyTokenExpiry) {
-    return spotifyToken;
-  }
-
-  const res = await axios.post(
-    "https://accounts.spotify.com/api/token",
-    new URLSearchParams({ grant_type: "client_credentials" }),
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization:
-          "Basic " +
-          Buffer.from(
-            `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
-          ).toString("base64"),
-      },
-    }
-  );
-
-  spotifyToken = res.data.access_token;
-  spotifyTokenExpiry = Date.now() + res.data.expires_in * 1000 - 60000;
-
-  return spotifyToken;
-}
-
-const spotify = axios.create({
-  baseURL: "https://api.spotify.com/v1",
-  timeout: 10000,
-});
-
-spotify.interceptors.request.use(async (config) => {
-  const token = await getSpotifyToken();
-  config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+const {
+  getTrailerUrl,
+  spotify,
+  getSpotifyToken,
+  tmdb,
+} = require("../services/movieContent.service.js");
 
 router.get("/:type/:id", async (req, res) => {
   try {
@@ -130,9 +73,13 @@ router.get("/:type/:id", async (req, res) => {
 
     const endpoint = type === "movie" ? "movie" : "tv";
 
-    const details = await tmdb.get(`/${endpoint}/${id}`);
+    const [details, credits, trailerUrl] = await Promise.all([
+      tmdb.get(`/${endpoint}/${id}`),
+      tmdb.get(`/${endpoint}/${id}/credits`),
+      getTrailerUrl(endpoint, id),
+    ]);
+
     const item = details.data;
-    const credits = await tmdb.get(`/${endpoint}/${id}/credits`);
 
     const crew = credits.data.crew || [];
     const cast = credits.data.cast || [];
@@ -166,6 +113,8 @@ router.get("/:type/:id", async (req, res) => {
       backdrop_url: item.backdrop_path
         ? `https://image.tmdb.org/t/p/original${item.backdrop_path}`
         : null,
+
+      trailer_url: trailerUrl,
 
       release_year:
         (item.release_date || item.first_air_date || "").substring(0, 4) ||

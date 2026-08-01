@@ -19,7 +19,7 @@ export default function Detail() {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState('reviews');
+  const [activeTab, setActiveTab] = useState("reviews");
   const [error, setError] = useState("");
 
   const loadAll = async () => {
@@ -34,7 +34,7 @@ export default function Detail() {
         const wl = await api.get("/watchlist/content");
         const mine = wl.data.find((w) => String(w.content_id) === String(id));
         setWatchStatus(mine ? mine.status : null);
-      } catch { }
+      } catch {}
       const mineReview = r.data.find((rv) => rv.user_id === user.id);
       if (mineReview) {
         setRating(mineReview.rating);
@@ -68,7 +68,7 @@ export default function Detail() {
       await api.delete(`/watchlist/${id}`);
       setWatchStatus(null);
       toast.success("Removed from list");
-    } catch { }
+    } catch {}
   };
 
   const submitReview = async (e) => {
@@ -121,8 +121,9 @@ export default function Detail() {
           {/* Poster */}
           <div className="w-40 shrink-0 sm:w-52 md:w-60">
             <div
-              className={`overflow-hidden rounded-xl border border-white/10 shadow-2xl ${content.type === "song" ? "aspect-square" : "aspect-[2/3]"
-                }`}
+              className={`overflow-hidden rounded-xl border border-white/10 shadow-2xl ${
+                content.type === "song" ? "aspect-square" : "aspect-[2/3]"
+              }`}
             >
               <img
                 src={content.cover_url}
@@ -221,10 +222,11 @@ export default function Detail() {
                     key={s}
                     onClick={() => (active ? removeFromList() : setStatus(s))}
                     data-testid={`watchlist-${s}-btn`}
-                    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${active
+                    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                      active
                         ? "border-[#00F0FF] bg-[#00F0FF] text-black"
                         : "border-white/15 bg-white/5 text-white hover:border-white/40"
-                      }`}
+                    }`}
                   >
                     {active ? (
                       <Check className="h-4 w-4" />
@@ -242,110 +244,131 @@ export default function Detail() {
             </div>
           </div>
         </div>
-
+        {/*Youtube trailer*/}
         <div className="divider-line mt-16" />
+        {content.trailer_url && (
+          <div className="mt-8">
+            <div className="mb-3 flex items-center gap-2">
+              <Play className="h-5 w-5 text-[#00F0FF]" />
+              <h2 className="font-display text-2xl font-semibold text-white">
+                Official Trailer
+              </h2>
+            </div>
 
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-xl pt-[56.25%]">
+              <iframe
+                className="absolute inset-0 h-full w-full"
+                src={content.trailer_url}
+                title={`${content.title} Trailer`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        )}
         {/* Community Section */}
         <section className="mt-12" data-testid="reviews-section">
           <div className="flex gap-8 border-b border-white/10 pb-4 mb-6">
-            <button 
-              onClick={() => setActiveTab('reviews')}
-              className={`font-display text-3xl font-semibold tracking-tight transition ${activeTab === 'reviews' ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'}`}
+            <button
+              onClick={() => setActiveTab("reviews")}
+              className={`font-display text-3xl font-semibold tracking-tight transition ${activeTab === "reviews" ? "text-white" : "text-neutral-500 hover:text-neutral-300"}`}
             >
               Reviews
             </button>
-            <button 
-              onClick={() => setActiveTab('comments')}
-              className={`font-display text-3xl font-semibold tracking-tight transition ${activeTab === 'comments' ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'}`}
+            <button
+              onClick={() => setActiveTab("comments")}
+              className={`font-display text-3xl font-semibold tracking-tight transition ${activeTab === "comments" ? "text-white" : "text-neutral-500 hover:text-neutral-300"}`}
             >
               Comments
             </button>
           </div>
 
-          {activeTab === 'reviews' ? (
+          {activeTab === "reviews" ? (
             <>
               {user ? (
-            <form
-              onSubmit={submitReview}
-              className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6"
-              data-testid="review-form"
-            >
-              <p className="label-caps mb-3">Your rating</p>
-              <StarInput value={rating} onChange={setRating} />
-              <textarea
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                rows={4}
-                placeholder="Share your thoughts…"
-                className="mt-4 w-full resize-none rounded-lg border border-white/10 bg-black/40 p-4 text-sm text-white placeholder:text-neutral-600 focus:border-[#00F0FF]/50 focus:outline-none"
-                maxLength={1000}
-                data-testid="review-text-input"
-              />
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-xs text-neutral-500">
-                  {reviewText.length}/1000
-                </span>
-                {error && (
-                  <span
-                    className="text-xs text-[#FF0055]"
-                    data-testid="review-error"
+                <form
+                  onSubmit={submitReview}
+                  className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6"
+                  data-testid="review-form"
+                >
+                  <p className="label-caps mb-3">Your rating</p>
+                  <StarInput value={rating} onChange={setRating} />
+                  <textarea
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    rows={4}
+                    placeholder="Share your thoughts…"
+                    className="mt-4 w-full resize-none rounded-lg border border-white/10 bg-black/40 p-4 text-sm text-white placeholder:text-neutral-600 focus:border-[#00F0FF]/50 focus:outline-none"
+                    maxLength={1000}
+                    data-testid="review-text-input"
+                  />
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs text-neutral-500">
+                      {reviewText.length}/1000
+                    </span>
+                    {error && (
+                      <span
+                        className="text-xs text-[#FF0055]"
+                        data-testid="review-error"
+                      >
+                        {error}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    data-testid="review-submit-btn"
+                    className="mt-4 rounded-full bg-[#00F0FF] px-6 py-2.5 text-sm font-bold text-black transition hover:brightness-110 disabled:opacity-50"
                   >
-                    {error}
-                  </span>
+                    {submitting ? "Posting…" : "Post Review"}
+                  </button>
+                </form>
+              ) : (
+                <p className="mt-6 rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-sm text-neutral-400">
+                  <Link to="/login" className="text-[#00F0FF] underline">
+                    Log in
+                  </Link>{" "}
+                  to rate and review.
+                </p>
+              )}
+
+              <div className="mt-8 space-y-4" data-testid="reviews-list">
+                {reviews.length === 0 ? (
+                  <p className="rounded-2xl border border-white/5 bg-white/[0.02] p-8 text-center text-sm text-neutral-500">
+                    No reviews yet. Be the first to write one.
+                  </p>
+                ) : (
+                  reviews.map((r) => (
+                    <div
+                      key={r.id}
+                      className="rounded-xl border border-white/5 bg-white/[0.03] p-5"
+                      data-testid={`review-${r.id}`}
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] font-bold text-black">
+                            {r.username?.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-white">
+                              {r.username}
+                            </p>
+                            <p className="font-mono-alt text-[10px] uppercase text-neutral-500">
+                              {new Date(r.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <StarRating value={r.rating} />
+                      </div>
+                      <p className="mt-2 leading-relaxed text-neutral-300">
+                        {r.text}
+                      </p>
+                    </div>
+                  ))
                 )}
               </div>
-              <button
-                type="submit"
-                disabled={submitting}
-                data-testid="review-submit-btn"
-                className="mt-4 rounded-full bg-[#00F0FF] px-6 py-2.5 text-sm font-bold text-black transition hover:brightness-110 disabled:opacity-50"
-              >
-                {submitting ? "Posting…" : "Post Review"}
-              </button>
-            </form>
-          ) : (
-            <p className="mt-6 rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-sm text-neutral-400">
-              <Link to="/login" className="text-[#00F0FF] underline">
-                Log in
-              </Link>{" "}
-              to rate and review.
-            </p>
-          )}
-
-          <div className="mt-8 space-y-4" data-testid="reviews-list">
-            {reviews.length === 0 ? (
-              <p className="rounded-2xl border border-white/5 bg-white/[0.02] p-8 text-center text-sm text-neutral-500">
-                No reviews yet. Be the first to write one.
-              </p>
-            ) : (
-              reviews.map((r) => (
-                <div
-                  key={r.id}
-                  className="rounded-xl border border-white/5 bg-white/[0.03] p-5"
-                  data-testid={`review-${r.id}`}
-                >
-                  <div className="mb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] font-bold text-black">
-                        {r.username?.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-medium text-white">{r.username}</p>
-                        <p className="font-mono-alt text-[10px] uppercase text-neutral-500">
-                          {new Date(r.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <StarRating value={r.rating} />
-                  </div>
-                  <p className="mt-2 leading-relaxed text-neutral-300">
-                    {r.text}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
-          </>
+            </>
           ) : (
             <ReviewComments contentId={id} />
           )}
