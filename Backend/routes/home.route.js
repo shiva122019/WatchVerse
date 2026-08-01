@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const tmdb = require("../lib/tmdb");
+const { musicCache, spotifySearchTracks, spotifySearchAll } = require("../lib/spotify");
 const {
   homeCache,
   browseCache,
@@ -281,9 +282,41 @@ router.get("/queryContent", async (req, res) => {
     const { type = "", genre = "", q = "", limit = 100 } = req.query;
     const page = parseInt(req.query.page) || 1;
 
+    //--------------------------------------------------
+    // Music (Spotify)
+    //--------------------------------------------------
+
     if (type === "song") {
-      return res.json([]);
+  try {
+    const cacheKey = `song-${q || genre || "default"}`;
+    const cached = musicCache.get(cacheKey);
+
+    if (cached) {
+      return res.json(cached.slice(0, Number(limit)));
     }
+
+    let results;
+
+    if (q) {
+      results = await spotifySearchTracks(q, 10);
+    } else if (genre) {
+      results = await spotifySearchTracks(`genre:"${genre.toLowerCase()}"`, 10);
+    } else {
+      results = await spotifySearchAll(10);
+    }
+
+    musicCache.set(cacheKey, results);
+
+    return res.json(results.slice(0, Number(limit)));
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch music.",
+    });
+  }
+}
 
     //--------------------------------------------------
     // Determine media types

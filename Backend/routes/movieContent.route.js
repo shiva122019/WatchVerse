@@ -20,15 +20,113 @@ tmdb.defaults.raxConfig = {
 
 rax.attach(tmdb);
 
+//---------------------------------------------------
+// Spotify Client (Client Credentials Flow)
+//---------------------------------------------------
+
+let spotifyToken = null;
+let spotifyTokenExpiry = 0;
+
+async function getSpotifyToken() {
+  if (spotifyToken && Date.now() < spotifyTokenExpiry) {
+    return spotifyToken;
+  }
+
+  const res = await axios.post(
+    "https://accounts.spotify.com/api/token",
+    new URLSearchParams({ grant_type: "client_credentials" }),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(
+            `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+          ).toString("base64"),
+      },
+    }
+  );
+
+  spotifyToken = res.data.access_token;
+  spotifyTokenExpiry = Date.now() + res.data.expires_in * 1000 - 60000;
+
+  return spotifyToken;
+}
+
+const spotify = axios.create({
+  baseURL: "https://api.spotify.com/v1",
+  timeout: 10000,
+});
+
+spotify.interceptors.request.use(async (config) => {
+  const token = await getSpotifyToken();
+  config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 router.get("/:type/:id", async (req, res) => {
   try {
     const { type, id } = req.params;
 
-    if (!["movie", "series", "tv"].includes(type)) {
+    if (!["movie", "series", "tv", "song"].includes(type)) {
       return res.status(400).json({
         error: "Invalid content type",
       });
     }
+
+    //--------------------------------------------------
+    // Song (Spotify)
+    //--------------------------------------------------
+
+    if (type === "song") {
+      const { data: track } = await spotify.get(`/tracks/${id}`);
+
+      const cover = track.album?.images?.[0]?.url || null;
+
+      const durationMs = track.duration_ms || 0;
+      const minutes = Math.floor(durationMs / 60000);
+      const seconds = Math.floor((durationMs % 60000) / 1000)
+        .toString()
+        .padStart(2, "0");
+
+      return res.json({
+        id: track.id,
+
+        type: "song",
+
+        title: track.name,
+
+        description: track.album?.name
+          ? `From the album "${track.album.name}"`
+          : null,
+
+        cover_url: cover,
+
+        backdrop_url: cover,
+
+        release_year: track.album?.release_date
+          ? Number(track.album.release_date.substring(0, 4))
+          : null,
+
+        duration: durationMs ? `${minutes}:${seconds}` : null,
+
+        language: null,
+
+        genres: [],
+
+        creator: (track.artists || []).map((a) => a.name).join(", "),
+
+        cast: [],
+
+        avg_rating: 0,
+
+        review_count: 0,
+      });
+    }
+
+    //--------------------------------------------------
+    // Movie / Series (TMDB)
+    //--------------------------------------------------
 
     const endpoint = type === "movie" ? "movie" : "tv";
 

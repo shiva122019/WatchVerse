@@ -11,7 +11,7 @@ const TYPES = [
   { value: "song", label: "Music" },
 ];
 
-const GENRES = [
+const MOVIE_SERIES_GENRES = [
   "Drama",
   "Sci-Fi",
   "Thriller",
@@ -21,12 +21,9 @@ const GENRES = [
   "Romance",
   "Horror",
   "Fantasy",
-  "Synthwave",
-  "Indie",
-  "Pop",
-  "Jazz",
-  "Folk",
 ];
+
+const MUSIC_GENRES = ["Synthwave", "Indie", "Pop", "Jazz", "Folk"];
 
 export default function Browse() {
   const [params, setParams] = useSearchParams();
@@ -41,6 +38,9 @@ export default function Browse() {
   const q = params.get("q") || "";
 
   const [searchInput, setSearchInput] = useState(q);
+
+  // Which genre list applies to the currently selected type.
+  const activeGenres = type === "song" ? MUSIC_GENRES : MOVIE_SERIES_GENRES;
 
   useEffect(() => {
     setPage(1);
@@ -114,8 +114,23 @@ export default function Browse() {
 
   const updateParam = (key, value) => {
     const next = new URLSearchParams(params);
+
     if (value) next.set(key, value);
     else next.delete(key);
+
+    // Switching content type: drop the current genre if it doesn't
+    // belong to the new type's genre list (e.g. "Folk" selected,
+    // then switching to Movies — Folk isn't a movie genre).
+    if (key === "type") {
+      const newGenreList =
+        value === "song" ? MUSIC_GENRES : MOVIE_SERIES_GENRES;
+      const currentGenre = params.get("genre");
+
+      if (currentGenre && !newGenreList.includes(currentGenre)) {
+        next.delete("genre");
+      }
+    }
+
     setParams(next);
   };
 
@@ -176,7 +191,7 @@ export default function Browse() {
         ))}
       </div>
 
-      {/* Genre chips */}
+      {/* Genre chips — swap list based on selected type */}
       <div className="mb-10 flex flex-wrap gap-2">
         <button
           onClick={() => updateParam("genre", "")}
@@ -189,7 +204,7 @@ export default function Browse() {
         >
           All Genres
         </button>
-        {GENRES.map((g) => (
+        {activeGenres.map((g) => (
           <button
             key={g}
             onClick={() => updateParam("genre", g)}

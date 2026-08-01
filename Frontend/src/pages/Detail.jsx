@@ -32,7 +32,7 @@ export default function Detail() {
     if (user) {
       try {
         const wl = await api.get("/watchlist/content");
-        const mine = wl.data.find((w) => Number(w.content_id) === Number(id));
+        const mine = wl.data.find((w) => String(w.content_id) === String(id));
         setWatchStatus(mine ? mine.status : null);
       } catch { }
       const mineReview = r.data.find((rv) => rv.user_id === user.id);
