@@ -3,10 +3,7 @@ mongoose = require("mongoose");
 const reviewSchema = new mongoose.Schema(
   {
     tmdbId: {
-      type: Number,
-    },
-    spotiftid: {
-      type: Number,
+      type: String,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,

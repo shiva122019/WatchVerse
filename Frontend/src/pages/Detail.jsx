@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import api, { formatApiError } from "@/lib/api";
 import { StarRating, StarInput } from "@/components/StarRating";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, Check, Play, Clock, Film, Tv, Music2 } from "lucide-react";
+import { Plus, Check, Play, Clock, Film, Tv, Music2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import ReviewComments from "@/components/ReviewComments";
 
@@ -212,10 +212,53 @@ export default function Detail() {
               </p>
             )}
 
+            {/* Spotify Preview Player */}
+            {content.type === "song" && (
+              <div className="mt-8 flex flex-col gap-3">
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm shadow-lg">
+                  <iframe
+                    src={`https://open.spotify.com/embed/track/${content.id}?utm_source=generator&theme=0`}
+                    width="100%"
+                    height="152"
+                    frameBorder="0"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                    title={`Preview: ${content.title}`}
+                    className="rounded-2xl"
+                    data-testid="spotify-embed"
+                  />
+                </div>
+                {content.external_url && (
+                  <a
+                    href={content.external_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-fit items-center gap-2 rounded-full border border-[#1DB954]/40 bg-[#1DB954]/10 px-4 py-2 text-sm font-semibold text-[#1DB954] transition hover:bg-[#1DB954]/20"
+                    data-testid="spotify-open-link"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open in Spotify
+                  </a>
+                )}
+              </div>
+            )}
+
             {/* Watchlist buttons */}
             <div className="mt-8 flex flex-wrap gap-2">
               {["want", "watching", "watched"].map((s) => {
+                const isSong = content.type === "song";
                 const active = watchStatus === s;
+                const label = isSong
+                  ? s === "want"
+                    ? "Want to Listen"
+                    : s === "watching"
+                      ? "Listening"
+                      : "Listened"
+                  : s === "want"
+                    ? "Want to Watch"
+                    : s === "watching"
+                      ? "Currently Watching"
+                      : "Watched";
                 return (
                   <button
                     key={s}
@@ -231,11 +274,7 @@ export default function Detail() {
                     ) : (
                       <Plus className="h-4 w-4" />
                     )}
-                    {s === "want"
-                      ? "Want to Watch"
-                      : s === "watching"
-                        ? "Currently Watching"
-                        : "Watched"}
+                    {label}
                   </button>
                 );
               })}

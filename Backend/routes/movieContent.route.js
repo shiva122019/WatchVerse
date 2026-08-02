@@ -1,7 +1,8 @@
-router = require("express").Router();
+const router = require("express").Router();
 const axios = require("axios");
 const rax = require("retry-axios");
-reviewContent = require("../Models/reviewContent.js");
+const reviewContent = require("../Models/reviewContent.js");
+const { spotifyGetTrack } = require("../lib/spotify");
 
 const tmdb = axios.create({
   baseURL: "https://api.themoviedb.org/3",
@@ -20,50 +21,6 @@ tmdb.defaults.raxConfig = {
 
 rax.attach(tmdb);
 
-//---------------------------------------------------
-// Spotify Client (Client Credentials Flow)
-//---------------------------------------------------
-
-let spotifyToken = null;
-let spotifyTokenExpiry = 0;
-
-async function getSpotifyToken() {
-  if (spotifyToken && Date.now() < spotifyTokenExpiry) {
-    return spotifyToken;
-  }
-
-  const res = await axios.post(
-    "https://accounts.spotify.com/api/token",
-    new URLSearchParams({ grant_type: "client_credentials" }),
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization:
-          "Basic " +
-          Buffer.from(
-            `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
-          ).toString("base64"),
-      },
-    }
-  );
-
-  spotifyToken = res.data.access_token;
-  spotifyTokenExpiry = Date.now() + res.data.expires_in * 1000 - 60000;
-
-  return spotifyToken;
-}
-
-const spotify = axios.create({
-  baseURL: "https://api.spotify.com/v1",
-  timeout: 10000,
-});
-
-spotify.interceptors.request.use(async (config) => {
-  const token = await getSpotifyToken();
-  config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
 router.get("/:type/:id", async (req, res) => {
   try {
     const { type, id } = req.params;
@@ -75,52 +32,19 @@ router.get("/:type/:id", async (req, res) => {
     }
 
     //--------------------------------------------------
-    // Song (Spotify)
+    // Song (Spotify) — uses shared lib/spotify.js
     //--------------------------------------------------
 
     if (type === "song") {
-      const { data: track } = await spotify.get(`/tracks/${id}`);
+      const track = await spotifyGetTrack(id);
 
-      const cover = track.album?.images?.[0]?.url || null;
-
-      const durationMs = track.duration_ms || 0;
-      const minutes = Math.floor(durationMs / 60000);
-      const seconds = Math.floor((durationMs % 60000) / 1000)
-        .toString()
-        .padStart(2, "0");
+      // Merge review statistics from the database
+      const cache = await reviewContent.findOne({ tmdbId: String(id) });
 
       return res.json({
-        id: track.id,
-
-        type: "song",
-
-        title: track.name,
-
-        description: track.album?.name
-          ? `From the album "${track.album.name}"`
-          : null,
-
-        cover_url: cover,
-
-        backdrop_url: cover,
-
-        release_year: track.album?.release_date
-          ? Number(track.album.release_date.substring(0, 4))
-          : null,
-
-        duration: durationMs ? `${minutes}:${seconds}` : null,
-
-        language: null,
-
-        genres: [],
-
-        creator: (track.artists || []).map((a) => a.name).join(", "),
-
-        cast: [],
-
-        avg_rating: 0,
-
-        review_count: 0,
+        ...track,
+        avg_rating: cache?.averageRating ?? track.avg_rating ?? 0,
+        review_count: cache?.totalReviews ?? track.review_count ?? 0,
       });
     }
 
@@ -147,7 +71,7 @@ router.get("/:type/:id", async (req, res) => {
 
     // Cached review statistics
     const cache = await reviewContent.findOne({
-      tmdbId: Number(id),
+      tmdbId: String(id),
     });
 
     res.json({
@@ -174,9 +98,8 @@ router.get("/:type/:id", async (req, res) => {
       duration:
         type === "movie"
           ? `${item.runtime} min`
-          : `${item.number_of_seasons} Season${
-              item.number_of_seasons === 1 ? "" : "s"
-            }`,
+          : `${item.number_of_seasons} Season${item.number_of_seasons === 1 ? "" : "s"
+          }`,
 
       language: item.original_language?.toUpperCase(),
 

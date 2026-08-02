@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const commentSchema = new mongoose.Schema(
   {
-    // The movie this comment belongs to
+    // The content this comment belongs to (TMDB ID or Spotify track ID)
     tmdbId: {
-      type: Number,
+      type: String,
       required: true,
     },
 
