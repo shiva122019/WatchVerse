@@ -6,22 +6,82 @@ import MediaCard from "@/components/MediaCard";
 import { StarRating } from "@/components/StarRating";
 import { ChevronLeft, ChevronRight, Play, Plus } from "lucide-react";
 
-function Row({ title, items = [], testid }) {
+function Row({ title, items: initialItems = [], section, testid }) {
   const scrollRef = useRef(null);
 
-  const scroll = (dir) => {
-    if (!scrollRef.current) return;
+  const [items, setItems] = useState(initialItems);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-    scrollRef.current.scrollBy({
-      left: dir * scrollRef.current.clientWidth * 0.8,
-      behavior: "smooth",
-    });
+  // Reset whenever homepage data changes
+  useEffect(() => {
+    setItems(initialItems);
+    setPage(1);
+    setHasMore(true);
+  }, [initialItems]);
+
+  const loadNextPage = async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+
+    try {
+      const nextPage = page + 1;
+
+      const res = await api.get("/home/section", {
+        params: {
+          section,
+          page: nextPage,
+        },
+      });
+
+      const newItems = res.data || [];
+
+      if (newItems.length === 0) {
+        setHasMore(false);
+      } else {
+        setItems((prev) => {
+          const combined = [...prev, ...newItems];
+
+          const seen = new Set();
+
+          return combined.filter((item) => {
+            const key = `${item.type}-${item.id}`;
+
+            if (seen.has(key)) return false;
+
+            seen.add(key);
+
+            return true;
+          });
+        });
+
+        setPage(nextPage);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+
+    if (!el) return;
+
+    const remaining = el.scrollWidth - el.scrollLeft - el.clientWidth;
+
+    if (remaining < 400) {
+      loadNextPage();
+    }
   };
 
   if (!items.length) return null;
 
   return (
-    <section className="mb-14">
+    <section className="mb-14" data-testid={testid}>
       <div className="mb-5 flex items-center justify-between">
         <h2 className="font-display text-2xl font-semibold text-white">
           {title}
@@ -29,19 +89,25 @@ function Row({ title, items = [], testid }) {
 
         <div className="flex gap-2">
           <button
-            onClick={() => scroll(-1)}
+            onClick={() =>
+              scrollRef.current?.scrollBy({
+                left: -scrollRef.current.clientWidth * 0.8,
+                behavior: "smooth",
+              })
+            }
             className="rounded-full border border-white/10 bg-white/5 p-2 text-neutral-300 hover:text-white"
-            aria-label="Scroll left"
-            data-testid={`${testid}-scroll-left`}
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
 
           <button
-            onClick={() => scroll(1)}
+            onClick={() =>
+              scrollRef.current?.scrollBy({
+                left: scrollRef.current.clientWidth * 0.8,
+                behavior: "smooth",
+              })
+            }
             className="rounded-full border border-white/10 bg-white/5 p-2 text-neutral-300 hover:text-white"
-            aria-label="Scroll right"
-            data-testid={`${testid}-scroll-right`}
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -50,11 +116,18 @@ function Row({ title, items = [], testid }) {
 
       <div
         ref={scrollRef}
+        onScroll={handleScroll}
         className="flex gap-5 overflow-x-auto scroll-smooth scrollbar-hide"
       >
-        {items.map((it) => (
-          <MediaCard key={`${it.type}-${it.id}`} item={it} />
+        {items.map((item) => (
+          <MediaCard key={`${item.type}-${item.id}`} item={item} />
         ))}
+
+        {loadingMore && (
+          <div className="flex min-w-[180px] items-center justify-center text-neutral-500">
+            Loading...
+          </div>
+        )}
       </div>
     </section>
   );
@@ -84,7 +157,10 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       if (loading || loadingMore || !hasMore) return;
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300) {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 300
+      ) {
         setPage((prev) => prev + 1);
       }
     };
@@ -106,7 +182,7 @@ export default function Home() {
           setExploreItems((prev) => {
             const combined = [...prev, ...newItems];
             const seen = new Set();
-            return combined.filter(it => {
+            return combined.filter((it) => {
               const key = `${it.type}-${it.id}`;
               if (seen.has(key)) return false;
               seen.add(key);
@@ -216,66 +292,10 @@ export default function Home() {
           items={home.trending}
           testid="row-trending"
         />
-
-        <Row title="Upcoming" items={home.upcoming} testid="row-upcoming" />
-
-        {home.continueWatching?.length > 0 && (
-          <Row
-            title="Continue Watching"
-            items={home.continueWatching}
-            testid="row-continue-watching"
-          />
-        )}
-
-        {home.genreRows?.Action?.length > 0 && (
-          <Row
-            title="Action"
-            items={home.genreRows.Action}
-            testid="row-action"
-          />
-        )}
-
-        {home.genreRows?.Comedy?.length > 0 && (
-          <Row
-            title="Comedy"
-            items={home.genreRows.Comedy}
-            testid="row-comedy"
-          />
-        )}
-
-        {home.genreRows?.Drama?.length > 0 && (
-          <Row title="Drama" items={home.genreRows.Drama} testid="row-drama" />
-        )}
-
-        {home.genreRows?.["Science Fiction"]?.length > 0 && (
-          <Row
-            title="Science Fiction"
-            items={home.genreRows["Science Fiction"]}
-            testid="row-scifi"
-          />
-        )}
-
-        {home.genreRows?.Horror?.length > 0 && (
-          <Row
-            title="Horror"
-            items={home.genreRows.Horror}
-            testid="row-horror"
-          />
-        )}
-
-        {home.genreRows?.Romance?.length > 0 && (
-          <Row
-            title="Romance"
-            items={home.genreRows.Romance}
-            testid="row-romance"
-          />
-        )}
-
-        <Row title="TV Shows" items={home.tvShows} testid="row-tv-shows" />
-
         {home.recommended?.length > 0 && (
           <Row
             title="Recommended For You"
+            section="recommended"
             items={home.recommended}
             testid="row-recommended"
           />
@@ -284,19 +304,102 @@ export default function Home() {
         {home.becauseYouWatched?.items?.length > 0 && (
           <Row
             title={`Because You Watched ${home.becauseYouWatched.source.title}`}
+            section={`becauseYouWatched:${home.becauseYouWatched.source.id}`}
             items={home.becauseYouWatched.items}
             testid="row-because-you-watched"
           />
         )}
+        {home.continueWatching?.length > 0 && (
+          <Row
+            title="Continue Watching"
+            section="continueWatching"
+            items={home.continueWatching}
+            testid="row-continue-watching"
+          />
+        )}
 
+        <Row
+          title="Upcoming"
+          section="upcoming"
+          items={home.upcoming}
+          testid="row-upcoming"
+        />
+
+        {home.genreRows?.Action?.length > 0 && (
+          <Row
+            title="Action"
+            section="action"
+            items={home.genreRows.Action}
+            testid="row-action"
+          />
+        )}
+
+        {home.genreRows?.Comedy?.length > 0 && (
+          <Row
+            title="Comedy"
+            section="comedy"
+            items={home.genreRows.Comedy}
+            testid="row-comedy"
+          />
+        )}
+
+        {home.genreRows?.Drama?.length > 0 && (
+          <Row
+            title="Drama"
+            section="drama"
+            items={home.genreRows.Drama}
+            testid="row-drama"
+          />
+        )}
+
+        {home.genreRows?.["Science Fiction"]?.length > 0 && (
+          <Row
+            title="Science Fiction"
+            section="science-fiction"
+            items={home.genreRows["Science Fiction"]}
+            testid="row-scifi"
+          />
+        )}
+
+        {home.genreRows?.Horror?.length > 0 && (
+          <Row
+            title="Horror"
+            section="horror"
+            items={home.genreRows.Horror}
+            testid="row-horror"
+          />
+        )}
+
+        {home.genreRows?.Romance?.length > 0 && (
+          <Row
+            title="Romance"
+            section="romance"
+            items={home.genreRows.Romance}
+            testid="row-romance"
+          />
+        )}
+
+        <Row
+          title="TV Shows"
+          section="tv"
+          items={home.tvShows}
+          testid="row-tv-shows"
+        />
         {exploreItems.length > 0 && (
           <section className="mb-14" data-testid="explore-grid-section">
             <h2 className="font-display text-2xl font-semibold text-white mb-6">
               More to Explore
             </h2>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" data-testid="explore-grid">
+            <div
+              className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+              data-testid="explore-grid"
+            >
               {exploreItems.map((it) => (
-                <MediaCard key={`${it.type}-${it.id}`} item={it} width="w-full" />
+                <MediaCard
+                  key={`${it.type}-${it.id}`}
+                  item={it}
+                  width="w-full"
+                />
               ))}
             </div>
           </section>

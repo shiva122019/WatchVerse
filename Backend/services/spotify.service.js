@@ -15,7 +15,7 @@ const spotifyApi = axios.create({
     retryDelay: 300,
     backoffType: "linear",
     httpMethodsToRetry: ["GET", "POST"],
-    statusCodesToRetry: [[500, 599]],
+    statusCodesToRetry: [[500, 599, 400]],
     onRetryAttempt: (err) => {
       const cfg = rax.getConfig(err);
       console.warn(
@@ -93,22 +93,90 @@ spotifyApi.interceptors.request.use(async (config) => {
 // Normalizes a raw Spotify track object into the shape the rest of the app expects.
 function mapTrack(track) {
   return {
-    deezerId: track.id, // kept field name "deezerId" for drop-in compatibility with controller
-    artistId: track.artists?.[0]?.id,
+    id: track.id,
+    type: "song",
+
     title: track.name,
-    artist: (track.artists || []).map((a) => a.name).join(", "),
+
+    artist: (track.artists || []).map((artist) => artist.name).join(", "),
+
+    artistId: track.artists?.[0]?.id || null,
+
     album: track.album?.name || null,
+
     cover:
-      track.album?.images?.[0]?.url || track.album?.images?.[1]?.url || null,
-    previewUrl: track.preview_url || null, // Spotify often returns null here (deprecated for most apps)
-    deezerUrl: track.external_urls?.spotify || null, // field name kept for compatibility; it's the Spotify URL
-    durationMs: track.duration_ms || null,
+      track.album?.images?.[0]?.url ||
+      track.album?.images?.[1]?.url ||
+      track.album?.images?.[2]?.url ||
+      null,
+
+    image:
+      track.album?.images?.[0]?.url ||
+      track.album?.images?.[1]?.url ||
+      track.album?.images?.[2]?.url ||
+      null,
+
+    poster:
+      track.album?.images?.[0]?.url ||
+      track.album?.images?.[1]?.url ||
+      track.album?.images?.[2]?.url ||
+      null,
+
     year: track.album?.release_date
       ? track.album.release_date.slice(0, 4)
       : null,
+
+    durationMs: track.duration_ms || null,
+
+    previewUrl: track.preview_url || null,
+
+    spotifyUrl: track.external_urls?.spotify || null,
+
+    // Temporary compatibility with old code
+    deezerId: track.id,
+    deezerUrl: track.external_urls?.spotify || null,
   };
 }
+const MAX_SPOTIFY_LIMIT = 10; // this app's access tier rejects limit > 10 on /search
 
+async function spotifySearchTracks(query, limit = 20, offset = 0) {
+  try {
+    const { data } = await spotifyApi.get("/search", {
+      params: { q: query, type: "track", limit, offset },
+    });
+    return (data.tracks?.items || []).map(mapTrack);
+  } catch (e) {
+    console.error(
+      "🔴 SPOTIFY SEARCH ERROR:",
+      query,
+      limit,
+      offset,
+      e.response?.status,
+      e.response?.data || e.message,
+    );
+    throw e;
+  }
+}
+
+// Fetches up to `total` tracks by making sequential limit=10 requests,
+// since single requests above that limit get rejected.
+async function spotifySearchTracksBatch(query, total = 50, startOffset = 0) {
+  const results = [];
+  let offset = startOffset;
+
+  while (results.length < total) {
+    const batch = await spotifySearchTracks(query, MAX_SPOTIFY_LIMIT, offset);
+
+    if (batch.length === 0) break; // no more matches from Spotify
+
+    results.push(...batch);
+    offset += MAX_SPOTIFY_LIMIT;
+
+    if (batch.length < MAX_SPOTIFY_LIMIT) break; // partial page = end of results
+  }
+
+  return results.slice(0, total);
+}
 async function searchTrack(query, limit = 5) {
   query = query
     .trim()
@@ -152,4 +220,9 @@ async function getArtistTopTracks(artistId, market = "US") {
   }
 }
 
-module.exports = { searchTrack, getArtistTopTracks };
+module.exports = {
+  searchTrack,
+  getArtistTopTracks,
+  spotifySearchTracks,
+  spotifySearchTracksBatch,
+};

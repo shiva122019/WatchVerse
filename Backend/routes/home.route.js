@@ -1,6 +1,11 @@
 const router = require("express").Router();
 const tmdb = require("../lib/tmdb");
-const { musicCache, spotifySearchTracks, spotifySearchAll } = require("../lib/spotify");
+const {
+  musicCache,
+  spotifySearchTracks,
+  spotifySearchTracksBatch,
+  searchTrack,
+} = require("../lib/spotify");
 const {
   homeCache,
   browseCache,
@@ -10,225 +15,23 @@ const {
   getRecommendedForUser,
   getBecauseYouWatched,
   getTVShows,
-  getUpcoming,
   getGenreRows,
+  getUpcoming,
+  getGenreContent,
   getTrending,
   getContinueWatching,
 } = require("../services/home.service");
 
-// router.get("/", async (req, res) => {
-//   try {
-//     //---------------------------------------------------
-//     // Cache
-//     //---------------------------------------------------
-
-//     const cached = homeCache.get("homepage");
-
-//     if (cached) {
-//       return res.json(cached);
-//     }
-
-//     //---------------------------------------------------
-//     // Genre Maps
-//     //---------------------------------------------------
-
-//     const [movieGenresRes, tvGenresRes] = await Promise.all([
-//       tmdb.get("/genre/movie/list"),
-//       tmdb.get("/genre/tv/list"),
-//     ]);
-
-//     const movieGenreMap = {};
-//     const tvGenreMap = {};
-
-//     movieGenresRes.data.genres.forEach((g) => {
-//       movieGenreMap[g.id] = g.name;
-//     });
-
-//     tvGenresRes.data.genres.forEach((g) => {
-//       tvGenreMap[g.id] = g.name;
-//     });
-
-//     //---------------------------------------------------
-//     // Homepage Requests
-//     //---------------------------------------------------
-
-//     const responses = await Promise.allSettled([
-//       tmdb.get("/trending/all/week"),
-//       tmdb.get("/movie/popular"),
-//       tmdb.get("/movie/top_rated"),
-//       tmdb.get("/tv/popular"),
-//       tmdb.get("/tv/top_rated"),
-//     ]);
-
-//     const getData = (index) =>
-//       responses[index].status === "fulfilled"
-//         ? responses[index].value.data.results
-//         : [];
-
-//     //---------------------------------------------------
-//     // Trending
-//     //---------------------------------------------------
-
-//     const trending = getData(0)
-//       .filter((item) => item.media_type === "movie" || item.media_type === "tv")
-//       .map((item) =>
-//         mapTMDBItem(
-//           item,
-//           item.media_type,
-//           item.media_type === "movie" ? movieGenreMap : tvGenreMap,
-//         ),
-//       );
-
-//     //---------------------------------------------------
-//     // Popular Movies
-//     //---------------------------------------------------
-
-//     const popularMovies = getData(1).map((item) =>
-//       mapTMDBItem(item, "movie", movieGenreMap),
-//     );
-
-//     //---------------------------------------------------
-//     // Top Rated Movies
-//     //---------------------------------------------------
-
-//     const topRatedMovies = getData(2).map((item) =>
-//       mapTMDBItem(item, "movie", movieGenreMap),
-//     );
-
-//     //---------------------------------------------------
-//     // Popular Series
-//     //---------------------------------------------------
-
-//     const popularSeries = getData(3).map((item) =>
-//       mapTMDBItem(item, "tv", tvGenreMap),
-//     );
-
-//     //---------------------------------------------------
-//     // Top Rated Series
-//     //---------------------------------------------------
-
-//     const topRatedSeries = getData(4).map((item) =>
-//       mapTMDBItem(item, "tv", tvGenreMap),
-//     );
-
-//     //---------------------------------------------------
-//     // Featured
-//     //---------------------------------------------------
-
-//     const featured =
-//       trending.length > 0
-//         ? trending[0]
-//         : popularMovies[0] || popularSeries[0] || null;
-
-//     //---------------------------------------------------
-//     // Response
-//     //---------------------------------------------------
-
-//     if (req.user) {
-//       const recommended = req.user
-//         ? await getRecommendedForUser(req.user._id)
-//         : [];
-
-//       const becauseYouWatched = req.user
-//         ? await getBecauseYouWatched(req.user._id)
-//         : [];
-//     }
-
-//     const response = {
-//       featured,
-
-//       trending,
-
-//       popularMovies,
-
-//       topRatedMovies,
-
-//       popularSeries,
-
-//       topRatedSeries,
-
-//       recommended,
-
-//       becauseYouWatched,
-//     };
-
-//     //---------------------------------------------------
-//     // Save Cache
-//     //---------------------------------------------------
-
-//     homeCache.set("homepage", response);
-
-//     res.json(response);
-//   } catch (err) {
-//     console.error(err.response?.data || err.message);
-
-//     res.status(500).json({
-//       success: false,
-//       message: "Unable to load homepage.",
-//     });
-//   }
-// });
-
 router.get("/", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-
-    //---------------------------------------------------
-    // Genre Maps
-    //---------------------------------------------------
-
-    const [movieGenresRes, tvGenresRes] = await Promise.all([
-      tmdb.get("/genre/movie/list"),
-      tmdb.get("/genre/tv/list"),
-    ]);
-
-    const movieGenreMap = {};
-    const tvGenreMap = {};
-
-    movieGenresRes.data.genres.forEach((g) => {
-      movieGenreMap[g.id] = g.name;
-    });
-
-    tvGenresRes.data.genres.forEach((g) => {
-      tvGenreMap[g.id] = g.name;
-    });
-
-    if (page > 1) {
-      // Fetch trending page
-      const cacheKey = `homepage-trending-${page}`;
-      let data = browseCache.get(cacheKey);
-      if (!data) {
-        data = await tmdbFetch("/trending/all/week", {
-          params: { page },
-        });
-        browseCache.set(cacheKey, data);
-      }
-
-      const results = (data.results || [])
-        .filter((item) => item.media_type === "movie" || item.media_type === "tv")
-        .map((item) =>
-          mapTMDBItem(
-            item,
-            item.media_type,
-            item.media_type === "movie" ? movieGenreMap : tvGenreMap,
-          ),
-        );
-
-      return res.json(results);
-    }
-
-    //---------------------------------------------------
-    // Public Homepage (Cached)
-    //---------------------------------------------------
-
     let publicSections = homeCache.get("homepage");
 
     if (!publicSections) {
       const [trending, upcoming, genreRows, tvShows] = await Promise.all([
-        getTrending(movieGenreMap, tvGenreMap),
-        getUpcoming(movieGenreMap, tvGenreMap),
-        getGenreRows(movieGenreMap),
-        getTVShows(tvGenreMap),
+        getTrending(),
+        getUpcoming(),
+        getGenreRows(),
+        getTVShows(),
       ]);
 
       publicSections = {
@@ -241,13 +44,12 @@ router.get("/", async (req, res) => {
       homeCache.set("homepage", publicSections);
     }
 
-    //---------------------------------------------------
-    // Personalized Sections
-    //---------------------------------------------------
-
     let continueWatching = [];
     let recommended = [];
-    let becauseYouWatched = [];
+    let becauseYouWatched = {
+      source: null,
+      items: [],
+    };
 
     if (req.user) {
       [continueWatching, recommended, becauseYouWatched] = await Promise.all([
@@ -257,22 +59,84 @@ router.get("/", async (req, res) => {
       ]);
     }
 
-    //---------------------------------------------------
-    // Response
-    //---------------------------------------------------
-
-    res.json({
+    return res.json({
       ...publicSections,
       continueWatching,
       recommended,
       becauseYouWatched,
     });
   } catch (err) {
-    console.error(err.response?.data || err.message);
+    console.error(err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Unable to load homepage.",
+    });
+  }
+});
+
+router.get("/section", async (req, res) => {
+  try {
+    const { section, page = 1 } = req.query;
+
+    const pageNum = Math.max(1, Number(page));
+
+    const SECTION_HANDLERS = {
+      trending: () => getTrending(pageNum),
+
+      upcoming: () => getUpcoming(pageNum),
+
+      tv: () => getTVShows(pageNum),
+
+      action: () => getGenreContent("Action", pageNum),
+
+      comedy: () => getGenreContent("Comedy", pageNum),
+
+      drama: () => getGenreContent("Drama", pageNum),
+
+      "science-fiction": () => getGenreContent("Science Fiction", pageNum),
+
+      horror: () => getGenreContent("Horror", pageNum),
+
+      romance: () => getGenreContent("Romance", pageNum),
+
+      recommended: () => {
+        if (!req.user) return [];
+        return getRecommendedForUser(req.user._id, pageNum);
+      },
+
+      continueWatching: () => {
+        if (!req.user) return [];
+        return getContinueWatching(req.user._id, pageNum);
+      },
+
+      becauseYouWatched: async () => {
+        if (!req.user) return [];
+
+        const result = await getBecauseYouWatched(req.user._id, pageNum);
+
+        return result.items;
+      },
+    };
+
+    const handler = SECTION_HANDLERS[section];
+
+    if (!handler) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid section.",
+      });
+    }
+
+    const items = await handler();
+
+    return res.json(items);
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load section.",
     });
   }
 });
@@ -287,36 +151,42 @@ router.get("/queryContent", async (req, res) => {
     //--------------------------------------------------
 
     if (type === "song") {
-  try {
-    const cacheKey = `song-${q || genre || "default"}`;
-    const cached = musicCache.get(cacheKey);
+      try {
+        const pageNum = Math.max(1, Number(req.query.page) || 1);
+        const pageSize = Number(limit) || 20;
 
-    if (cached) {
-      return res.json(cached.slice(0, Number(limit)));
+        const cacheKey = `song-${q || genre || "default"}`;
+        let results = musicCache.get(cacheKey);
+
+        if (!results) {
+          if (q) {
+            results = await spotifySearchTracks(q, 20, 0);
+          } else if (genre) {
+            results = await spotifySearchTracks(
+              `genre:"${genre.toLowerCase()}"`,
+              20,
+              0,
+            );
+          } else {
+            results = await spotifySearchTracks("a", 20, 0);
+          }
+
+          musicCache.set(cacheKey, results);
+        }
+
+        const start = (pageNum - 1) * pageSize;
+        const end = start + pageSize;
+
+        return res.json(results.slice(start, end));
+      } catch (err) {
+        console.error("🔴 SPOTIFY ERROR MESSAGE:", err.response?.data);
+
+        return res.status(500).json({
+          success: false,
+          message: "Failed to fetch music.",
+        });
+      }
     }
-
-    let results;
-
-    if (q) {
-      results = await spotifySearchTracks(q, 10);
-    } else if (genre) {
-      results = await spotifySearchTracks(`genre:"${genre.toLowerCase()}"`, 10);
-    } else {
-      results = await spotifySearchAll(10);
-    }
-
-    musicCache.set(cacheKey, results);
-
-    return res.json(results.slice(0, Number(limit)));
-  } catch (err) {
-    console.error(err);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch music.",
-    });
-  }
-}
 
     //--------------------------------------------------
     // Determine media types
