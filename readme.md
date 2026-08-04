@@ -1,10 +1,8 @@
 <div align="center">
 
-# 🎬 WatchVerse
+![WatchVerse](./banner.svg)
 
 **A full-stack MERN media discovery platform for movies, TV, music, and community.**
-
-Discover · Review · Track · Swipe · Chat · Listen — all powered by TMDB, Spotify, and Gemini.
 
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb&logoColor=white)](#)
 [![Express.js](https://img.shields.io/badge/Express.js-000000?style=flat&logo=express&logoColor=white)](#)
@@ -21,6 +19,10 @@ Discover · Review · Track · Swipe · Chat · Listen — all powered by TMDB, 
 
 - [About](#-about)
 - [Features](#-features)
+- [Architecture](#-architecture)
+- [Data Model](#-data-model)
+- [AI Chatbot Flow](#-ai-chatbot-flow)
+- [Screenshots](#-screenshots)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
@@ -112,6 +114,143 @@ Powered by Spotify integration:
 
 ### ♾️ Infinite Scrolling
 Continuous content discovery without pagination — smoother browsing and better exploration.
+
+---
+
+## 🏗️ Architecture
+
+High-level view of how the frontend, backend, and external services fit together.
+
+```mermaid
+flowchart TD
+    subgraph Client["Frontend — React + Vite"]
+        UI["Pages & Components<br/>Home · Browser · Detail · SwipeStack · Chatbot"]
+    end
+
+    subgraph Server["Backend — Node.js + Express"]
+        Routes["Routes<br/>auth · home · watchlist · comments · chat · onboarding"]
+        Auth["Passport.js<br/>Session Auth"]
+        Ctrl["Controllers<br/>chat.controller.js"]
+        Services["Services Layer<br/>tmdb · spotify · gemini · intent · prompt · mediaClassifier"]
+        Cache[("NodeCache")]
+    end
+
+    subgraph Data["Data Layer"]
+        Mongo[("MongoDB<br/>Users · Reviews · Comments · Preferences")]
+        SessionStore[("connect-mongo<br/>Session Store")]
+    end
+
+    subgraph External["External APIs"]
+        TMDB[("TMDB API")]
+        Spotify[("Spotify API")]
+        Gemini[("Gemini API")]
+    end
+
+    UI -- "Axios / REST" --> Routes
+    Routes --> Auth
+    Routes --> Ctrl
+    Ctrl --> Services
+    Auth --> SessionStore
+    Services --> Cache
+    Services --> Mongo
+    Services -- "movie & TV metadata" --> TMDB
+    Services -- "music data" --> Spotify
+    Services -- "AI responses" --> Gemini
+    Routes --> Mongo
+```
+
+---
+
+## 🗃️ Data Model
+
+Core entities and how they relate, based on the Mongoose models in `Backend/Models/`.
+
+```mermaid
+erDiagram
+    USER ||--o{ REVIEW : writes
+    USER ||--o{ COMMENT : posts
+    USER ||--|| USERPREFERENCE : has
+    REVIEW ||--o{ COMMENT : "receives"
+    REVIEW }o--|| REVIEWCONTENT : "rates"
+
+    USER {
+        string username
+        string passwordHash
+        date createdAt
+    }
+    REVIEW {
+        string userId
+        string mediaId
+        int rating
+        string text
+    }
+    COMMENT {
+        string reviewId
+        string userId
+        string text
+    }
+    USERPREFERENCE {
+        string userId
+        array genres
+        array interests
+    }
+    REVIEWCONTENT {
+        string mediaId
+        float averageRating
+        int reviewCount
+    }
+```
+
+---
+
+## 🤖 AI Chatbot Flow
+
+How a natural-language question turns into a recommendation.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Chatbot UI
+    participant R as chat.route.js
+    participant C as chat.controller.js
+    participant I as intent.service.js
+    participant P as prompt.service.js
+    participant G as Gemini API
+    participant T as tmdb.service.js
+
+    U->>FE: "What should I watch if I liked Interstellar?"
+    FE->>R: POST /chat
+    R->>C: handle message
+    C->>I: classify intent
+    I-->>C: recommendation intent
+    C->>P: build contextual prompt
+    P->>G: generate suggestions
+    G-->>P: AI-generated titles & reasoning
+    C->>T: fetch matching metadata
+    T-->>C: posters, ratings, genres
+    C-->>FE: reply + enriched title cards
+    FE-->>U: conversational response
+```
+
+---
+
+## 📸 Screenshots
+
+> Add real screenshots or a screen recording here — this section is a placeholder layout to drop them into.
+
+<div align="center">
+
+| Home | Content Detail | Swipe Discovery |
+|:---:|:---:|:---:|
+| ![Home screenshot](./screenshots/home.png) | ![Detail screenshot](./screenshots/detail.png) | ![Swipe screenshot](./screenshots/swipe.png) |
+
+| AI Chatbot | Watchlist | Chat Rooms |
+|:---:|:---:|:---:|
+| ![Chatbot screenshot](./screenshots/chatbot.png) | ![Watchlist screenshot](./screenshots/watchlist.png) | ![Chat rooms screenshot](./screenshots/chatrooms.png) |
+
+</div>
+
+To use these: create a `screenshots/` folder in the repo root, drop in your PNGs with the matching filenames above (or update the paths), and they'll render automatically on GitHub.
 
 ---
 
