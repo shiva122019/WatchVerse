@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Toaster } from "./components/ui/sonner";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { Toaster } from "./components/watchparty/ui/sonner";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import SplashScreen from "./components/SplashScreen";
@@ -12,17 +12,24 @@ import Register from "./pages/Register";
 import Watchlist from "./pages/Watchlist";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AudioVisualizer from "./components/MediaAssistantChatbot";
+import WatchParty from "./pages/WatchParty";
+import WatchRoom from "./pages/WatchRoom";
 import "./App.css";
 
 function AppShell({ splashDone }) {
+  const location = useLocation();
+  // The watch room is a full-screen, self-contained experience — no global
+  // nav/footer, so it fills the viewport exactly and never needs to scroll.
+  const isImmersive = location.pathname.startsWith("/watch-room");
+
   return (
     <>
-      <Navbar />
-      <main className="relative z-[2]">
+      {!isImmersive && <Navbar />}
+      <main className={isImmersive ? "" : "relative z-[2]"}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
-          <Route path="/content/:id" element={<Detail />} />
+          <Route path="/content/:type/:id" element={<Detail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
@@ -33,17 +40,37 @@ function AppShell({ splashDone }) {
               </ProtectedRoute>
             }
           />
+          <Route
+    path="/watchparty"
+    element={
+      <ProtectedRoute>
+        <WatchParty />
+      </ProtectedRoute>
+    }
+  />
+
+  <Route
+    path="/watch-room/:roomId"
+    element={
+      <ProtectedRoute>
+        <WatchRoom />
+      </ProtectedRoute>
+    }
+  />
         </Routes>
       </main>
-      {splashDone &&
-      <AudioVisualizer
-      siteName="WatchVerse"
-      chatUrl="http://localhost:5001/chat"
-      />}
+      {splashDone && !isImmersive && (
+        <AudioVisualizer
+        siteName="WatchVerse"
+        chatUrl="http://localhost:5001/chat"
+        />
+      )}
 
-      <footer className="border-t border-white/5 py-10 text-center text-xs uppercase tracking-[0.3em] text-neutral-600">
-        Prismo · Movies · Series · Music
-      </footer>
+      {!isImmersive && (
+        <footer className="border-t border-white/5 py-10 text-center text-xs uppercase tracking-[0.3em] text-neutral-600">
+          Prismo · Movies · Series · Music
+        </footer>
+      )}
     </>
   );
 }

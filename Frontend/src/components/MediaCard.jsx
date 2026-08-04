@@ -14,7 +14,7 @@ export default function MediaCard({ item, width = "w-44 md:w-52" }) {
 
   return (
     <Link
-      to={`/content/${item.id}`}
+      to={`/content/${item.type}/${item.id}`}
       data-testid={`media-card-${item.id}`}
       className={`group card-hover relative flex ${width} shrink-0 flex-col`}
     >
