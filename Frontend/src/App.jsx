@@ -10,6 +10,7 @@ import Detail from "./pages/Detail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Watchlist from "./pages/Watchlist";
+import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AudioVisualizer from "./components/MediaAssistantChatbot";
 import "./App.css";
@@ -27,6 +28,14 @@ function AppShell({ splashDone }) {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/onBoarding" element={<Onboarding />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/watchlist"
             element={
