@@ -6,7 +6,7 @@ const {
   getSpotifyToken,
   tmdb,
 } = require("../services/movieContent.service.js");
-
+const { spotifyGetTrack } = require("../lib/spotify");
 router.get("/:type/:id", async (req, res) => {
   try {
     const { type, id } = req.params;

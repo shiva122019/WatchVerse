@@ -5,7 +5,8 @@ const {
   spotifySearchTracks,
   spotifySearchTracksBatch,
   searchTrack,
-} = require("../lib/spotify");
+} = require("../services/spotify.service");
+const { spotifySearchTrack } = require("../lib/spotify");
 const {
   homeCache,
   browseCache,
@@ -160,15 +161,15 @@ router.get("/queryContent", async (req, res) => {
 
         if (!results) {
           if (q) {
-            results = await spotifySearchTracks(q, 20, 0);
+            results = await spotifySearchTracks(q, 10, 0);
           } else if (genre) {
             results = await spotifySearchTracks(
               `genre:"${genre.toLowerCase()}"`,
-              20,
+              10,
               0,
             );
           } else {
-            results = await spotifySearchTracks("a", 20, 0);
+            results = await spotifySearchTracks("a", 10, 0);
           }
 
           musicCache.set(cacheKey, results);
