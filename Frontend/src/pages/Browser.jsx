@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "@/lib/api";
 import MediaCard from "@/components/MediaCard";
+import MusicMediaCard from "@/components/MusicMediaCard";
 import { Search } from "lucide-react";
 
 const TYPES = [
@@ -75,7 +76,7 @@ export default function Browse() {
           }
           const combined = [...prev, ...newItems];
           const seen = new Set();
-          return combined.filter(it => {
+          return combined.filter((it) => {
             const key = `${it.type}-${it.id}`;
             if (seen.has(key)) return false;
             seen.add(key);
@@ -104,7 +105,10 @@ export default function Browse() {
   useEffect(() => {
     const handleScroll = () => {
       if (loading || loadingMore || !hasMore) return;
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300) {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 300
+      ) {
         setPage((prev) => prev + 1);
       }
     };
@@ -238,9 +242,13 @@ export default function Browse() {
             className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
             data-testid="browse-grid"
           >
-            {items.map((it) => (
-              <MediaCard key={it.id} item={it} width="w-full" />
-            ))}
+            {type === "song"
+              ? items.map((song) => (
+                  <MusicMediaCard key={song.id} item={song} width="w-full" />
+                ))
+              : items.map((item) => (
+                  <MediaCard key={item.id} item={item} width="w-full" />
+                ))}
           </div>
           {loadingMore && (
             <div className="py-10 text-center text-neutral-500">

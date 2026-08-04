@@ -1,12 +1,11 @@
 const router = require("express").Router();
 const tmdb = require("../lib/tmdb");
 const {
-  musicCache,
   spotifySearchTracks,
   spotifySearchTracksBatch,
   searchTrack,
 } = require("../services/spotify.service");
-const { spotifySearchTrack } = require("../lib/spotify");
+const { spotifySearchTrack, musicCache } = require("../lib/spotify");
 const {
   homeCache,
   browseCache,
@@ -180,7 +179,7 @@ router.get("/queryContent", async (req, res) => {
 
         return res.json(results.slice(start, end));
       } catch (err) {
-        console.error("🔴 SPOTIFY ERROR MESSAGE:", err.response?.data);
+        console.error("🔴 SPOTIFY ERROR MESSAGE:", err);
 
         return res.status(500).json({
           success: false,

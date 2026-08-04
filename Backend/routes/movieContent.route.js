@@ -8,12 +8,6 @@ const {
   tmdb,
 } = require("../services/movieContent.service.js");
 const { spotifyGetTrack } = require("../lib/spotify");
-const {
-  getTrailerUrl,
-  spotify,
-  getSpotifyToken,
-  tmdb,
-} = require("../services/movieContent.service.js");
 
 router.get("/:type/:id", async (req, res) => {
   try {
