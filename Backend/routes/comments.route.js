@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
     }
 
     // Fetch all comments for this movie (both top-level and replies), oldest first
-    const all = await Comment.find({ tmdbId: Number(content_id) })
+    const all = await Comment.find({ tmdbId: String(content_id) })
       .populate("userId", "username")
       .sort({ createdAt: 1 })
       .lean();
@@ -92,7 +92,7 @@ router.post("/", async (req, res) => {
       if (!parent) {
         return res.status(404).json({ error: "Parent comment not found" });
       }
-      if (Number(parent.tmdbId) !== Number(content_id)) {
+      if (String(parent.tmdbId) !== String(content_id)) {
         return res
           .status(400)
           .json({ error: "Parent comment does not belong to this movie" });
@@ -100,7 +100,7 @@ router.post("/", async (req, res) => {
     }
 
     const comment = await Comment.create({
-      tmdbId: Number(content_id),
+      tmdbId: String(content_id),
       userId: req.user._id,
       text: text.trim(),
       parentId: parent_id || null,

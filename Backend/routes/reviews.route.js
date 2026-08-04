@@ -1,21 +1,21 @@
-router = require("express").Router();
-mongoose = require("mongoose");
-Review = require("../models/Review.js");
-reviewContent = require("../Models/reviewContent.js");
+const router = require("express").Router();
+const mongoose = require("mongoose");
+const Review = require("../models/Review.js");
+const reviewContent = require("../Models/reviewContent.js");
 
 // get all reviews for one item
 router.get("/", async (req, res) => {
   try {
     const { content_id } = req.query;
 
-    if (!content_id || isNaN(Number(content_id))) {
+    if (!content_id) {
       return res.status(400).json({
-        error: "Valid content_id is required",
+        error: "content_id is required",
       });
     }
 
     const reviews = await Review.find({
-      tmdbId: Number(content_id),
+      tmdbId: String(content_id),
     }).sort({ createdAt: -1 });
 
     const formatted = reviews.map((review) => ({
@@ -54,9 +54,9 @@ router.post("/", async (req, res) => {
       });
     }
 
-    if (!content_id || isNaN(Number(content_id))) {
+    if (!content_id) {
       return res.status(400).json({
-        error: "Valid content_id is required",
+        error: "content_id is required",
       });
     }
 
@@ -73,7 +73,7 @@ router.post("/", async (req, res) => {
     }
 
     const existing = await Review.findOne({
-      tmdbId: Number(content_id),
+      tmdbId: String(content_id),
       userId: req.user._id,
     });
 
@@ -84,20 +84,20 @@ router.post("/", async (req, res) => {
     }
 
     const review = await Review.create({
-      tmdbId: Number(content_id),
+      tmdbId: String(content_id),
       userId: req.user._id,
       rating,
       comment: text.trim(),
     });
 
     let content = await reviewContent.findOne({
-      tmdbId: Number(content_id),
+      tmdbId: String(content_id),
     });
 
     if (!content) {
       // First review for this movie
       content = await reviewContent.create({
-        tmdbId: Number(content_id),
+        tmdbId: String(content_id),
         averageRating: rating,
         totalReviews: 1,
       });

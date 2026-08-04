@@ -8,12 +8,12 @@ const watchlistSchema = new mongoose.Schema(
       required: true,
     },
     tmdbId: {
-      type: Number,
+      type: String,
       required: true,
     },
     mediaType: {
       type: String,
-      enum: ["movie", "tv", "song"],
+      enum: ["movie", "tv"],
       required: true,
     },
     status: {
