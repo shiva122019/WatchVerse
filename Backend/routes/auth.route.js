@@ -108,7 +108,28 @@ router.get("/me", (req, res) => {
     id: req.user._id,
     username: req.user.username,
     email: req.user.email,
+    avatar: req.user.avatar || null,
+    displayName: req.user.displayName || null,
+    provider: req.user.provider || "local",
   });
 });
+
+// --- Google OAuth Routes ---
+
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] }),
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "http://localhost:5173/login",
+  }),
+  (req, res) => {
+    // Session is already created by Passport — redirect to frontend
+    res.redirect("http://localhost:5173");
+  },
+);
 
 module.exports = router;

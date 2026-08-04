@@ -13,11 +13,28 @@ const userSchema = new mongoose.Schema({
   },
   hash: {
     type: String,
-    required: true,
+    required: false,
   },
   onboardingCompleted: {
     type: Boolean,
     default: false,
+  },
+  googleId: {
+    type: String,
+    default: null,
+  },
+  provider: {
+    type: String,
+    enum: ["local", "google"],
+    default: "local",
+  },
+  avatar: {
+    type: String,
+    default: null,
+  },
+  displayName: {
+    type: String,
+    default: null,
   },
 });
 
