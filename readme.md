@@ -4,12 +4,15 @@
 
 **A full-stack MERN media discovery platform for movies, TV, music, and community.**
 
-[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb&logoColor=white)](#)
-[![Express.js](https://img.shields.io/badge/Express.js-000000?style=flat&logo=express&logoColor=white)](#)
-[![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)](#)
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)](#)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)](#)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)](#)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](#)
+[![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](#)
+[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](#)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](#)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](#)
+[![TMDB](https://img.shields.io/badge/TMDB-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white)](#)
+[![Spotify](https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white)](#)
+[![Gemini](https://img.shields.io/badge/Gemini-8E75F7?style=for-the-badge&logo=googlegemini&logoColor=white)](#)
 
 </div>
 
@@ -119,15 +122,15 @@ Continuous content discovery without pagination — smoother browsing and better
 
 ## 🏗️ Architecture
 
-High-level view of how the frontend, backend, and external services fit together.
+High-level view of how the frontend, backend, and external services fit together — colored by layer.
 
 ```mermaid
 flowchart TD
-    subgraph Client["Frontend — React + Vite"]
+    subgraph Client["🖥️ Frontend — React + Vite"]
         UI["Pages & Components<br/>Home · Browser · Detail · SwipeStack · Chatbot"]
     end
 
-    subgraph Server["Backend — Node.js + Express"]
+    subgraph Server["⚙️ Backend — Node.js + Express"]
         Routes["Routes<br/>auth · home · watchlist · comments · chat · onboarding"]
         Auth["Passport.js<br/>Session Auth"]
         Ctrl["Controllers<br/>chat.controller.js"]
@@ -135,12 +138,12 @@ flowchart TD
         Cache[("NodeCache")]
     end
 
-    subgraph Data["Data Layer"]
+    subgraph Data["🗄️ Data Layer"]
         Mongo[("MongoDB<br/>Users · Reviews · Comments · Preferences")]
         SessionStore[("connect-mongo<br/>Session Store")]
     end
 
-    subgraph External["External APIs"]
+    subgraph External["🌐 External APIs"]
         TMDB[("TMDB API")]
         Spotify[("Spotify API")]
         Gemini[("Gemini API")]
@@ -157,6 +160,20 @@ flowchart TD
     Services -- "music data" --> Spotify
     Services -- "AI responses" --> Gemini
     Routes --> Mongo
+
+    classDef client fill:#60a5fa,stroke:#1d4ed8,stroke-width:2px,color:#0b0e14
+    classDef server fill:#e8b84b,stroke:#8a6f2e,stroke-width:2px,color:#0b0e14
+    classDef data fill:#a78bfa,stroke:#5b3fa0,stroke-width:2px,color:#0b0e14
+    classDef tmdb fill:#01b4e4,stroke:#016a86,stroke-width:2px,color:#ffffff
+    classDef spotify fill:#1db954,stroke:#0f7a34,stroke-width:2px,color:#ffffff
+    classDef gemini fill:#8e75f7,stroke:#4c2fb0,stroke-width:2px,color:#ffffff
+
+    class UI client
+    class Routes,Auth,Ctrl,Services,Cache server
+    class Mongo,SessionStore data
+    class TMDB tmdb
+    class Spotify spotify
+    class Gemini gemini
 ```
 
 ---
@@ -166,6 +183,15 @@ flowchart TD
 Core entities and how they relate, based on the Mongoose models in `Backend/Models/`.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {
+  'primaryColor': '#e8b84b',
+  'primaryTextColor': '#0b0e14',
+  'primaryBorderColor': '#8a6f2e',
+  'secondaryColor': '#3ec6b6',
+  'tertiaryColor': '#a78bfa',
+  'lineColor': '#3ec6b6',
+  'fontFamily': 'Arial'
+}}}%%
 erDiagram
     USER ||--o{ REVIEW : writes
     USER ||--o{ COMMENT : posts
@@ -208,14 +234,29 @@ erDiagram
 How a natural-language question turns into a recommendation.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {
+  'actorBkg': '#191f2c',
+  'actorBorder': '#e8b84b',
+  'actorTextColor': '#edeae0',
+  'actorLineColor': '#3ec6b6',
+  'signalColor': '#3ec6b6',
+  'signalTextColor': '#edeae0',
+  'labelBoxBkgColor': '#a78bfa',
+  'labelBoxBorderColor': '#5b3fa0',
+  'labelTextColor': '#0b0e14',
+  'noteBkgColor': '#e8b84b',
+  'noteTextColor': '#0b0e14',
+  'noteBorderColor': '#8a6f2e',
+  'sequenceNumberColor': '#0b0e14'
+}}}%%
 sequenceDiagram
-    participant U as User
-    participant FE as Chatbot UI
+    participant U as 👤 User
+    participant FE as 💬 Chatbot UI
     participant R as chat.route.js
     participant C as chat.controller.js
     participant I as intent.service.js
     participant P as prompt.service.js
-    participant G as Gemini API
+    participant G as ✨ Gemini API
     participant T as tmdb.service.js
 
     U->>FE: "What should I watch if I liked Interstellar?"
@@ -260,36 +301,36 @@ To use these: create a `screenshots/` folder in the repo root, drop in your PNGs
 <tr>
 <td valign="top" width="33%">
 
-**Frontend**
-- React
-- Vite
-- React Router
-- Axios
-- Tailwind CSS
-- Framer Motion
+**🖥️ Frontend**
+
+![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-EF008F?style=flat-square&logo=framer&logoColor=white)
 
 </td>
 <td valign="top" width="33%">
 
-**Backend**
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- Passport.js
-- Express Session
-- connect-mongo
-- bcrypt
-- NodeCache
-- retry-axios
+**⚙️ Backend**
+
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)
+![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=flat-square&logo=mongoose&logoColor=white)
+![Passport](https://img.shields.io/badge/Passport.js-34E27A?style=flat-square&logo=passport&logoColor=white)
+
+`Express Session` · `connect-mongo` · `bcrypt` · `NodeCache` · `retry-axios`
 
 </td>
 <td valign="top" width="33%">
 
-**External APIs**
-- TMDB (The Movie Database)
-- Spotify API
-- Gemini API
+**🌐 External APIs**
+
+![TMDB](https://img.shields.io/badge/TMDB-01B4E4?style=flat-square&logo=themoviedatabase&logoColor=white)
+![Spotify](https://img.shields.io/badge/Spotify-1DB954?style=flat-square&logo=spotify&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-8E75F7?style=flat-square&logo=googlegemini&logoColor=white)
 
 </td>
 </tr>
