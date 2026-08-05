@@ -127,8 +127,11 @@ router.get(
     failureRedirect: "http://localhost:5173/login",
   }),
   (req, res) => {
-    // Session is already created by Passport — redirect to frontend
-    res.redirect("http://localhost:5173");
+    if (req.user.onboardingCompleted) {
+      return res.redirect("http://localhost:5173");
+    }
+
+    return res.redirect("http://localhost:5173/onBoarding");
   },
 );
 
