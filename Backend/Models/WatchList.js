@@ -7,13 +7,14 @@ const watchlistSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    // String so it can hold both numeric TMDB ids and string Spotify ids
     tmdbId: {
       type: String,
       required: true,
     },
     mediaType: {
       type: String,
-      enum: ["movie", "tv"],
+      enum: ["movie", "tv", "song"],
       required: true,
     },
     status: {

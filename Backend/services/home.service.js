@@ -175,6 +175,7 @@ async function getBecauseYouWatched(userId) {
   const watched = await WatchList.find({
     user: userId,
     status: "watched",
+    mediaType: { $in: ["movie", "tv"] }, // songs aren't TMDB-recommendable
   })
     .sort({ updatedAt: -1 })
     .limit(5);
@@ -340,9 +341,16 @@ async function getTrending(movieGenreMap, tvGenreMap) {
 }
 
 async function getContinueWatching(userId) {
+  // IMPORTANT: only movie/tv entries belong here. Songs also use
+  // status "watching" (mapped to "Listening" in the UI), and without
+  // this filter their Spotify track id would get sent straight into
+  // TMDB's /movie or /tv endpoint below, which is what was causing
+  // an unrelated random movie to show up whenever a song was marked
+  // as "Listening".
   const watching = await WatchList.find({
     user: userId,
     status: "watching",
+    mediaType: { $in: ["movie", "tv"] },
   })
     .sort({ updatedAt: -1 })
     .limit(20);
