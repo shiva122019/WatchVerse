@@ -13,9 +13,9 @@ const geminiClient = axios.create({
 rax.attach(geminiClient);
 geminiClient.defaults.raxConfig = {
   instance: geminiClient,
-  retry: 2,
-  // Exponential back-off for rate-limit windows: ~100ms, ~200ms
-  retryDelay: 100,
+  retry: 5,
+  // Wait ~1.5s, ~3s, ~6s, ~12s, ~24s for rate limits
+  retryDelay: 1500,
   backoffType: "exponential",
   httpMethodsToRetry: ["POST"],
   // Only retry on Gemini-specific transient errors
@@ -67,7 +67,7 @@ async function askGemini(history, systemContext) {
     systemInstruction: systemContext
       ? { parts: [{ text: systemContext }] }
       : undefined,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
+    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
   };
   console.log("Payload:", JSON.stringify(payload, null, 2));
 

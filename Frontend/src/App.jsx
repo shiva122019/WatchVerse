@@ -13,6 +13,7 @@ import Watchlist from "./pages/Watchlist";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AudioVisualizer from "./components/MediaAssistantChatbot";
+import Karaoke from "./pages/Karaoke";
 import "./App.css";
 import Onboarding from "./pages/onBoarding";
 
@@ -41,6 +42,14 @@ function AppShell({ splashDone }) {
             element={
               <ProtectedRoute>
                 <Watchlist />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content/song/:id/karaoke"
+            element={
+              <ProtectedRoute>
+                <Karaoke />
               </ProtectedRoute>
             }
           />

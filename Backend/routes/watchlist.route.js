@@ -39,45 +39,40 @@ router.get("/content", async (req, res) => {
     const BACKDROP_BASE = "https://image.tmdb.org/t/p/original";
     const response = await Promise.all(
       watchlist.map(async (entry) => {
-        const tmdbResponse = await tmdb(`/${entry.mediaType}/${entry.tmdbId}`);
-        const movie = tmdbResponse.data;
-        return {
-          id: entry._id,
+        try {
+          const tmdbResponse = await tmdb(`/${entry.mediaType}/${entry.tmdbId}`);
+          const movie = tmdbResponse.data;
+          
+          let releaseYear = null;
+          if (movie.release_date || movie.first_air_date) {
+            const rawDate = movie.release_date || movie.first_air_date;
+            releaseYear = parseInt(rawDate.slice(0, 4));
+          }
 
-          content_id: entry.tmdbId,
-
-          status: entry.status,
-
-          content: {
-            id: movie.id,
-
-            title: movie.title || movie.name,
-
-            type: entry.mediaType,
-
-            avg_rating: Number((movie.vote_average / 2).toFixed(1)),
-
-            release_year: parseInt(
-              (movie.release_date || movie.first_air_date).slice(0, 4),
-            ),
-
-            genres: movie.genres.map((g) => g.name),
-
-            description: movie.overview,
-
-            cover_url: movie.poster_path
-              ? IMAGE_BASE + movie.poster_path
-              : null,
-
-            backdrop_url: movie.backdrop_path
-              ? BACKDROP_BASE + movie.backdrop_path
-              : null,
-          },
-        };
+          return {
+            id: entry._id,
+            content_id: entry.tmdbId,
+            status: entry.status,
+            content: {
+              id: movie.id,
+              title: movie.title || movie.name,
+              type: entry.mediaType,
+              avg_rating: Number((movie.vote_average / 2).toFixed(1)),
+              release_year: releaseYear,
+              genres: (movie.genres || []).map((g) => g.name),
+              description: movie.overview,
+              cover_url: movie.poster_path ? IMAGE_BASE + movie.poster_path : null,
+              backdrop_url: movie.backdrop_path ? BACKDROP_BASE + movie.backdrop_path : null,
+            },
+          };
+        } catch (err) {
+          console.warn(`Failed to fetch TMDB data for watchlist item ${entry.tmdbId}:`, err.message);
+          return null; // Skip this entry gracefully
+        }
       }),
     );
 
-    res.json(response);
+    res.json(response.filter(Boolean));
   } catch (err) {
     console.error(err);
 
