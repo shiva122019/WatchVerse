@@ -15,10 +15,10 @@ export default function SpotifyCard({ spotify }) {
       <motion.div
         whileHover={{ y: -3 }}
         transition={{ duration: 0.2 }}
-        className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6"
+        className="glass rounded-2xl p-6 shadow-xl"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-800 text-zinc-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-neutral-400">
             <Music size={18} />
           </div>
           <div>
@@ -29,13 +29,13 @@ export default function SpotifyCard({ spotify }) {
 
         <ul className="mt-4 space-y-2 text-sm text-zinc-400">
           <li className="flex items-center gap-2">
-            <Sparkles size={14} className="text-red-500" /> Import your favorite artists
+            <Sparkles size={14} className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" /> Import your favorite artists
           </li>
           <li className="flex items-center gap-2">
-            <Sparkles size={14} className="text-red-500" /> Get better recommendations
+            <Sparkles size={14} className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" /> Get better recommendations
           </li>
           <li className="flex items-center gap-2">
-            <Sparkles size={14} className="text-red-500" /> Sync your listening history
+            <Sparkles size={14} className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" /> Sync your listening history
           </li>
         </ul>
 
@@ -44,7 +44,7 @@ export default function SpotifyCard({ spotify }) {
           onClick={() => navigate("/settings/account")}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.97 }}
-          className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-500"
+          className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#1DB954] hover:bg-[#1ed760] px-5 py-2.5 text-sm font-bold text-black transition-all hover:shadow-[0_0_15px_rgba(29,185,84,0.4)]"
         >
           <Music size={15} />
           Connect Spotify
@@ -57,7 +57,7 @@ export default function SpotifyCard({ spotify }) {
     <motion.div
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
-      className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-900/60 p-6"
+      className="glass rounded-2xl p-6 shadow-xl bg-gradient-to-br from-neutral-900/40 to-neutral-950/20"
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -90,7 +90,7 @@ export default function SpotifyCard({ spotify }) {
             {spotify.topGenres.map((genre) => (
               <span
                 key={genre}
-                className="rounded-full border border-zinc-700 bg-zinc-800 px-2.5 py-1 text-xs text-zinc-300"
+                className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-zinc-300"
               >
                 {genre}
               </span>

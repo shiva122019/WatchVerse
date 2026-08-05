@@ -11,10 +11,10 @@ function SectionCard({ title, icon: Icon, children }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.35 }}
-      className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 sm:p-6"
+      className="glass rounded-2xl p-5 sm:p-6 shadow-xl"
     >
       <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
-        <Icon size={16} className="text-red-500" />
+        <Icon size={16} className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" />
         {title}
       </div>
       {children}
@@ -31,13 +31,13 @@ function activityLabel(entry) {
 
 export default function OverviewTab({ profile }) {
   return (
-    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 relative z-10">
       <SectionCard title="Recent Activity" icon={Activity}>
         <ul className="space-y-2.5">
           {profile.recentActivity.map((entry) => (
             <li
               key={entry.id}
-              className="rounded-xl border border-zinc-800/70 bg-zinc-950/40 px-3.5 py-2.5 text-sm text-zinc-300"
+              className="rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-2.5 text-sm text-neutral-300 transition-colors hover:border-white/10 hover:bg-white/[0.04]"
             >
               {activityLabel(entry)}
             </li>

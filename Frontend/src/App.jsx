@@ -37,6 +37,22 @@ function AppShell({ splashDone }) {
             }
           />
           <Route
+            path="/settings/account"
+            element={
+              <ProtectedRoute>
+                <settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/creator/dashboard"
+            element={
+              <ProtectedRoute>
+                <creatorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/watchlist"
             element={
               <ProtectedRoute>

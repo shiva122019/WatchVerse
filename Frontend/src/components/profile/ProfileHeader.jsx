@@ -30,7 +30,7 @@ export default function ProfileHeader({ profile }) {
               {profile.displayName}
             </h1>
             {profile.verified && (
-              <span title="Verified" className="text-red-500">
+              <span title="Verified" className="text-[#00F0FF] drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">
                 <ShieldCheck size={20} strokeWidth={2.4} />
               </span>
             )}
@@ -38,11 +38,11 @@ export default function ProfileHeader({ profile }) {
           <p className="mt-0.5 text-zinc-400">@{profile.username}</p>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-600/30 bg-red-600/10 px-3 py-1 text-xs font-medium text-red-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#00F0FF]/30 bg-[#00F0FF]/10 px-3 py-1 text-xs font-medium text-[#00F0FF]">
               <RoleIcon size={13} />
               {roleMeta.label}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-400">
               <Calendar size={13} />
               Joined {formatJoinDate(profile.joinDate)}
             </span>
@@ -66,7 +66,7 @@ export default function ProfileHeader({ profile }) {
             href={`https://${profile.website}`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 transition-colors hover:text-red-400"
+            className="inline-flex items-center gap-1.5 transition-colors hover:text-[#00F0FF]"
           >
             <LinkIcon size={14} />
             {profile.website}

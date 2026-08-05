@@ -39,12 +39,12 @@ export default function ProfileStats({ stats }) {
         <motion.div
           key={key}
           variants={item}
-          whileHover={{ y: -4, borderColor: "rgb(220 38 38 / 0.5)" }}
+          whileHover={{ y: -4, borderColor: "rgba(0, 240, 255, 0.4)", boxShadow: "0 0 20px rgba(0, 240, 255, 0.15)" }}
           transition={{ duration: 0.2 }}
-          className="group rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-5"
+          className="group glass rounded-2xl p-4 sm:p-5"
         >
-          <Icon size={18} className="text-zinc-500 transition-colors group-hover:text-red-500" />
-          <div className="mt-3 text-xl sm:text-2xl font-bold text-white">{formatCount(value)}</div>
+          <Icon size={18} className="text-zinc-500 transition-colors group-hover:text-[#00F0FF] group-hover:drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" />
+          <div className="mt-3 text-xl sm:text-2xl font-bold text-white font-display">{formatCount(value)}</div>
           <div className="mt-0.5 text-xs text-zinc-500">{label}</div>
         </motion.div>
       ))}

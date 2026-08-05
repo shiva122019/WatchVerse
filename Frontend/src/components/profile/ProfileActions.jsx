@@ -14,7 +14,7 @@ export default function ProfileActions({ role }) {
   ];
 
   return (
-    <div className="mt-6 flex flex-wrap gap-3">
+    <div className="mt-6 flex flex-wrap gap-3 relative z-10">
       {buttons.map(({ key, label, icon: Icon, to, variant }) => (
         <motion.button
           key={key}
@@ -24,8 +24,8 @@ export default function ProfileActions({ role }) {
           whileTap={{ scale: 0.97 }}
           className={
             variant === "primary"
-              ? "inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition-colors hover:bg-red-500"
-              : "inline-flex items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:border-zinc-700 hover:bg-zinc-800"
+              ? "inline-flex items-center gap-2 rounded-full bg-[#00F0FF] px-5 py-2.5 text-sm font-bold text-black shadow-lg shadow-[#00F0FF]/15 transition-all hover:bg-[#00F0FF]/85 hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]"
+              : "inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-neutral-300 transition-all hover:border-[#00F0FF]/40 hover:bg-white/10 hover:text-white"
           }
         >
           <Icon size={16} />

@@ -32,9 +32,18 @@ export default function Profile() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="min-h-screen bg-zinc-950 pb-20"
+      className="relative min-h-screen pb-20 overflow-hidden"
     >
-      <div className="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
+      {/* Background Glow */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-30 z-0"
+        style={{
+          background:
+            "radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.12), transparent 45%), radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.08), transparent 50%)",
+        }}
+      />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-6 pt-6 md:px-10">
         <ProfileBanner
           bannerUrl={profile.bannerUrl}
           avatarUrl={profile.avatarUrl}
