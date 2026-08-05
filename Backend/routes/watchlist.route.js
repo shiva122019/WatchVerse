@@ -4,6 +4,7 @@ const WatchList = require("../Models/WatchList.js");
 const UserPreference = require("../Models/UserPreference.js");
 const axios = require("axios");
 const rax = require("retry-axios");
+const { spotifyGetTrack } = require("../lib/spotify.js");
 
 const tmdb = axios.create({
   baseURL: "https://api.themoviedb.org/3",
@@ -22,7 +23,7 @@ tmdb.defaults.raxConfig = {
 
 rax.attach(tmdb);
 
-//to display all movies in the watchlist
+//to display all movies/series/songs in the watchlist
 router.get("/content", async (req, res) => {
   try {
     if (!req.user) {
@@ -37,8 +38,45 @@ router.get("/content", async (req, res) => {
     });
     const IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
     const BACKDROP_BASE = "https://image.tmdb.org/t/p/original";
+
     const response = await Promise.all(
       watchlist.map(async (entry) => {
+        //--------------------------------------------------
+        // Song (Spotify)
+        //--------------------------------------------------
+        if (entry.mediaType === "song") {
+          try {
+            const track = await spotifyGetTrack(entry.tmdbId);
+            return {
+              id: entry._id,
+              content_id: entry.tmdbId,
+              status: entry.status,
+              content: {
+                id: track.id,
+                title: track.title,
+                type: "song",
+                avg_rating: track.avg_rating,
+                release_year: track.release_year
+                  ? Number(track.release_year)
+                  : null,
+                genres: [],
+                description: track.description,
+                cover_url: track.cover_url,
+                backdrop_url: track.backdrop_url,
+              },
+            };
+          } catch (err) {
+            console.error(
+              `Failed to load spotify track ${entry.tmdbId}:`,
+              err.message,
+            );
+            return null;
+          }
+        }
+
+        //--------------------------------------------------
+        // Movie / Series (TMDB) — unchanged
+        //--------------------------------------------------
         const tmdbResponse = await tmdb(`/${entry.mediaType}/${entry.tmdbId}`);
         const movie = tmdbResponse.data;
         return {
@@ -77,7 +115,8 @@ router.get("/content", async (req, res) => {
       }),
     );
 
-    res.json(response);
+    // Drop any entries that failed to resolve (e.g. deleted spotify track)
+    res.json(response.filter(Boolean));
   } catch (err) {
     console.error(err);
 
@@ -106,8 +145,9 @@ router.post("/", async (req, res) => {
         message: "tmdbId, mediaType and status are required.",
       });
     }
-    //TMDB does not have songs, use spotify api
-    if (!["movie", "tv"].includes(mediaType)) {
+
+    // Songs now supported alongside movie/tv
+    if (!["movie", "tv", "song"].includes(mediaType)) {
       return res.status(400).json({
         success: false,
         message: "Invalid media type.",
@@ -125,7 +165,7 @@ router.post("/", async (req, res) => {
     const watchlistEntry = await WatchList.findOneAndUpdate(
       {
         user: req.user._id,
-        tmdbId,
+        tmdbId: String(tmdbId),
         mediaType,
       },
       {
@@ -144,12 +184,19 @@ router.post("/", async (req, res) => {
       watchlist: watchlistEntry,
     });
 
-    // ── Update user preferences in the background ──
-    // Weight: watched = 1.5 (strong signal), want/watching = 1
-    const weight = status === "watched" ? 1.5 : 1;
-    updatePreferencesFromWatchlist(req.user._id, tmdbId, mediaType, weight).catch(
-      (err) => console.error("Preference update failed:", err.message),
-    );
+    // Preference learning is TMDB-genre/actor based and doesn't apply
+    // to songs yet, so only run it for movie/tv.
+    if (mediaType !== "song") {
+      const weight = status === "watched" ? 1.5 : 1;
+      updatePreferencesFromWatchlist(
+        req.user._id,
+        tmdbId,
+        mediaType,
+        weight,
+      ).catch((err) =>
+        console.error("Preference update failed:", err.message),
+      );
+    }
   } catch (err) {
     console.error(err);
 
@@ -160,7 +207,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-//to get the status of a movie that u are viewing
+//to get the status of an item that u are viewing
 router.get("/:contentId", async (req, res) => {
   try {
     const { contentId } = req.params;
@@ -171,15 +218,10 @@ router.get("/:contentId", async (req, res) => {
       });
     }
 
-    if (isNaN(Number(contentId))) {
-      return res.status(400).json({
-        message: "Invalid content ID",
-      });
-    }
-
+    // NOTE: schema field is `user`, not `userId` — fixed below.
     const item = await WatchList.findOne({
-      userId: req.user._id,
-      tmdbId: Number(contentId),
+      user: req.user._id,
+      tmdbId: String(contentId),
     });
 
     if (!item) {
@@ -202,8 +244,8 @@ router.get("/:contentId", async (req, res) => {
 
 router.delete("/:tmdbId", async (req, res) => {
   try {
-    let tmdbId = Number(req.params.tmdbId);
-    // mabe if the cookie expires? then the user is not logged in??
+    const tmdbId = String(req.params.tmdbId);
+
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -233,7 +275,7 @@ router.delete("/:tmdbId", async (req, res) => {
 
 /**
  * Fetch TMDB details + credits for a single item and incrementally
- * update the user's genre / actor preference scores.
+ * update the user's genre / actor preference scores. Movie/TV only.
  */
 async function updatePreferencesFromWatchlist(userId, tmdbId, mediaType, weight) {
   const detailsEndpoint = `/${mediaType}/${tmdbId}`;
@@ -247,28 +289,24 @@ async function updatePreferencesFromWatchlist(userId, tmdbId, mediaType, weight)
   const details = detailsRes.data;
   const credits = creditsRes.data;
 
-  // Build $inc operations for genres
   const genreUpdates = (details.genres || []).map((genre) => ({
     genreId: genre.id,
     genreName: genre.name,
     weight,
   }));
 
-  // Build $inc operations for top 5 cast members
   const actorUpdates = (credits.cast || []).slice(0, 5).map((actor) => ({
     actorId: actor.id,
     actorName: actor.name,
     weight,
   }));
 
-  // Upsert the preference document
   let pref = await UserPreference.findOne({ user: userId });
 
   if (!pref) {
     pref = new UserPreference({ user: userId });
   }
 
-  // Merge genre scores
   for (const g of genreUpdates) {
     const existing = pref.genrePreferences.find((p) => p.genreId === g.genreId);
     if (existing) {
@@ -282,7 +320,6 @@ async function updatePreferencesFromWatchlist(userId, tmdbId, mediaType, weight)
     }
   }
 
-  // Merge actor scores
   for (const a of actorUpdates) {
     const existing = pref.actorPreferences.find((p) => p.actorId === a.actorId);
     if (existing) {
@@ -296,7 +333,6 @@ async function updatePreferencesFromWatchlist(userId, tmdbId, mediaType, weight)
     }
   }
 
-  // Sort by score descending and save
   pref.genrePreferences.sort((a, b) => b.score - a.score);
   pref.actorPreferences.sort((a, b) => b.score - a.score);
 
