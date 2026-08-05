@@ -971,7 +971,16 @@ const COLORS = {
 
 function SendIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#111014" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="#111014"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <line x1="22" y1="2" x2="11" y2="13"></line>
       <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
     </svg>
@@ -980,7 +989,14 @@ function SendIcon() {
 
 function SyncIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      width="13"
+      height="13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M4 4v5h5M20 20v-5h-5M4 9a8 8 0 0114-5M20 15a8 8 0 01-14 5" />
     </svg>
   );
@@ -1008,7 +1024,14 @@ function TypingDots() {
 
 function StarIcon({ color = COLORS.marqueeGold }) {
   return (
-    <svg viewBox="0 0 24 24" width="14" height="14" fill={color} stroke={color} strokeWidth="1">
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill={color}
+      stroke={color}
+      strokeWidth="1"
+    >
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
   );
@@ -1017,7 +1040,8 @@ function StarIcon({ color = COLORS.marqueeGold }) {
 // Generates a stable per-tab session id (persists for this browser tab only,
 // which matches the "RAM, no DB" session design on the backend).
 function makeSessionId() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && crypto.randomUUID)
+    return crypto.randomUUID();
   return `sess_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
 
@@ -1030,7 +1054,11 @@ const MOVIE_INTENT_META = {
 
 const SONG_INTENT_META = {
   about: { label: "About This Song", emoji: "🎧", buttonIntent: "about" },
-  similar: { label: "More From This Artist", emoji: "🔁", buttonIntent: "similar" },
+  similar: {
+    label: "More From This Artist",
+    emoji: "🔁",
+    buttonIntent: "similar",
+  },
 };
 
 function getIntentMeta(mediaType, key) {
@@ -1041,7 +1069,9 @@ function getIntentMeta(mediaType, key) {
 // have already been used on it (works for both song and movie/tv/anime cards).
 function getCardKey(card) {
   if (!card) return "unknown";
-  return card.mediaType === "song" ? `song-${card.deezerId}` : `media-${card.tmdbId}`;
+  return card.mediaType === "song"
+    ? `song-${card.deezerId}`
+    : `media-${card.tmdbId}`;
 }
 
 // Turns the raw backend payload for each intent into display text.
@@ -1049,9 +1079,13 @@ function formatIntentResult(intentKey, payload) {
   const { intent, source, data } = payload;
 
   if (intent === "cast") {
-    const castNames = (data.cast || []).slice(0, 6).map((c) => `${c.name} as ${c.character}`);
+    const castNames = (data.cast || [])
+      .slice(0, 6)
+      .map((c) => `${c.name} as ${c.character}`);
     const director = (data.crew || []).find((c) => c.job === "Director");
-    let text = castNames.length ? castNames.join(", ") + "." : "No cast info found.";
+    let text = castNames.length
+      ? castNames.join(", ") + "."
+      : "No cast info found.";
     if (director) text += ` Directed by ${director.name}.`;
     return { text, source: "Source: TMDB" };
   }
@@ -1067,28 +1101,39 @@ function formatIntentResult(intentKey, payload) {
   if (intent === "similar" && source === "spotify") {
     const list = (data || []).map((t) => `${t.title}`);
     return {
-      text: list.length ? `More from this artist: ${list.join(", ")}.` : "No other tracks found.",
+      text: list.length
+        ? `More from this artist: ${list.join(", ")}.`
+        : "No other tracks found.",
       source: "Source: Spotify",
     };
   }
 
   if (intent === "similar") {
-    const list = (data || []).map((s) => `${s.title}${s.year ? ` (${s.year})` : ""}`);
+    const list = (data || []).map(
+      (s) => `${s.title}${s.year ? ` (${s.year})` : ""}`,
+    );
     return {
-      text: list.length ? `You might also like: ${list.join(", ")}.` : "No similar titles found.",
+      text: list.length
+        ? `You might also like: ${list.join(", ")}.`
+        : "No similar titles found.",
       source: "Source: TMDB",
     };
   }
 
   if (intent === "reviews") {
     const list = (data || []).map((r) => `${r.author}: ${r.content}`);
-    return { text: list.length ? list[0] : "No reviews found.", source: "Source: TMDB" };
+    return {
+      text: list.length ? list[0] : "No reviews found.",
+      source: "Source: TMDB",
+    };
   }
 
   // storyline / open_question -> Gemini
   return {
     text: data.text,
-    source: data.sources?.length ? `Source: ${data.sources[0]}` : "Source: Gemini AI",
+    source: data.sources?.length
+      ? `Source: ${data.sources[0]}`
+      : "Source: Gemini AI",
   };
 }
 
@@ -1130,7 +1175,10 @@ export default function MediaAssistantChatbot({
   const sessionIdRef = useRef(makeSessionId());
 
   const scrollDown = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   }, []);
 
   useEffect(() => {
@@ -1159,7 +1207,8 @@ export default function MediaAssistantChatbot({
       };
       setLibrary(nextLibrary);
       setLibraryLoaded(true);
-      const total = nextLibrary.watchlist.length + nextLibrary.watchedHistory.length;
+      const total =
+        nextLibrary.watchlist.length + nextLibrary.watchedHistory.length;
       setSyncState("ok");
       setSyncText(`Library synced - ${total} items loaded`);
     } catch (err) {
@@ -1205,7 +1254,10 @@ export default function MediaAssistantChatbot({
   // Real call to POST {chatUrl}/message for a given intent, attached to a card.
   const runIntent = async (intentKey, cardOrOption) => {
     const meta = getIntentMeta(cardOrOption?.mediaType, intentKey);
-    setMessages((prev) => [...prev, { role: "user", text: `${meta.emoji} ${meta.label}` }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: `${meta.emoji} ${meta.label}` },
+    ]);
     setIsTyping(true);
 
     try {
@@ -1248,7 +1300,10 @@ export default function MediaAssistantChatbot({
       console.error(err);
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: "Sorry, I couldn't fetch that just now. Try again in a moment." },
+        {
+          role: "bot",
+          text: "Sorry, I couldn't fetch that just now. Try again in a moment.",
+        },
       ]);
     } finally {
       setIsTyping(false);
@@ -1257,7 +1312,10 @@ export default function MediaAssistantChatbot({
 
   // Real call to POST {chatUrl}/select when user disambiguates between multiple matches.
   const selectOption = async (option) => {
-    const label = option.mediaType === "song" ? `${option.title} — ${option.artist}` : `${option.title} (${option.year})`;
+    const label =
+      option.mediaType === "song"
+        ? `${option.title} — ${option.artist}`
+        : `${option.title} (${option.year})`;
     setMessages((prev) => [...prev, { role: "user", text: label }]);
     setIsTyping(true);
 
@@ -1316,7 +1374,10 @@ export default function MediaAssistantChatbot({
         const payload = await res.json();
         if (!res.ok) throw new Error(payload.error || "Backend error");
 
-        const { text: bodyText, source } = formatIntentResult(payload.intent, payload);
+        const { text: bodyText, source } = formatIntentResult(
+          payload.intent,
+          payload,
+        );
 
         setMessages((prev) => [
           ...prev,
@@ -1337,7 +1398,11 @@ export default function MediaAssistantChatbot({
         // No mode picked yet - re-prompt instead of guessing what they want
         setMessages((prev) => [
           ...prev,
-          { role: "bot", text: "Just tap one of these first 👇", modeOptions: true },
+          {
+            role: "bot",
+            text: "Just tap one of these first 👇",
+            modeOptions: true,
+          },
         ]);
       } else {
         // No active title yet - treat this as a fresh search, scoped by searchMode
@@ -1345,7 +1410,11 @@ export default function MediaAssistantChatbot({
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId: sessionIdRef.current, query: text, mode: searchMode }),
+          body: JSON.stringify({
+            sessionId: sessionIdRef.current,
+            query: text,
+            mode: searchMode,
+          }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Backend error");
@@ -1365,7 +1434,11 @@ export default function MediaAssistantChatbot({
           setActiveCard(data.card); // mark this title as the active context
           setMessages((prev) => [
             ...prev,
-            { role: "bot", text: "Sure! Here's what I found:", card: data.card },
+            {
+              role: "bot",
+              text: "Sure! Here's what I found:",
+              card: data.card,
+            },
           ]);
         }
       }
@@ -1373,7 +1446,10 @@ export default function MediaAssistantChatbot({
       console.error(err);
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: "Sorry, I couldn't reach the assistant just now. Please try again." },
+        {
+          role: "bot",
+          text: "Sorry, I couldn't reach the assistant just now. Please try again.",
+        },
       ]);
     } finally {
       setIsTyping(false);
@@ -1396,7 +1472,8 @@ export default function MediaAssistantChatbot({
   };
 
   // Helper for JSX: is this intent already used for this card?
-  const isUsed = (card, intentKey) => usedIntents.has(`${getCardKey(card)}-${intentKey}`);
+  const isUsed = (card, intentKey) =>
+    usedIntents.has(`${getCardKey(card)}-${intentKey}`);
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -1498,34 +1575,57 @@ export default function MediaAssistantChatbot({
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{
-                background: COLORS.marqueeGold,
-                borderRadius: "50%",
-                width: 38,
-                height: 38,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "bold",
-                color: COLORS.reelBlack
-              }}>
+              <div
+                style={{
+                  background: COLORS.marqueeGold,
+                  borderRadius: "50%",
+                  width: 38,
+                  height: 38,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "bold",
+                  color: COLORS.reelBlack,
+                }}
+              >
                 🤖
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <h3 style={{ margin: 0, fontSize: 16, color: "#fff", fontWeight: "600" }}>{siteName}</h3>
-                  <span style={{
-                    fontSize: 10,
-                    background: "rgba(47, 224, 208, 0.15)",
-                    color: COLORS.marqueeGold,
-                    padding: "2px 6px",
-                    borderRadius: 6,
-                    fontWeight: "bold",
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5
-                  }}>Beta</span>
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: 16,
+                      color: "#fff",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {siteName}
+                  </h3>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      background: "rgba(47, 224, 208, 0.15)",
+                      color: COLORS.marqueeGold,
+                      padding: "2px 6px",
+                      borderRadius: 6,
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    Beta
+                  </span>
                 </div>
-                <p style={{ margin: "2px 0 0 0", fontSize: 11.5, color: COLORS.inkDim }}>Your smart movie companion</p>
+                <p
+                  style={{
+                    margin: "2px 0 0 0",
+                    fontSize: 11.5,
+                    color: COLORS.inkDim,
+                  }}
+                >
+                  Your smart movie companion
+                </p>
               </div>
             </div>
 
@@ -1545,11 +1645,28 @@ export default function MediaAssistantChatbot({
                   sessionIdRef.current = makeSessionId();
                 }}
                 title="Reset Conversation"
-                style={{ background: "none", border: "none", color: COLORS.inkDim, cursor: "pointer" }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: COLORS.inkDim,
+                  cursor: "pointer",
+                }}
               >
                 <SyncIcon />
               </button>
-              <button onClick={() => setIsOpen(false)} style={{ background: "none", border: "none", color: COLORS.inkDim, fontSize: 22, cursor: "pointer", lineHeight: 1 }}>&times;</button>
+              <button
+                onClick={() => setIsOpen(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: COLORS.inkDim,
+                  fontSize: 22,
+                  cursor: "pointer",
+                  lineHeight: 1,
+                }}
+              >
+                &times;
+              </button>
             </div>
           </div>
 
@@ -1566,12 +1683,20 @@ export default function MediaAssistantChatbot({
             }}
           >
             {messages.map((m, idx) => (
-              <div key={idx} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-
+              <div
+                key={idx}
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
                 {/* NOTE: bot avatar bubble removed - bot messages now render
                     without the small 🤖 icon to the left */}
                 {m.text && (
-                  <div style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        m.role === "user" ? "flex-end" : "flex-start",
+                    }}
+                  >
                     <div
                       style={{
                         maxWidth: "80%",
@@ -1585,7 +1710,7 @@ export default function MediaAssistantChatbot({
                               background: COLORS.marqueeGold,
                               color: COLORS.reelBlack,
                               borderBottomRightRadius: 4,
-                              fontWeight: "500"
+                              fontWeight: "500",
                             }
                           : {
                               background: COLORS.reelCard,
@@ -1603,10 +1728,16 @@ export default function MediaAssistantChatbot({
                 {/* Initial mode choice - Song vs Movie/TV/Anime */}
                 {m.modeOptions && (
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button className="action-button" onClick={() => selectMode("media")}>
+                    <button
+                      className="action-button"
+                      onClick={() => selectMode("media")}
+                    >
                       🎬 Movie / TV / Anime
                     </button>
-                    <button className="action-button" onClick={() => selectMode("song")}>
+                    <button
+                      className="action-button"
+                      onClick={() => selectMode("song")}
+                    >
                       🎵 Song
                     </button>
                   </div>
@@ -1614,18 +1745,54 @@ export default function MediaAssistantChatbot({
 
                 {/* Disambiguation options (multiple matches within the chosen mode) */}
                 {m.options && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                  >
                     {m.options.map((opt) => (
-                      <div key={`${opt.mediaType}-${opt.tmdbId || opt.deezerId}`} className="option-card" onClick={() => selectOption(opt)}>
+                      <div
+                        key={`${opt.mediaType}-${opt.tmdbId || opt.deezerId}`}
+                        className="option-card"
+                        onClick={() => selectOption(opt)}
+                      >
                         {opt.poster && (
-                          <img src={opt.poster} alt={opt.title} style={{ width: 46, height: 68, borderRadius: 6, objectFit: "cover" }} />
+                          <img
+                            src={opt.poster}
+                            alt={opt.title}
+                            style={{
+                              width: 46,
+                              height: 68,
+                              borderRadius: 6,
+                              objectFit: "cover",
+                            }}
+                          />
                         )}
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 13.5, color: "#fff", fontWeight: 600 }}>
-                            {opt.title} {opt.mediaType === "song" ? `— ${opt.artist}` : opt.year ? `(${opt.year})` : ""}
+                          <div
+                            style={{
+                              fontSize: 13.5,
+                              color: "#fff",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {opt.title}{" "}
+                            {opt.mediaType === "song"
+                              ? `— ${opt.artist}`
+                              : opt.year
+                                ? `(${opt.year})`
+                                : ""}
                             {opt.mediaType === "anime" ? " · Anime" : ""}
                           </div>
-                          <div style={{ fontSize: 11.5, color: COLORS.inkDim, marginTop: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          <div
+                            style={{
+                              fontSize: 11.5,
+                              color: COLORS.inkDim,
+                              marginTop: 2,
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                            }}
+                          >
                             {opt.overview}
                           </div>
                         </div>
@@ -1635,39 +1802,93 @@ export default function MediaAssistantChatbot({
                 )}
 
                 {m.card && m.card.mediaType === "song" && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div style={{
-                      background: COLORS.reelPanel,
-                      border: `1px solid ${COLORS.border}`,
-                      borderRadius: 16,
-                      padding: "16px",
+                  <div
+                    style={{
                       display: "flex",
-                      gap: 16,
-                    }}>
+                      flexDirection: "column",
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: COLORS.reelPanel,
+                        border: `1px solid ${COLORS.border}`,
+                        borderRadius: 16,
+                        padding: "16px",
+                        display: "flex",
+                        gap: 16,
+                      }}
+                    >
                       {m.card.cover && (
                         <img
                           src={m.card.cover}
                           alt={m.card.title}
-                          style={{ width: 100, height: 100, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.border}` }}
+                          style={{
+                            width: 100,
+                            height: 100,
+                            borderRadius: 8,
+                            objectFit: "cover",
+                            border: `1px solid ${COLORS.border}`,
+                          }}
                         />
                       )}
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                      <div
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         <div>
-                          <h4 style={{ margin: 0, fontSize: 18, color: "#fff", fontWeight: "700" }}>{m.card.title}</h4>
-                          <p style={{ margin: "4px 0 2px 0", fontSize: 13, color: COLORS.marqueeGoldBright }}>{m.card.artist}</p>
-                          <p style={{ margin: 0, fontSize: 12, color: COLORS.inkDim }}>
-                            {m.card.album}{m.card.year ? `  •  ${m.card.year}` : ""}
+                          <h4
+                            style={{
+                              margin: 0,
+                              fontSize: 18,
+                              color: "#fff",
+                              fontWeight: "700",
+                            }}
+                          >
+                            {m.card.title}
+                          </h4>
+                          <p
+                            style={{
+                              margin: "4px 0 2px 0",
+                              fontSize: 13,
+                              color: COLORS.marqueeGoldBright,
+                            }}
+                          >
+                            {m.card.artist}
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: 12,
+                              color: COLORS.inkDim,
+                            }}
+                          >
+                            {m.card.album}
+                            {m.card.year ? `  •  ${m.card.year}` : ""}
                           </p>
                         </div>
                         {m.card.previewUrl && (
-                          <audio controls src={m.card.previewUrl} style={{ marginTop: 8, height: 32, width: "100%" }} />
+                          <audio
+                            controls
+                            src={m.card.previewUrl}
+                            style={{ marginTop: 8, height: 32, width: "100%" }}
+                          />
                         )}
                         {m.card.deezerUrl && (
                           <a
                             href={m.card.deezerUrl}
                             target="_blank"
                             rel="noreferrer"
-                            style={{ fontSize: 12, color: COLORS.marqueeGold, marginTop: 8, textDecoration: "none" }}
+                            style={{
+                              fontSize: 12,
+                              color: COLORS.marqueeGold,
+                              marginTop: 8,
+                              textDecoration: "none",
+                            }}
                           >
                             ▶ Open Track
                           </a>
@@ -1678,51 +1899,122 @@ export default function MediaAssistantChatbot({
                     {/* Only show buttons for intents not yet used on this card */}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {!isUsed(m.card, "about") && (
-                        <button className="action-button" onClick={() => runIntent("about", m.card)}>🎧 About This Song</button>
+                        <button
+                          className="action-button"
+                          onClick={() => runIntent("about", m.card)}
+                        >
+                          🎧 About This Song
+                        </button>
                       )}
                       {!isUsed(m.card, "similar") && (
-                        <button className="action-button" onClick={() => runIntent("similar", m.card)}>🔁 More From This Artist</button>
+                        <button
+                          className="action-button"
+                          onClick={() => runIntent("similar", m.card)}
+                        >
+                          🔁 More From This Artist
+                        </button>
                       )}
                     </div>
                   </div>
                 )}
 
                 {m.card && m.card.mediaType !== "song" && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div style={{
-                      background: COLORS.reelPanel,
-                      border: `1px solid ${COLORS.border}`,
-                      borderRadius: 16,
-                      padding: "16px",
+                  <div
+                    style={{
                       display: "flex",
-                      gap: 16,
-                      position: "relative"
-                    }}>
+                      flexDirection: "column",
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: COLORS.reelPanel,
+                        border: `1px solid ${COLORS.border}`,
+                        borderRadius: 16,
+                        padding: "16px",
+                        display: "flex",
+                        gap: 16,
+                        position: "relative",
+                      }}
+                    >
                       {m.card.poster && (
                         <img
                           src={m.card.poster}
                           alt={m.card.title}
-                          style={{ width: 105, height: 155, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.border}` }}
+                          style={{
+                            width: 105,
+                            height: 155,
+                            borderRadius: 8,
+                            objectFit: "cover",
+                            border: `1px solid ${COLORS.border}`,
+                          }}
                         />
                       )}
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                      <div
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         <div>
-                          <h4 style={{ margin: 0, fontSize: 20, color: "#fff", fontWeight: "700" }}>{m.card.title}</h4>
-                          <p style={{ margin: "4px 0 8px 0", fontSize: 12, color: COLORS.inkDim }}>
+                          <h4
+                            style={{
+                              margin: 0,
+                              fontSize: 20,
+                              color: "#fff",
+                              fontWeight: "700",
+                            }}
+                          >
+                            {m.card.title}
+                          </h4>
+                          <p
+                            style={{
+                              margin: "4px 0 8px 0",
+                              fontSize: 12,
+                              color: COLORS.inkDim,
+                            }}
+                          >
                             {m.card.mediaType === "anime" ? "Anime" : ""}
                             {m.card.year ? `  •  ${m.card.year}` : ""}
                             {m.card.genres ? `  •  ${m.card.genres}` : ""}
                             {m.card.duration ? `  •  ${m.card.duration}` : ""}
                           </p>
-                          <p style={{ margin: 0, fontSize: 12.5, color: COLORS.ink, lineHeight: 1.5, opacity: 0.9 }}>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: 12.5,
+                              color: COLORS.ink,
+                              lineHeight: 1.5,
+                              opacity: 0.9,
+                            }}
+                          >
                             {m.card.overview}
                           </p>
                         </div>
 
                         {m.card.rating != null && (
-                          <div style={{ display: "flex", gap: 16, marginTop: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.border}` }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 16,
+                              marginTop: 12,
+                              paddingTop: 10,
+                              borderTop: `1px solid ${COLORS.border}`,
+                            }}
+                          >
                             <div style={{ fontSize: 11, color: COLORS.inkDim }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 4, color: "#fff", fontWeight: "600", fontSize: 12 }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                  color: "#fff",
+                                  fontWeight: "600",
+                                  fontSize: 12,
+                                }}
+                              >
                                 <StarIcon /> {m.card.rating}/5
                               </div>
                               TMDB
@@ -1735,63 +2027,125 @@ export default function MediaAssistantChatbot({
                     {/* Only show buttons for intents not yet used on this card */}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {!isUsed(m.card, "story") && (
-                        <button className="action-button" onClick={() => runIntent("story", m.card)}>📖 Storyline</button>
+                        <button
+                          className="action-button"
+                          onClick={() => runIntent("story", m.card)}
+                        >
+                          📖 Storyline
+                        </button>
                       )}
                       {!isUsed(m.card, "cast") && (
-                        <button className="action-button" onClick={() => runIntent("cast", m.card)}>🎭 Cast</button>
+                        <button
+                          className="action-button"
+                          onClick={() => runIntent("cast", m.card)}
+                        >
+                          🎭 Cast
+                        </button>
                       )}
                       {!isUsed(m.card, "ratings") && (
-                        <button className="action-button" onClick={() => runIntent("ratings", m.card)}>⭐ Ratings</button>
+                        <button
+                          className="action-button"
+                          onClick={() => runIntent("ratings", m.card)}
+                        >
+                          ⭐ Ratings
+                        </button>
                       )}
                       {!isUsed(m.card, "similar") && (
-                        <button className="action-button" onClick={() => runIntent("similar", m.card)}>🔁 Similar Titles</button>
+                        <button
+                          className="action-button"
+                          onClick={() => runIntent("similar", m.card)}
+                        >
+                          🔁 Similar Titles
+                        </button>
                       )}
                     </div>
                   </div>
                 )}
 
                 {m.categoryResult && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div style={{
-                      background: COLORS.reelCard,
-                      border: `1px solid ${COLORS.border}`,
-                      borderRadius: 16,
-                      padding: 16,
-                      position: "relative"
-                    }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                        <span style={{ fontSize: 18 }}>{m.categoryResult.emoji}</span>
-                        <h4 style={{ margin: 0, fontSize: 15, color: "#fff", fontWeight: "600" }}>{m.categoryResult.title}</h4>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: COLORS.reelCard,
+                        border: `1px solid ${COLORS.border}`,
+                        borderRadius: 16,
+                        padding: 16,
+                        position: "relative",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          marginBottom: 10,
+                        }}
+                      >
+                        <span style={{ fontSize: 18 }}>
+                          {m.categoryResult.emoji}
+                        </span>
+                        <h4
+                          style={{
+                            margin: 0,
+                            fontSize: 15,
+                            color: "#fff",
+                            fontWeight: "600",
+                          }}
+                        >
+                          {m.categoryResult.title}
+                        </h4>
                       </div>
-                      
+
                       {m.categoryResult.intent === "similar" ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
-                          <p style={{ margin: "0 0 6px 0", fontSize: 13, color: COLORS.inkDim }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 8,
+                            marginTop: 4,
+                          }}
+                        >
+                          <p
+                            style={{
+                              margin: "0 0 6px 0",
+                              fontSize: 13,
+                              color: COLORS.inkDim,
+                            }}
+                          >
                             Here are some similar recommendations:
                           </p>
                           {(m.categoryResult.data || []).map((item) => {
-                            const isSong = m.categoryResult.parentCard?.mediaType === "song";
-                            const option = isSong ? {
-                              deezerId: item.deezerId,
-                              artistId: item.artistId,
-                              mediaType: "song",
-                              title: item.title,
-                              artist: item.artist,
-                              album: item.album,
-                              year: item.year,
-                              poster: item.cover,
-                              overview: `by ${item.artist}${item.album ? ` · ${item.album}` : ""}`,
-                              previewUrl: item.previewUrl,
-                              deezerUrl: item.deezerUrl,
-                              durationMs: item.durationMs,
-                            } : {
-                              tmdbId: item.tmdbId,
-                              mediaType: item.mediaType,
-                              title: item.title,
-                              poster: item.poster,
-                              year: item.year,
-                              overview: item.overview,
-                            };
+                            const isSong =
+                              m.categoryResult.parentCard?.mediaType === "song";
+                            const option = isSong
+                              ? {
+                                  deezerId: item.deezerId,
+                                  artistId: item.artistId,
+                                  mediaType: "song",
+                                  title: item.title,
+                                  artist: item.artist,
+                                  album: item.album,
+                                  year: item.year,
+                                  poster: item.cover,
+                                  overview: `by ${item.artist}${item.album ? ` · ${item.album}` : ""}`,
+                                  previewUrl: item.previewUrl,
+                                  deezerUrl: item.deezerUrl,
+                                  durationMs: item.durationMs,
+                                }
+                              : {
+                                  tmdbId: item.tmdbId,
+                                  mediaType: item.mediaType,
+                                  title: item.title,
+                                  poster: item.poster,
+                                  year: item.year,
+                                  overview: item.overview,
+                                };
 
                             return (
                               <div
@@ -1803,22 +2157,40 @@ export default function MediaAssistantChatbot({
                                   <img
                                     src={option.poster}
                                     alt={option.title}
-                                    style={{ width: 40, height: 58, borderRadius: 6, objectFit: "cover" }}
+                                    style={{
+                                      width: 40,
+                                      height: 58,
+                                      borderRadius: 6,
+                                      objectFit: "cover",
+                                    }}
                                   />
                                 )}
                                 <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>
-                                    {option.title} {isSong ? `— ${option.artist}` : option.year ? `(${option.year})` : ""}
+                                  <div
+                                    style={{
+                                      fontSize: 13,
+                                      color: "#fff",
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {option.title}{" "}
+                                    {isSong
+                                      ? `— ${option.artist}`
+                                      : option.year
+                                        ? `(${option.year})`
+                                        : ""}
                                   </div>
-                                  <div style={{
-                                    fontSize: 11,
-                                    color: COLORS.inkDim,
-                                    marginTop: 2,
-                                    display: "-webkit-box",
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: "vertical",
-                                    overflow: "hidden"
-                                  }}>
+                                  <div
+                                    style={{
+                                      fontSize: 11,
+                                      color: COLORS.inkDim,
+                                      marginTop: 2,
+                                      display: "-webkit-box",
+                                      WebkitLineClamp: 2,
+                                      WebkitBoxOrient: "vertical",
+                                      overflow: "hidden",
+                                    }}
+                                  >
                                     {option.overview}
                                   </div>
                                 </div>
@@ -1827,55 +2199,139 @@ export default function MediaAssistantChatbot({
                           })}
                         </div>
                       ) : (
-                        <p style={{ margin: 0, fontSize: 13, color: COLORS.ink, lineHeight: 1.6 }}>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: 13,
+                            color: COLORS.ink,
+                            lineHeight: 1.6,
+                          }}
+                        >
                           {m.categoryResult.body}
                         </p>
                       )}
 
-                      <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 11, color: COLORS.inkFaint, fontStyle: "italic" }}>
+                      <div
+                        style={{
+                          marginTop: 12,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: COLORS.inkFaint,
+                            fontStyle: "italic",
+                          }}
+                        >
                           {m.categoryResult.source}
                         </span>
                       </div>
                     </div>
 
                     {/* Remaining (unused) action buttons for this card, shown again after a follow-up result */}
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        flexWrap: "wrap",
+                        marginTop: 4,
+                      }}
+                    >
                       {m.categoryResult.parentCard?.mediaType === "song" ? (
                         <>
                           {!isUsed(m.categoryResult.parentCard, "about") && (
-                            <button className="action-button" onClick={() => runIntent("about", m.categoryResult.parentCard)}>🎧 About This Song</button>
+                            <button
+                              className="action-button"
+                              onClick={() =>
+                                runIntent("about", m.categoryResult.parentCard)
+                              }
+                            >
+                              🎧 About This Song
+                            </button>
                           )}
                           {!isUsed(m.categoryResult.parentCard, "similar") && (
-                            <button className="action-button" onClick={() => runIntent("similar", m.categoryResult.parentCard)}>🔁 More From This Artist</button>
+                            <button
+                              className="action-button"
+                              onClick={() =>
+                                runIntent(
+                                  "similar",
+                                  m.categoryResult.parentCard,
+                                )
+                              }
+                            >
+                              🔁 More From This Artist
+                            </button>
                           )}
                         </>
                       ) : (
                         <>
                           {!isUsed(m.categoryResult.parentCard, "story") && (
-                            <button className="action-button" onClick={() => runIntent("story", m.categoryResult.parentCard)}>📖 Storyline</button>
+                            <button
+                              className="action-button"
+                              onClick={() =>
+                                runIntent("story", m.categoryResult.parentCard)
+                              }
+                            >
+                              📖 Storyline
+                            </button>
                           )}
                           {!isUsed(m.categoryResult.parentCard, "cast") && (
-                            <button className="action-button" onClick={() => runIntent("cast", m.categoryResult.parentCard)}>🎭 Cast</button>
+                            <button
+                              className="action-button"
+                              onClick={() =>
+                                runIntent("cast", m.categoryResult.parentCard)
+                              }
+                            >
+                              🎭 Cast
+                            </button>
                           )}
                           {!isUsed(m.categoryResult.parentCard, "ratings") && (
-                            <button className="action-button" onClick={() => runIntent("ratings", m.categoryResult.parentCard)}>⭐ Ratings</button>
+                            <button
+                              className="action-button"
+                              onClick={() =>
+                                runIntent(
+                                  "ratings",
+                                  m.categoryResult.parentCard,
+                                )
+                              }
+                            >
+                              ⭐ Ratings
+                            </button>
                           )}
                           {!isUsed(m.categoryResult.parentCard, "similar") && (
-                            <button className="action-button" onClick={() => runIntent("similar", m.categoryResult.parentCard)}>🔁 Similar Titles</button>
+                            <button
+                              className="action-button"
+                              onClick={() =>
+                                runIntent(
+                                  "similar",
+                                  m.categoryResult.parentCard,
+                                )
+                              }
+                            >
+                              🔁 Similar Titles
+                            </button>
                           )}
                         </>
                       )}
                     </div>
                   </div>
                 )}
-
               </div>
             ))}
 
             {isTyping && (
               <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                <div style={{ padding: "10px 14px", borderRadius: 14, background: COLORS.reelCard, border: `1px solid ${COLORS.border}` }}>
+                <div
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 14,
+                    background: COLORS.reelCard,
+                    border: `1px solid ${COLORS.border}`,
+                  }}
+                >
                   <TypingDots />
                 </div>
               </div>
@@ -1894,7 +2350,14 @@ export default function MediaAssistantChatbot({
             {/* NOTE: "+" attachment button removed - input row now goes
                 straight from the textarea to the send button */}
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center" }}>
+              <div
+                style={{
+                  position: "relative",
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
                 <textarea
                   ref={textareaRef}
                   className="esb-textarea"
@@ -1927,7 +2390,9 @@ export default function MediaAssistantChatbot({
                   height: 38,
                   borderRadius: "50%",
                   flexShrink: 0,
-                  background: isSending ? COLORS.marqueeGoldDim : COLORS.marqueeGold,
+                  background: isSending
+                    ? COLORS.marqueeGoldDim
+                    : COLORS.marqueeGold,
                   border: "none",
                   cursor: isSending ? "default" : "pointer",
                   display: "flex",
@@ -1939,7 +2404,14 @@ export default function MediaAssistantChatbot({
               </button>
             </div>
 
-            <p style={{ margin: "10px 0 0 0", fontSize: 10.5, color: COLORS.inkFaint, textAlign: "center" }}>
+            <p
+              style={{
+                margin: "10px 0 0 0",
+                fontSize: 10.5,
+                color: COLORS.inkFaint,
+                textAlign: "center",
+              }}
+            >
               AI can make mistakes. Check important info.
             </p>
           </div>

@@ -41,19 +41,23 @@
 ## ✨ Features
 
 ### 🔐 User Authentication
+
 - Secure registration and login
 - Password hashing with `bcrypt`
 - Session-based authentication using Passport.js
 - Persistent login sessions via Express Session + MongoDB
 
 ### 🏠 Home Page
+
 Browse curated, horizontally scrollable collections inspired by modern streaming platforms:
+
 - Featured movie banner
 - Trending, popular & top-rated movies
 - Popular & top-rated TV series
 - Curated content sections
 
 ### 🔎 Browse & Search
+
 - Search by title, actor, or creator
 - Filter by genre and media type
 - Discover trending content and content by genre
@@ -61,7 +65,9 @@ Browse curated, horizontally scrollable collections inspired by modern streaming
 - Infinite scrolling
 
 ### 🎞️ Content Detail Page
+
 Each title has a dedicated page with:
+
 - High-resolution poster & backdrop
 - Description, genres, release year
 - Runtime or season count
@@ -70,6 +76,7 @@ Each title has a dedicated page with:
 - User reviews and watchlist controls
 
 ### ⭐ Reviews & Ratings
+
 - 1–5 star ratings with written reviews
 - One review per user per title
 - Cached community average rating
@@ -77,7 +84,9 @@ Each title has a dedicated page with:
 - Comments on reviews
 
 ### 📝 Personal Watchlist
+
 Track content across custom states:
+
 - **Want to Watch**
 - **Watching**
 - **Watched**
@@ -85,37 +94,46 @@ Track content across custom states:
 Add, update status, remove, and view all saved titles.
 
 ### 🃏 Swipe-Based Discovery
+
 A Tinder-style content discovery experience:
+
 - Interactive swipe cards
 - Quick like/skip decisions
 - Smooth card animations
 - Personalized discovery experience
 
 ### 🤖 AI Entertainment Chatbot
+
 Ask natural-language questions like:
-> *"Recommend some thriller movies"*
-> *"What should I watch if I liked Interstellar?"*
-> *"Suggest some good comedy series"*
+
+> _"Recommend some thriller movies"_
+> _"What should I watch if I liked Interstellar?"_
+> _"Suggest some good comedy series"_
 
 Powered by the Gemini API for conversational content discovery.
 
 ### 💬 Chat Rooms
+
 - Join entertainment discussions
 - Share recommendations and exchange opinions
 - Interact with other users in real time
 
 ### 🎵 Music Discovery
+
 Powered by Spotify integration:
+
 - Explore songs, artists, and albums
 - Get music recommendations
 - Extends WatchVerse beyond movies & TV
 
 ### 🎯 User Preferences & Personalization
+
 - Genre and interest preferences
 - Personalized discovery and recommendations
 - User-specific content tuning
 
 ### ♾️ Infinite Scrolling
+
 Continuous content discovery without pagination — smoother browsing and better exploration.
 
 ---
@@ -281,12 +299,12 @@ sequenceDiagram
 
 <div align="center">
 
-| Home | Content Detail | Swipe Discovery |
-|:---:|:---:|:---:|
+|                    Home                    |                 Content Detail                 |               Swipe Discovery                |
+| :----------------------------------------: | :--------------------------------------------: | :------------------------------------------: |
 | ![Home screenshot](./screenshots/home.png) | ![Detail screenshot](./screenshots/detail.png) | ![Swipe screenshot](./screenshots/swipe.png) |
 
-| AI Chatbot | Watchlist | Chat Rooms |
-|:---:|:---:|:---:|
+|                    AI Chatbot                    |                      Watchlist                       |                      Chat Rooms                       |
+| :----------------------------------------------: | :--------------------------------------------------: | :---------------------------------------------------: |
 | ![Chatbot screenshot](./screenshots/chatbot.png) | ![Watchlist screenshot](./screenshots/watchlist.png) | ![Chat rooms screenshot](./screenshots/chatrooms.png) |
 
 </div>

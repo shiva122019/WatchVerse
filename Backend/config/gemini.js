@@ -1,7 +1,7 @@
 // config/gemini.js
-
+require("dotenv").config();
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// ✅ FIX: Update default to the latest stable model (gemini-3.6-flash)
+// FIX: Update default to the latest stable model (gemini-3.6-flash)
 // gemini-2.5-flash retires Oct 16, 2026.
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 const GEMINI_BASE_URL =

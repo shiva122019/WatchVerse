@@ -25,7 +25,9 @@ const tmdb = axios.create({
     statusCodesToRetry: [[500, 599]],
     onRetryAttempt: (err) => {
       const cfg = rax.getConfig(err);
-      console.warn(`[TMDB] Retry attempt #${cfg.currentRetryAttempt} – ${err.code || err.message}`);
+      console.warn(
+        `[TMDB] Retry attempt #${cfg.currentRetryAttempt} – ${err.code || err.message}`,
+      );
     },
   },
 });

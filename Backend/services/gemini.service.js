@@ -2,6 +2,10 @@
 const axios = require("axios");
 const rax = require("retry-axios");
 const { getEndpoint, GEMINI_MODEL } = require("../config/gemini");
+//can remove
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const geminiClient = axios.create({
   timeout: 30000,
@@ -37,7 +41,9 @@ async function askGemini(history, systemContext) {
   if (typeof history === "string") {
     normalizedHistory = [{ role: "user", text: history }];
   } else if (!Array.isArray(history)) {
-    throw new TypeError("History must be a string or an array of message objects");
+    throw new TypeError(
+      "History must be a string or an array of message objects",
+    );
   }
 
   // 1. Map history correctly
