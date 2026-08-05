@@ -54,7 +54,7 @@ export default function Detail() {
       await api.post("/watchlist", {
         tmdbId: id,
         status,
-        mediaType: type === "series" ? "tv" : "movie",
+        mediaType: type === "series" ? "tv" : type === "song" ? "song" : "movie",
       });
       setWatchStatus(status);
       toast.success(`Added to ${status.replace("_", " ")}`);

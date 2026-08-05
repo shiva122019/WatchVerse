@@ -218,6 +218,7 @@ async function getBecauseYouWatched(userId, page = 1) {
   const watched = await WatchList.find({
     user: userId,
     status: "watched",
+    mediaType: { $in: ["movie", "tv"] }, // songs aren't TMDB-recommendable
   })
     .sort({ updatedAt: -1 })
     .limit(5);
@@ -295,6 +296,7 @@ async function getContinueWatching(userId, page = 1) {
   const watching = await WatchList.find({
     user: userId,
     status: "watching",
+    mediaType: { $in: ["movie", "tv"] },
   })
     .sort({ updatedAt: -1 })
     .skip((page - 1) * 20)
