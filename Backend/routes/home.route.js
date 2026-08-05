@@ -24,6 +24,48 @@ const {
 
 router.get("/", async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const [movieGenresRes, tvGenresRes] = await Promise.all([
+      tmdb.get("/genre/movie/list"),
+      tmdb.get("/genre/tv/list"),
+    ]);
+
+    const movieGenreMap = {};
+    const tvGenreMap = {};
+
+    movieGenresRes.data.genres.forEach((g) => {
+      movieGenreMap[g.id] = g.name;
+    });
+
+    tvGenresRes.data.genres.forEach((g) => {
+      tvGenreMap[g.id] = g.name;
+    });
+    if (page > 1) {
+      // Fetch trending page
+      const cacheKey = `homepage-trending-${page}`;
+      let data = browseCache.get(cacheKey);
+      if (!data) {
+        data = await tmdbFetch("/trending/all/week", {
+          params: { page },
+        });
+        browseCache.set(cacheKey, data);
+      }
+
+      const results = (data.results || [])
+        .filter(
+          (item) => item.media_type === "movie" || item.media_type === "tv",
+        )
+        .map((item) =>
+          mapTMDBItem(
+            item,
+            item.media_type,
+            item.media_type === "movie" ? movieGenreMap : tvGenreMap,
+          ),
+        );
+
+      return res.json(results);
+    }
+
     let publicSections = homeCache.get("homepage");
 
     if (!publicSections) {
