@@ -36,6 +36,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  spotify: {
+    connected: {
+      type: Boolean,
+      default: false,
+    },
+    id: {
+      type: String,
+      default: null,
+    },
+    refreshToken: {
+      type: String,
+      default: null,
+    },
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -18,6 +18,7 @@ import WatchRoom from "./pages/WatchRoom";
 import Karaoke from "./pages/Karaoke";
 import "./App.css";
 import Onboarding from "./pages/onBoarding";
+import ConnectSpotify from "./pages/ConnectSpotify";
 
 function AppShell({ splashDone }) {
   const location = useLocation();
@@ -35,6 +36,14 @@ function AppShell({ splashDone }) {
           <Route path="/content/:type/:id" element={<Detail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route
+            path="/connect-spotify"
+            element={
+              <ProtectedRoute>
+                <ConnectSpotify />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/onBoarding" element={<Onboarding />} />
           <Route
             path="/profile"

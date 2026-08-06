@@ -228,6 +228,40 @@ function formatDuration(ms) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
+/**
+ * Refresh a Spotify Access Token using a User's stored Refresh Token.
+ * Useful for user-scoped endpoints like /v1/me/player/recently-played, /v1/me/top/tracks, etc.
+ */
+async function getAccessTokenFromRefreshToken(refreshToken) {
+  if (!refreshToken) {
+    throw new Error("Refresh token is required.");
+  }
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET in environment.");
+  }
+
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+  const response = await axios.post(
+    "https://accounts.spotify.com/api/token",
+    new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }).toString(),
+    {
+      headers: {
+        Authorization: `Basic ${basicAuth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  return response.data.access_token;
+}
+
 module.exports = {
   musicCache,
   spotifySearchTracks,
@@ -235,4 +269,5 @@ module.exports = {
   spotifyGetTrack,
   mapSpotifyItem,
   getSpotifyToken,
+  getAccessTokenFromRefreshToken,
 };

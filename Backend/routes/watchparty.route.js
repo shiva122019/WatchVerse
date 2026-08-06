@@ -1,7 +1,13 @@
 const express = require("express");
 const crypto = require("crypto");
 const rooms = require("../lib/watchpartyRooms");
-const tmdb = require("../services/tmdb.service");
+const {
+  searchTitle,
+  getGenres,
+  discoverByGenres,
+  getSurprisePick,
+  getTrendingPosters,
+} = require("../services/tmdb.service");
 
 const router = express.Router();
 
@@ -13,7 +19,8 @@ const DEFAULT_SURPRISE_GENRES = ["Action", "Comedy", "Drama", "Thriller"];
 function makeRoomCode() {
   const chars = "abcdefghjkmnpqrstuvwxyz23456789";
   let code = "";
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 6; i++)
+    code += chars[Math.floor(Math.random() * chars.length)];
   return code;
 }
 
@@ -55,14 +62,16 @@ router.get("/search", async (req, res) => {
   if (!query) return res.json({ results: [] });
 
   try {
-    const results = await tmdb.searchTitle(query);
+    const results = await searchTitle(query);
     res.json({
       results: results.slice(0, 12).map((r) => ({
         id: r.id,
         mediaType: r.media_type,
         title: r.title || r.name,
         year: (r.release_date || r.first_air_date || "").slice(0, 4),
-        posterUrl: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : null,
+        posterUrl: r.poster_path
+          ? `https://image.tmdb.org/t/p/w342${r.poster_path}`
+          : null,
       })),
     });
   } catch (err) {
@@ -74,11 +83,13 @@ router.get("/search", async (req, res) => {
 // GET /watchparty/genres — full genre list for the picker UI
 router.get("/genres", async (req, res) => {
   try {
-    const genres = await tmdb.getGenres();
+    const genres = await getGenres();
     res.json({ genres: genres.map((g) => g.name) });
   } catch (err) {
     console.error("Failed to fetch genres:", err.message);
-    res.status(502).json({ error: "Couldn't load genres. Try again in a moment." });
+    res
+      .status(502)
+      .json({ error: "Couldn't load genres. Try again in a moment." });
   }
 });
 
@@ -88,14 +99,19 @@ router.get("/suggestions", async (req, res) => {
   const genresParam = (req.query.genres || "").trim();
   if (!genresParam) return res.json({ suggestions: [] });
 
-  const genreNames = genresParam.split(",").map((g) => g.trim()).filter(Boolean);
+  const genreNames = genresParam
+    .split(",")
+    .map((g) => g.trim())
+    .filter(Boolean);
 
   try {
-    const suggestions = await tmdb.discoverByGenres(genreNames);
+    const suggestions = await discoverByGenres(genreNames);
     res.json({ suggestions });
   } catch (err) {
     console.error("Failed to fetch suggestions:", err.message);
-    res.status(502).json({ error: "Couldn't load suggestions. Try again in a moment." });
+    res
+      .status(502)
+      .json({ error: "Couldn't load suggestions. Try again in a moment." });
   }
 });
 
@@ -107,18 +123,25 @@ router.get("/suggestions", async (req, res) => {
 router.get("/surprise", async (req, res) => {
   const genresParam = (req.query.genres || "").trim();
   const genreNames = genresParam
-    ? genresParam.split(",").map((g) => g.trim()).filter(Boolean)
+    ? genresParam
+        .split(",")
+        .map((g) => g.trim())
+        .filter(Boolean)
     : DEFAULT_SURPRISE_GENRES;
 
   try {
-    const pick = await tmdb.getSurprisePick(genreNames);
+    const pick = await getSurprisePick(genreNames);
     if (!pick) {
-      return res.status(404).json({ error: "Couldn't find a match. Try different genres." });
+      return res
+        .status(404)
+        .json({ error: "Couldn't find a match. Try different genres." });
     }
     res.json({ pick });
   } catch (err) {
     console.error("Failed to get surprise pick:", err.message);
-    res.status(502).json({ error: "Couldn't get a surprise pick. Try again in a moment." });
+    res
+      .status(502)
+      .json({ error: "Couldn't get a surprise pick. Try again in a moment." });
   }
 });
 
@@ -126,7 +149,7 @@ router.get("/surprise", async (req, res) => {
 // to build the mosaic background on the watch-party landing page.
 router.get("/posters", async (req, res) => {
   try {
-    const posters = await tmdb.getTrendingPosters(30);
+    const posters = await getTrendingPosters(30);
     res.json({ posters });
   } catch (err) {
     console.error("Failed to fetch posters:", err.message);

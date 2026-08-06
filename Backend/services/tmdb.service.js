@@ -100,6 +100,154 @@ async function getSimilar(tmdbId, mediaType) {
   }));
 }
 
+const IMAGE_BASE = "https://image.tmdb.org/t/p";
+
+// ----------------------------
+// Search movies & TV shows
+// ----------------------------
+async function searchTitle(query) {
+  const { data } = await tmdb.get("/search/multi", {
+    params: {
+      query,
+      include_adult: false,
+    },
+  });
+
+  return data.results.filter(
+    (item) => item.media_type === "movie" || item.media_type === "tv",
+  );
+}
+
+// ----------------------------
+// Get all genres
+// ----------------------------
+async function getGenres() {
+  const [movieGenres, tvGenres] = await Promise.all([
+    tmdb.get("/genre/movie/list"),
+    tmdb.get("/genre/tv/list"),
+  ]);
+
+  const map = new Map();
+
+  [...movieGenres.data.genres, ...tvGenres.data.genres].forEach((genre) => {
+    map.set(genre.id, genre);
+  });
+
+  return [...map.values()];
+}
+
+// ----------------------------
+// Discover by genres
+// ----------------------------
+async function discoverByGenres(genreNames) {
+  const genres = await getGenres();
+
+  const ids = genres
+    .filter((g) => genreNames.includes(g.name))
+    .map((g) => g.id);
+
+  if (!ids.length) return [];
+
+  const [movies, tv] = await Promise.all([
+    tmdb.get("/discover/movie", {
+      params: {
+        with_genres: ids.join(","),
+        sort_by: "vote_average.desc",
+        "vote_count.gte": 200,
+      },
+    }),
+    tmdb.get("/discover/tv", {
+      params: {
+        with_genres: ids.join(","),
+        sort_by: "vote_average.desc",
+        "vote_count.gte": 100,
+      },
+    }),
+  ]);
+
+  return [...movies.data.results, ...tv.data.results]
+    .sort((a, b) => b.vote_average - a.vote_average)
+    .slice(0, 30)
+    .map((item) => ({
+      id: item.id,
+      mediaType: item.title ? "movie" : "tv",
+      title: item.title || item.name,
+      year: (item.release_date || item.first_air_date || "").slice(0, 4),
+      rating: item.vote_average,
+      posterUrl: item.poster_path
+        ? `${IMAGE_BASE}/w342${item.poster_path}`
+        : null,
+      backdropUrl: item.backdrop_path
+        ? `${IMAGE_BASE}/w780${item.backdrop_path}`
+        : null,
+      overview: item.overview,
+    }));
+}
+
+// ----------------------------
+// Surprise pick
+// ----------------------------
+async function getSurprisePick(genreNames) {
+  const list = await discoverByGenres(genreNames);
+
+  if (!list.length) return null;
+
+  const candidates = list.slice(0, 20);
+
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+// ----------------------------
+// Trending posters
+// ----------------------------
+async function getTrendingPosters(limit = 30) {
+  const { data } = await tmdb.get("/trending/all/week");
+
+  return data.results
+    .filter((item) => item.poster_path)
+    .slice(0, limit)
+    .map((item) => ({
+      id: item.id,
+      posterUrl: `${IMAGE_BASE}/w342${item.poster_path}`,
+    }));
+}
+
+async function getVideo(mediaType, id) {
+  if (!["movie", "tv"].includes(mediaType)) {
+    throw new Error("Invalid media type");
+  }
+
+  const { data } = await tmdb.get(`/${mediaType}/${id}/videos`);
+
+  const videos = data.results || [];
+
+  // Prefer official YouTube trailers
+  let video =
+    videos.find(
+      (v) => v.site === "YouTube" && v.type === "Trailer" && v.official,
+    ) ||
+    // Then any YouTube trailer
+    videos.find((v) => v.site === "YouTube" && v.type === "Trailer") ||
+    // Then any official YouTube video
+    videos.find((v) => v.site === "YouTube" && v.official) ||
+    // Finally any YouTube video
+    videos.find((v) => v.site === "YouTube");
+
+  if (!video) {
+    return null;
+  }
+
+  return {
+    id: video.id,
+    name: video.name,
+    type: video.type,
+    official: video.official,
+    youtubeKey: video.key,
+    url: `https://www.youtube.com/watch?v=${video.key}`,
+    embedUrl: `https://www.youtube.com/embed/${video.key}`,
+  };
+}
+
 module.exports = {
   searchTitle,
   getDetails,
@@ -107,4 +255,10 @@ module.exports = {
   getRatings,
   getReviews,
   getSimilar,
+  searchTitle,
+  getGenres,
+  discoverByGenres,
+  getSurprisePick,
+  getTrendingPosters,
+  getVideo,
 };

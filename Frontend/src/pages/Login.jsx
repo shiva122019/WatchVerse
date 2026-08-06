@@ -18,8 +18,19 @@ export default function Login() {
     setBusy(true);
     const res = await login(email.trim().toLowerCase(), password);
     setBusy(false);
-    if (res.ok) navigate("/");
-    else setErr(res.error);
+    if (res.ok) {
+      const u = res.user;
+      const hasSpotify = Boolean(u?.spotify?.refreshToken && u.spotify.refreshToken.trim() !== "");
+      if (!hasSpotify) {
+        navigate("/connect-spotify");
+      } else if (!u?.onboardingCompleted) {
+        navigate("/onBoarding");
+      } else {
+        navigate("/");
+      }
+    } else {
+      setErr(res.error);
+    }
   };
 
   return (

@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
 
       return {
         ok: true,
+        user: data.user,
       };
     } catch (e) {
       return {
@@ -64,6 +65,7 @@ export function AuthProvider({ children }) {
 
       return {
         ok: true,
+        user: data.user,
       };
     } catch (e) {
       return {

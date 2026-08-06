@@ -25,7 +25,7 @@ export default function Register() {
       username.trim(),
     );
     setBusy(false);
-    if (res.ok) navigate("/onBoarding");
+    if (res.ok) navigate("/connect-spotify");
     else setErr(res.error);
   };
 
