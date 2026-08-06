@@ -3,6 +3,7 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const KaraokeRecording = require("../Models/KaraokeRecording");
 const { getSyncedLyrics } = require("../services/lyrics.service");
+const { getBackingTrack } = require("../config/karaokeTracksMap");
 
 // Multer configuration for memory storage
 const storage = multer.memoryStorage();
@@ -36,6 +37,26 @@ router.get("/lyrics", async (req, res) => {
     return res.status(500).json({ error: "Failed to generate lyrics" });
   }
 });
+
+/**
+ * GET /karaoke/backing-track
+ * Query params: title
+ * Returns the Cloudinary-hosted backing track URL for a given song title.
+ */
+router.get("/backing-track", (req, res) => {
+  const { title } = req.query;
+  if (!title) {
+    return res.status(400).json({ error: "Title is required" });
+  }
+
+  const url = getBackingTrack(title);
+  if (!url) {
+    return res.status(404).json({ error: "No backing track found for this song" });
+  }
+
+  return res.json({ url });
+});
+
 
 /**
  * GET /karaoke/youtube-video

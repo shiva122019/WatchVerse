@@ -36,7 +36,11 @@ router.post("/login", (req, res, next) => {
           username: user.username,
           email: user.email,
           onboardingCompleted: user.onboardingCompleted || false,
-          spotify: user.spotify || { connected: false, id: null, refreshToken: null },
+          spotify: user.spotify || {
+            connected: false,
+            id: null,
+            refreshToken: null,
+          },
         },
       });
     });
@@ -83,7 +87,11 @@ router.post("/register", async (req, res, next) => {
           username: newUser.username,
           email: newUser.email,
           onboardingCompleted: newUser.onboardingCompleted || false,
-          spotify: newUser.spotify || { connected: false, id: null, refreshToken: null },
+          spotify: newUser.spotify || {
+            connected: false,
+            id: null,
+            refreshToken: null,
+          },
         },
       });
     });
@@ -203,7 +211,9 @@ router.get("/spotify/callback", async (req, res, next) => {
     const { code, error, state } = req.query;
 
     if (error) {
-      return res.redirect(`${frontendUrl}/connect-spotify?error=${encodeURIComponent(error)}`);
+      return res.redirect(
+        `${frontendUrl}/connect-spotify?error=${encodeURIComponent(error)}`,
+      );
     }
 
     if (!code) {
@@ -290,12 +300,17 @@ router.get("/spotify/callback", async (req, res, next) => {
 
     return res.redirect(frontendUrl);
   } catch (err) {
-    console.error("Spotify OAuth Callback Error:", err.response?.data || err.message);
+    console.error(
+      "Spotify OAuth Callback Error:",
+      err.response?.data || err.message,
+    );
     const errorMsg =
       err.response?.data?.error_description ||
       err.response?.data?.error ||
       "Failed to link Spotify account";
-    return res.redirect(`${frontendUrl}/connect-spotify?error=${encodeURIComponent(errorMsg)}`);
+    return res.redirect(
+      `${frontendUrl}/connect-spotify?error=${encodeURIComponent(errorMsg)}`,
+    );
   }
 });
 
