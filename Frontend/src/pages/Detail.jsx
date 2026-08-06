@@ -3,7 +3,17 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import api, { formatApiError } from "@/lib/api";
 import { StarRating, StarInput } from "@/components/StarRating";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, Check, Play, Clock, Film, Tv, Music2, ExternalLink } from "lucide-react";
+import {
+  Plus,
+  Check,
+  Play,
+  Clock,
+  Film,
+  Tv,
+  Music2,
+  ExternalLink,
+  Heart,
+} from "lucide-react";
 import { toast } from "sonner";
 import ReviewComments from "@/components/ReviewComments";
 
@@ -16,10 +26,12 @@ export default function Detail() {
   const [content, setContent] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [watchStatus, setWatchStatus] = useState(null); // want|watching|watched|null
+  const [favoriteMap, setFavoriteMap] = useState({});
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("reviews");
+  const [mediaTab, setMediaTab] = useState("watchlist");
   const [error, setError] = useState("");
 
   const loadAll = async () => {
@@ -31,9 +43,16 @@ export default function Detail() {
     setReviews(r.data);
     if (user) {
       try {
-        const wl = await api.get("/watchlist/content");
+        const [wl, favs] = await Promise.all([
+          api.get("/watchlist/content"),
+          api.get("/profile/favorites/mine"),
+        ]);
+
         const mine = wl.data.find((w) => String(w.content_id) === String(id));
+
         setWatchStatus(mine ? mine.status : null);
+
+        setFavoriteMap(favs.data.favoriteMap || {});
       } catch {}
       const mineReview = r.data.find((rv) => rv.user_id === user.id);
       if (mineReview) {
@@ -54,7 +73,8 @@ export default function Detail() {
       await api.post("/watchlist", {
         tmdbId: id,
         status,
-        mediaType: type === "series" ? "tv" : type === "song" ? "song" : "movie",
+        mediaType:
+          type === "series" ? "tv" : type === "song" ? "song" : "movie",
       });
       setWatchStatus(status);
       toast.success(`Added to ${status.replace("_", " ")}`);
@@ -68,7 +88,60 @@ export default function Detail() {
       await api.delete(`/watchlist/${id}`);
       setWatchStatus(null);
       toast.success("Removed from list");
-    } catch {}
+    } catch (e) {
+      toast.error(
+        formatApiError(e.response?.data?.error) || "Failed to remove",
+      );
+    }
+  };
+
+  const toggleFavorite = async (category, item) => {
+    if (!user) return navigate("/login");
+
+    const key = `${category}:${item.id}`;
+    const isFavorite = !!favoriteMap[key];
+
+    try {
+      if (isFavorite) {
+        await api.delete(`/profile/favorites/item/${category}/${item.id}`);
+        setFavoriteMap((prev) => {
+          const copy = { ...prev };
+          delete copy[key];
+          return copy;
+        });
+        toast.success("Removed from favorites");
+        return;
+      }
+
+      const payload =
+        category === "movie" || category === "show"
+          ? {
+              category,
+              externalId: item.id,
+              title: item.title,
+              year: item.year,
+              posterUrl: item.posterUrl,
+              rating: item.rating,
+            }
+          : {
+              category,
+              externalId: item.id,
+              name: item.name,
+              photoUrl: item.photoUrl,
+            };
+
+      const res = await api.post("/profile/favorites/toggle", payload);
+
+      setFavoriteMap((prev) => ({
+        ...prev,
+        [key]: res.data.favorite,
+      }));
+      toast.success("Added to favorites");
+    } catch (e) {
+      toast.error(
+        formatApiError(e.response?.data?.error) || "Failed to update favorite",
+      );
+    }
   };
 
   const submitReview = async (e) => {
@@ -103,6 +176,8 @@ export default function Detail() {
   }
 
   const Icon = typeIcon[content.type] || Film;
+  const favCategory = type === "movie" ? "movie" : "show";
+  const favorited = !!favoriteMap[`${favCategory}:${content.id}`];
 
   return (
     <div data-testid="detail-page" className="pb-24">
@@ -196,23 +271,6 @@ export default function Detail() {
               {content.description}
             </p>
 
-            {content.creator && (
-              <p className="mt-4 text-sm text-neutral-400">
-                <span className="label-caps mr-2">
-                  {content.type === "song" ? "Artist" : "Creator"}
-                </span>
-                <span className="text-white">{content.creator}</span>
-              </p>
-            )}
-            {content.cast?.length > 0 && (
-              <p className="mt-2 text-sm text-neutral-400">
-                <span className="label-caps mr-2">Cast</span>
-                <span className="text-neutral-300">
-                  {content.cast.join(", ")}
-                </span>
-              </p>
-            )}
-
             {/* Spotify Preview Player */}
             {content.type === "song" && (
               <div className="mt-8 flex flex-col gap-3">
@@ -253,42 +311,191 @@ export default function Detail() {
               </div>
             )}
 
-            {/* Watchlist buttons */}
-            <div className="mt-8 flex flex-wrap gap-2">
-              {["want", "watching", "watched"].map((s) => {
-                const isSong = content.type === "song";
-                const active = watchStatus === s;
-                const label = isSong
-                  ? s === "want"
-                    ? "Want to Listen"
-                    : s === "watching"
-                      ? "Listening"
-                      : "Listened"
-                  : s === "want"
-                    ? "Want to Watch"
-                    : s === "watching"
-                      ? "Currently Watching"
-                      : "Watched";
-                return (
+            {/* Action Tabs */}
+            <div className="mt-8">
+              <div className="mb-6 flex gap-2 rounded-xl bg-white/5 p-1 w-fit">
+                <button
+                  onClick={() => setMediaTab("watchlist")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    mediaTab === "watchlist"
+                      ? "bg-[#00F0FF] text-black"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Watchlist
+                </button>
+
+                <button
+                  onClick={() => setMediaTab("favorites")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    mediaTab === "favorites"
+                      ? "bg-[#00F0FF] text-black"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Favorites
+                </button>
+              </div>
+
+              {mediaTab === "watchlist" && (
+                <div className="flex flex-wrap gap-2">
                   <button
-                    key={s}
-                    onClick={() => (active ? removeFromList() : setStatus(s))}
-                    data-testid={`watchlist-${s}-btn`}
+                    onClick={() =>
+                      toggleFavorite(favCategory, {
+                        id: content.id,
+                        title: content.title,
+                        year: content.release_year,
+                        posterUrl: content.cover_url,
+                        rating: content.avg_rating,
+                      })
+                    }
+                    data-testid="favorite-btn"
                     className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                      active
-                        ? "border-[#00F0FF] bg-[#00F0FF] text-black"
+                      favorited
+                        ? "border-red-500 bg-red-500/10 text-red-400"
                         : "border-white/15 bg-white/5 text-white hover:border-white/40"
                     }`}
                   >
-                    {active ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                    {label}
+                    <Heart
+                      className="h-4 w-4"
+                      fill={favorited ? "currentColor" : "none"}
+                    />
+                    {favorited ? "Favorited" : "Add Favorite"}
                   </button>
-                );
-              })}
+
+                  {["want", "watching", "watched"].map((s) => {
+                    const isSong = content.type === "song";
+                    const active = watchStatus === s;
+
+                    const label = isSong
+                      ? s === "want"
+                        ? "Want to Listen"
+                        : s === "watching"
+                          ? "Listening"
+                          : "Listened"
+                      : s === "want"
+                        ? "Want to Watch"
+                        : s === "watching"
+                          ? "Currently Watching"
+                          : "Watched";
+
+                    return (
+                      <button
+                        key={s}
+                        onClick={() =>
+                          active ? removeFromList() : setStatus(s)
+                        }
+                        data-testid={`watchlist-${s}-btn`}
+                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                          active
+                            ? "border-[#00F0FF] bg-[#00F0FF] text-black"
+                            : "border-white/15 bg-white/5 text-white hover:border-white/40"
+                        }`}
+                      >
+                        {active ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Plus className="h-4 w-4" />
+                        )}
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {mediaTab === "favorites" && (
+                <div className="space-y-8">
+                  {content.creator && (
+                    <div>
+                      <h3 className="mb-3 text-lg font-semibold text-white">
+                        Director
+                      </h3>
+
+                      <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={
+                              content.creator.photoUrl ||
+                              "https://placehold.co/100x100?text=%F0%9F%91%A4"
+                            }
+                            className="h-12 w-12 rounded-full object-cover"
+                            alt={content.creator.name}
+                          />
+
+                          <span className="text-white">
+                            {content.creator.name}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            toggleFavorite("director", content.creator)
+                          }
+                        >
+                          <Heart
+                            className={`h-5 w-5 ${
+                              favoriteMap[`director:${content.creator.id}`]
+                                ? "fill-red-500 text-red-500"
+                                : "text-neutral-400"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {content.cast?.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 text-lg font-semibold text-white">
+                        Cast
+                      </h3>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {content.cast.map((actor) => (
+                          <div
+                            key={actor.id}
+                            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] p-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={
+                                  actor.photoUrl ||
+                                  "https://placehold.co/100x100?text=%F0%9F%91%A4"
+                                }
+                                className="h-12 w-12 rounded-full object-cover"
+                                alt={actor.name}
+                              />
+
+                              <div>
+                                <p className="text-white">{actor.name}</p>
+
+                                {actor.character && (
+                                  <p className="text-xs text-neutral-400">
+                                    {actor.character}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => toggleFavorite("actor", actor)}
+                            >
+                              <Heart
+                                className={`h-5 w-5 ${
+                                  favoriteMap[`actor:${actor.id}`]
+                                    ? "fill-red-500 text-red-500"
+                                    : "text-neutral-400"
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

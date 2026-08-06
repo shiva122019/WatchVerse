@@ -56,9 +56,29 @@ router.get("/:type/:id", async (req, res) => {
     let creator = null;
 
     if (type === "movie") {
-      creator = crew.find((p) => p.job === "Director")?.name || null;
+      const director = crew.find((p) => p.job === "Director");
+
+      if (director) {
+        creator = {
+          id: director.id,
+          name: director.name,
+          photoUrl: director.profile_path
+            ? `https://image.tmdb.org/t/p/w185${director.profile_path}`
+            : null,
+        };
+      }
     } else {
-      creator = item.created_by?.map((c) => c.name).join(", ") || null;
+      const showCreator = item.created_by?.[0];
+
+      if (showCreator) {
+        creator = {
+          id: showCreator.id,
+          name: showCreator.name,
+          photoUrl: showCreator.profile_path
+            ? `https://image.tmdb.org/t/p/w185${showCreator.profile_path}`
+            : null,
+        };
+      }
     }
 
     // Cached review statistics
@@ -102,7 +122,14 @@ router.get("/:type/:id", async (req, res) => {
 
       creator,
 
-      cast: cast.slice(0, 10).map((person) => person.name),
+      cast: cast.slice(0, 10).map((person) => ({
+        id: person.id,
+        name: person.name,
+        character: person.character,
+        photoUrl: person.profile_path
+          ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
+          : null,
+      })),
 
       avg_rating: cache?.averageRating ?? 0,
 

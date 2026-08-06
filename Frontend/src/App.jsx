@@ -53,6 +53,7 @@ function AppShell({ splashDone }) {
               </ProtectedRoute>
             }
           />
+          <Route path="/profile/:username" element={<Profile />} />
           <Route
             path="/settings/account"
             element={

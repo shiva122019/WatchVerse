@@ -23,6 +23,21 @@ const reviewSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 1000,
     },
+
+    // ── Profile-display fields (stored at write time to avoid N+1 TMDB calls) ──
+    title: {
+      type: String,
+      default: null,
+    },
+    posterUrl: {
+      type: String,
+      default: null,
+    },
+    mediaType: {
+      type: String,
+      enum: ["movie", "tv", "song"],
+      default: null,
+    },
   },
   { timestamps: true },
 );
