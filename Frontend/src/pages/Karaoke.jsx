@@ -72,53 +72,39 @@ export default function Karaoke() {
   const loadData = async () => {
     try {
       setLoading(true);
+
+      // ── Step 1: Fetch song metadata + recordings in parallel ──────────────
       const [songRes, recordingsRes] = await Promise.all([
         api.get(`/content/song/${id}`),
         api.get(`/karaoke/recordings/${id}`),
       ]);
       const songData = songRes.data;
-
-      // Fetch Cloudinary Backing Track (primary source — uploaded by admin)
-      try {
-        const backingRes = await api.get("/karaoke/backing-track", {
-          params: { title: songData.title },
-        });
-        if (backingRes.data?.url) {
-          songData.preview_url = backingRes.data.url;
-          console.log("🎵 Cloudinary backing track loaded:", backingRes.data.url);
-        }
-      } catch (err) {
-        console.warn("No Cloudinary backing track for this song, will use Spotify preview.");
-      }
-
       setSong(songData);
       setRecordings(recordingsRes.data);
 
-      // Fetch YouTube Video ID
-      try {
-        const ytRes = await api.get("/karaoke/youtube-video", {
-          params: {
-            title: songData.title,
-            artist: songData.creator,
-          },
-        });
-        setYoutubeId(ytRes.data.videoId);
-      } catch (err) {
-        console.warn("Could not fetch YouTube ID:", err);
+      // ── Step 2: Fetch CRITICAL data in parallel (backing track + lyrics) ──
+      // YouTube is NOT included here — it's slow and not needed to start singing
+      const [backingResult, lyricsResult] = await Promise.allSettled([
+        api.get("/karaoke/backing-track", { params: { title: songData.title } }),
+        api.get("/karaoke/lyrics",         { params: { title: songData.title, artist: songData.creator } }),
+      ]);
+
+      // Handle backing track
+      if (backingResult.status === "fulfilled" && backingResult.value.data?.url) {
+        songData.preview_url = backingResult.value.data.url;
+        setSong({ ...songData });
+        console.log("🎵 Cloudinary backing track loaded:", backingResult.value.data.url);
+      } else {
+        console.warn("No Cloudinary backing track — using Spotify preview if available.");
       }
 
-      // Fetch Synced Lyrics
-      try {
-        const lyricsRes = await api.get("/karaoke/lyrics", {
-          params: {
-            title: songData.title,
-            artist: songData.creator,
-          },
-        });
-        setLyrics(lyricsRes.data);
-      } catch (err) {
-        console.warn("Could not load synced lyrics:", err);
+      // Handle Lyrics
+      if (lyricsResult.status === "fulfilled" && Array.isArray(lyricsResult.value.data)) {
+        setLyrics(lyricsResult.value.data);
+      } else {
+        console.warn("Could not load synced lyrics:", lyricsResult.reason);
       }
+
     } catch (error) {
       toast.error("Failed to load karaoke session details.");
       navigate(`/content/song/${id}`);
