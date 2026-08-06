@@ -3,7 +3,16 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import api, { formatApiError } from "@/lib/api";
 import { StarRating, StarInput } from "@/components/StarRating";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, Check, Play, Clock, Film, Tv, Music2, ExternalLink } from "lucide-react";
+import {
+  Plus,
+  Check,
+  Play,
+  Clock,
+  Film,
+  Tv,
+  Music2,
+  ExternalLink,
+} from "lucide-react";
 import { toast } from "sonner";
 import ReviewComments from "@/components/ReviewComments";
 
@@ -54,7 +63,8 @@ export default function Detail() {
       await api.post("/watchlist", {
         tmdbId: id,
         status,
-        mediaType: type === "series" ? "tv" : type === "song" ? "song" : "movie",
+        mediaType:
+          type === "series" ? "tv" : type === "song" ? "song" : "movie",
       });
       setWatchStatus(status);
       toast.success(`Added to ${status.replace("_", " ")}`);
@@ -195,7 +205,37 @@ export default function Detail() {
             <p className="mt-6 max-w-3xl leading-relaxed text-neutral-300">
               {content.description}
             </p>
+            {content.available_on?.length > 0 && (
+              <div className="mt-8">
+                <p className="label-caps mb-3 text-neutral-400">Available On</p>
 
+                <div className="flex flex-wrap gap-3">
+                  {content.available_on.map((platform) => (
+                    <a
+                      key={platform.name}
+                      href={platform.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 transition hover:border-[#00F0FF]/40 hover:bg-white/10"
+                    >
+                      {platform.logo && (
+                        <img
+                          src={platform.logo}
+                          alt={platform.name}
+                          className="h-8 w-8 rounded-md object-contain"
+                        />
+                      )}
+
+                      <span className="text-sm font-medium text-white">
+                        {platform.name}
+                      </span>
+
+                      <ExternalLink className="h-4 w-4 text-neutral-400" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
             {content.creator && (
               <p className="mt-4 text-sm text-neutral-400">
                 <span className="label-caps mr-2">

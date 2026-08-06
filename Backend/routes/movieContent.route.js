@@ -42,10 +42,11 @@ router.get("/:type/:id", async (req, res) => {
 
     const endpoint = type === "movie" ? "movie" : "tv";
 
-    const [details, credits, trailerUrl] = await Promise.all([
+    const [details, credits, trailerUrl, providers] = await Promise.all([
       tmdb.get(`/${endpoint}/${id}`),
       tmdb.get(`/${endpoint}/${id}/credits`),
       getTrailerUrl(endpoint, id),
+      tmdb.get(`/${endpoint}/${id}/watch/providers`),
     ]);
 
     const item = details.data;
@@ -65,6 +66,28 @@ router.get("/:type/:id", async (req, res) => {
     const cache = await reviewContent.findOne({
       tmdbId: String(id),
     });
+
+    const region = providers.data.results?.IN || {};
+    const providerList = [
+      ...(region.flatrate || []),
+      ...(region.rent || []),
+      ...(region.buy || []),
+    ];
+
+    // Remove duplicates
+    const availableOn = [
+      ...new Map(
+        providerList.map((p) => [
+          p.provider_id,
+          {
+            id: p.provider_id,
+            name: p.provider_name,
+            logo: `https://image.tmdb.org/t/p/w92${p.logo_path}`,
+            url: region.link,
+          },
+        ]),
+      ).values(),
+    ];
 
     res.json({
       id: item.id,
@@ -101,6 +124,8 @@ router.get("/:type/:id", async (req, res) => {
       genres: item.genres.map((g) => g.name),
 
       creator,
+
+      available_on: availableOn,
 
       cast: cast.slice(0, 10).map((person) => person.name),
 
