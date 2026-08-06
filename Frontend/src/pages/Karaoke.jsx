@@ -77,11 +77,18 @@ export default function Karaoke() {
         api.get(`/karaoke/recordings/${id}`),
       ]);
       const songData = songRes.data;
-      const lowerTitle = (songData.title || "").toLowerCase();
-      if (lowerTitle.includes("arz kiya") || lowerTitle.includes("anuv")) {
-        songData.preview_url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-      } else if (lowerTitle.includes("aarzu") || lowerTitle.includes("noor")) {
-        songData.preview_url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
+
+      // Fetch Cloudinary Backing Track (primary source — uploaded by admin)
+      try {
+        const backingRes = await api.get("/karaoke/backing-track", {
+          params: { title: songData.title },
+        });
+        if (backingRes.data?.url) {
+          songData.preview_url = backingRes.data.url;
+          console.log("🎵 Cloudinary backing track loaded:", backingRes.data.url);
+        }
+      } catch (err) {
+        console.warn("No Cloudinary backing track for this song, will use Spotify preview.");
       }
 
       setSong(songData);
@@ -91,8 +98,8 @@ export default function Karaoke() {
       try {
         const ytRes = await api.get("/karaoke/youtube-video", {
           params: {
-            title: songRes.data.title,
-            artist: songRes.data.creator,
+            title: songData.title,
+            artist: songData.creator,
           },
         });
         setYoutubeId(ytRes.data.videoId);
@@ -104,8 +111,8 @@ export default function Karaoke() {
       try {
         const lyricsRes = await api.get("/karaoke/lyrics", {
           params: {
-            title: songRes.data.title,
-            artist: songRes.data.creator,
+            title: songData.title,
+            artist: songData.creator,
           },
         });
         setLyrics(lyricsRes.data);
@@ -119,6 +126,7 @@ export default function Karaoke() {
       setLoading(false);
     }
   };
+
 
   // Load YouTube script and handle page cleanup
   useEffect(() => {

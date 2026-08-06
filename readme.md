@@ -2,7 +2,7 @@
 
 ![WatchVerse](./banner.svg)
 
-**A full-stack MERN media discovery platform for movies, TV, music, and community.**
+**A premium, next-generation full-stack MERN media discovery and social interaction platform.**
 
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](#)
 [![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](#)
@@ -21,7 +21,7 @@
 ## 📖 Table of Contents
 
 - [About](#-about)
-- [Features](#-features)
+- [Key Features](#-key-features)
 - [Architecture](#-architecture)
 - [Data Model](#-data-model)
 - [AI Chatbot Flow](#-ai-chatbot-flow)
@@ -34,89 +34,64 @@
 
 ## 📌 About
 
-**WatchVerse** enables users to discover movies and TV series, explore detailed information, write reviews, manage personalized watchlists, discover music, interact with AI, and connect with other users. Powered by [The Movie Database (TMDB)](https://www.themoviedb.org/), WatchVerse combines rich media metadata with personalized and social entertainment features.
+**WatchVerse** is a modern entertainment hub enabling users to seamlessly discover movies and TV series, explore rich metadata, write interactive reviews, swipe through content recommendations, discuss in real-time chat rooms, and sing in a fully integrated Karaoke Studio. 
+
+Powered by [The Movie Database (TMDB)](https://www.themoviedb.org/) and [Spotify Web API](https://developer.spotify.com/), WatchVerse blends high-fidelity media metadata with community-focused features and advanced Gemini AI assistants.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-### 🔐 User Authentication
-- Secure registration and login
-- Password hashing with `bcrypt`
-- Session-based authentication using Passport.js
-- Persistent login sessions via Express Session + MongoDB
+### 🎤 Karaoke Studio & Voice Recorder (NEW!)
+Sing along to your favorite tracks directly inside the app:
+- **Synced Lyrics Player**: Real-time scrolling and highlighting of transliterated (Romanized) lyrics for regional and Hindi tracks, making them accessible to read.
+- **Auto-Play Backing Music**: Interactive HTML5 audio player and YouTube video integrations that trigger automatically when you start recording.
+- **Web Audio API voice visualizer**: Smooth canvas visualizer showing real-time frequency waves of your voice.
+- **Vocal Cover Mixer**: Automatically mixes your recorded microphone audio with the backing instrumental track, letting you preview your vocal cover inside the studio.
+- **Community Submissions**: Save your covers directly to Cloudinary and share them in the Community Recordings catalog!
+
+### 🤖 AI Entertainment Chatbot
+Conversational media recommendations powered by the Gemini API:
+- Ask natural-language questions like *"Recommend some thriller movies"* or *"Suggest good Hindi songs for karaoke"*.
+- Understands search context and returns interactive movie/TV title cards.
 
 ### 🏠 Home Page
 Browse curated, horizontally scrollable collections inspired by modern streaming platforms:
-- Featured movie banner
-- Trending, popular & top-rated movies
-- Popular & top-rated TV series
-- Curated content sections
-
-### 🔎 Browse & Search
-- Search by title, actor, or creator
-- Filter by genre and media type
-- Discover trending content and content by genre
-- Duplicate result removal, sorted by rating
-- Infinite scrolling
-
-### 🎞️ Content Detail Page
-Each title has a dedicated page with:
-- High-resolution poster & backdrop
-- Description, genres, release year
-- Runtime or season count
-- Director/creator and main cast
-- Average community rating & review count
-- User reviews and watchlist controls
-
-### ⭐ Reviews & Ratings
-- 1–5 star ratings with written reviews
-- One review per user per title
-- Cached community average rating
-- Reverse-chronological review feed
-- Comments on reviews
-
-### 📝 Personal Watchlist
-Track content across custom states:
-- **Want to Watch**
-- **Watching**
-- **Watched**
-
-Add, update status, remove, and view all saved titles.
+- Featured hero movie banner.
+- Trending, popular & top-rated movies.
+- Popular & top-rated TV series.
+- Custom recommended feed.
 
 ### 🃏 Swipe-Based Discovery
 A Tinder-style content discovery experience:
-- Interactive swipe cards
-- Quick like/skip decisions
-- Smooth card animations
-- Personalized discovery experience
+- Interactive swipe cards with fluid Framer Motion animations.
+- Quick like/skip decisions to build recommendation algorithms.
 
-### 🤖 AI Entertainment Chatbot
-Ask natural-language questions like:
-> *"Recommend some thriller movies"*
-> *"What should I watch if I liked Interstellar?"*
-> *"Suggest some good comedy series"*
+### 🔐 User Authentication
+- Secure registration and login with Passport.js.
+- Secure password hashing using `bcrypt`.
+- Persistent session storage in MongoDB using `connect-mongo`.
 
-Powered by the Gemini API for conversational content discovery.
+### 🔎 Browse & Search
+- Smart lookup by title, actor, or creator.
+- Filter by genre and media type.
+- Duplicate result removal, sorted by rating, with smooth infinite scrolling.
+
+### 🎞️ Content Detail Page
+- Dedicated high-resolution posters & backdrops.
+- Interactive cast list, creator metadata, and average community ratings.
+- Watchlist management and user review statistics.
+
+### ⭐ Reviews & Ratings
+- 1–5 star ratings with written reviews (one review per user per title).
+- Cached community average rating and comments thread on user reviews.
+
+### 📝 Personal Watchlist
+Track content across custom states:
+- **Want to Watch** · **Watching** · **Watched**
 
 ### 💬 Chat Rooms
-- Join entertainment discussions
-- Share recommendations and exchange opinions
-- Interact with other users in real time
-
-### 🎵 Music Discovery
-Powered by Spotify integration:
-- Explore songs, artists, and albums
-- Get music recommendations
-- Extends WatchVerse beyond movies & TV
-
-### 🎯 User Preferences & Personalization
-- Genre and interest preferences
-- Personalized discovery and recommendations
-- User-specific content tuning
-
-### ♾️ Infinite Scrolling
-Continuous content discovery without pagination — smoother browsing and better exploration.
+- Join real-time entertainment rooms to discuss suggestions with other users.
 
 ---
 
@@ -277,8 +252,6 @@ sequenceDiagram
 
 ## 📸 Screenshots
 
-> Add real screenshots or a screen recording here — this section is a placeholder layout to drop them into.
-
 <div align="center">
 
 | Home | Content Detail | Swipe Discovery |
@@ -290,8 +263,6 @@ sequenceDiagram
 | ![Chatbot screenshot](./screenshots/chatbot.png) | ![Watchlist screenshot](./screenshots/watchlist.png) | ![Chat rooms screenshot](./screenshots/chatrooms.png) |
 
 </div>
-
-To use these: create a `screenshots/` folder in the repo root, drop in your PNGs with the matching filenames above (or update the paths), and they'll render automatically on GitHub.
 
 ---
 
@@ -359,7 +330,8 @@ WatchVerse/
 │   │   │   ├── Browser.jsx
 │   │   │   ├── Detail.jsx
 │   │   │   ├── Register.jsx
-│   │   │   └── onBoarding.jsx
+│   │   │   ├── onBoarding.jsx
+│   │   │   └── Karaoke.jsx (New!)
 │   │   │
 │   │   ├── App.jsx
 │   │   └── index.css
@@ -372,7 +344,8 @@ WatchVerse/
 │   │   ├── Review.js
 │   │   ├── User.js
 │   │   ├── UserPreference.js
-│   │   └── reviewContent.js
+│   │   ├── reviewContent.js
+│   │   └── KaraokeRecording.js (New!)
 │   │
 │   ├── controllers/
 │   │   └── chat.controller.js
@@ -384,6 +357,7 @@ WatchVerse/
 │   │   ├── home.route.js
 │   │   ├── onboarding.route.js
 │   │   ├── watchlist.route.js
+│   │   ├── karaoke.route.js (New!)
 │   │   └── index.js
 │   │
 │   ├── services/
@@ -393,7 +367,8 @@ WatchVerse/
 │   │   ├── mediaClassifier.service.js
 │   │   ├── prompt.service.js
 │   │   ├── spotify.service.js
-│   │   └── tmdb.service.js
+│   │   ├── tmdb.service.js
+│   │   └── lyrics.service.js (New!)
 │   │
 │   ├── config/
 │   ├── lib/
@@ -410,7 +385,7 @@ WatchVerse/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/WatchVerse.git
+git clone https://github.com/shiva122019/WatchVerse.git
 cd WatchVerse
 
 # Install dependencies
