@@ -271,6 +271,75 @@ export default function Detail() {
               {content.description}
             </p>
 
+            {content.platforms?.length > 0 && (
+              <div className="mt-6">
+                <h3 className="mb-3 font-display text-xl font-semibold text-white">
+                  Available On
+                </h3>
+
+                <div className="flex flex-wrap gap-3">
+                  {content.platforms.map((platform) => (
+                    <a
+                      key={platform.name}
+                      href={platform.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/10"
+                      data-testid={`platform-${platform.name.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
+                      {platform.logo && (
+                        <img
+                          src={platform.logo}
+                          alt={platform.name}
+                          className="h-5 w-5 rounded-full object-contain"
+                        />
+                      )}
+                      {platform.name}
+                      <ExternalLink className="h-3.5 w-3.5 text-neutral-400" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {content.creator && (
+              <div className="mt-6">
+                <h3 className="mb-3 font-display text-xl font-semibold text-white">
+                  Director
+                </h3>
+
+                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={
+                        content.creator.photoUrl ??
+                        "https://placehold.co/100x100?text=%F0%9F%91%A4"
+                      }
+                      alt={content.creator.name}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+
+                    <span className="font-medium text-white">
+                      {content.creator.name}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => toggleFavorite("director", content.creator)}
+                    className="rounded-full p-2 transition hover:bg-white/10"
+                  >
+                    <Heart
+                      className={`h-5 w-5 transition ${
+                        favoriteMap[`director:${content.creator.id}`]
+                          ? "fill-red-500 text-red-500"
+                          : "text-neutral-400 hover:text-red-400"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Spotify Preview Player */}
             {content.type === "song" && (
               <div className="mt-8 flex flex-col gap-3">
