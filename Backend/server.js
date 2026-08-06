@@ -25,9 +25,26 @@ app.use(express.urlencoded({ extended: true }));
 // headers the browser needs. Mounting routes before this was the bug:
 // requests to /watchparty/rooms got a response with no CORS headers,
 // so the browser blocked it and fetch() threw "Failed to fetch".
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        /^http:\/\/localhost:\d+$/.test(origin)
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );

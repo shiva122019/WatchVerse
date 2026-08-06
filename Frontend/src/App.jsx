@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AudioVisualizer from "./components/MediaAssistantChatbot";
 import WatchParty from "./pages/WatchParty";
 import WatchRoom from "./pages/WatchRoom";
+import Karaoke from "./pages/Karaoke";
 import "./App.css";
 import Onboarding from "./pages/onBoarding";
 
@@ -81,6 +82,14 @@ function AppShell({ splashDone }) {
             element={
               <ProtectedRoute>
                 <WatchRoom />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content/song/:id/karaoke"
+            element={
+              <ProtectedRoute>
+                <Karaoke />
               </ProtectedRoute>
             }
           />

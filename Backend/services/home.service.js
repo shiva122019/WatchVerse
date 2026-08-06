@@ -245,37 +245,56 @@ async function getBecauseYouWatched(userId, page = 1) {
     ...tvGenreMap,
   };
 
-  const sourceRes = await tmdb.get(
-    recent.mediaType === "movie"
-      ? `/movie/${recent.tmdbId}`
-      : `/tv/${recent.tmdbId}`,
-  );
+  let source = null;
+  try {
+    const sourceRes = await tmdb.get(
+      recent.mediaType === "movie"
+        ? `/movie/${recent.tmdbId}`
+        : `/tv/${recent.tmdbId}`,
+    );
+    source = mapTMDBItem(sourceRes.data, recent.mediaType, genreMap);
+  } catch (err) {
+    console.warn(`Failed to fetch TMDB info for recommendation source ${recent.tmdbId}:`, err.message);
+  }
 
-  const source = mapTMDBItem(sourceRes.data, recent.mediaType, genreMap);
+  if (!source) {
+    return {
+      source: null,
+      items: [],
+    };
+  }
 
   const responses = await Promise.all(
-    watched.map((item) =>
-      tmdb.get(
-        item.mediaType === "movie"
-          ? `/movie/${item.tmdbId}/recommendations`
-          : `/tv/${item.tmdbId}/recommendations`,
-      ),
-    ),
+    watched.map(async (item) => {
+      try {
+        const res = await tmdb.get(
+          item.mediaType === "movie"
+            ? `/movie/${item.tmdbId}/recommendations`
+            : `/tv/${item.tmdbId}/recommendations`,
+        );
+        return { success: true, data: res.data, mediaType: item.mediaType };
+      } catch (err) {
+        console.warn(`Failed to fetch TMDB recommendations for item ${item.tmdbId}:`, err.message);
+        return { success: false };
+      }
+    }),
   );
 
   const unique = new Map();
 
-  responses.forEach((response, index) => {
-    const mediaType = watched[index].mediaType;
+  responses
+    .filter((res) => res.success)
+    .forEach((response) => {
+      const mediaType = response.mediaType;
 
-    response.data.results.forEach((item) => {
-      const key = `${mediaType}-${item.id}`;
+      response.data.results.forEach((item) => {
+        const key = `${mediaType}-${item.id}`;
 
-      if (!unique.has(key) && !existing.has(key)) {
-        unique.set(key, mapTMDBItem(item, mediaType, genreMap));
-      }
+        if (!unique.has(key) && !existing.has(key)) {
+          unique.set(key, mapTMDBItem(item, mediaType, genreMap));
+        }
+      });
     });
-  });
 
   const items = Array.from(unique.values());
 
@@ -304,25 +323,33 @@ async function getContinueWatching(userId, page = 1) {
 
   if (!watching.length) return [];
 
-  const requests = watching.map((item) =>
-    tmdb.get(
-      item.mediaType === "movie"
-        ? `/movie/${item.tmdbId}`
-        : `/tv/${item.tmdbId}`,
-    ),
-  );
+  const requests = watching.map(async (item) => {
+    try {
+      const res = await tmdb.get(
+        item.mediaType === "movie"
+          ? `/movie/${item.tmdbId}`
+          : `/tv/${item.tmdbId}`,
+      );
+      return { success: true, data: res.data, mediaType: item.mediaType };
+    } catch (err) {
+      console.warn(`Failed to fetch TMDB data for item ${item.tmdbId}:`, err.message);
+      return { success: false };
+    }
+  });
 
   const responses = await Promise.all(requests);
 
-  return responses.map((res, index) => {
-    const mediaType = watching[index].mediaType;
+  return responses
+    .filter((res) => res.success)
+    .map((res) => {
+      const mediaType = res.mediaType;
 
-    return mapTMDBItem(
-      res.data,
-      mediaType,
-      mediaType === "movie" ? movieGenreMap : tvGenreMap,
-    );
-  });
+      return mapTMDBItem(
+        res.data,
+        mediaType,
+        mediaType === "movie" ? movieGenreMap : tvGenreMap,
+      );
+    });
 }
 
 // async function getTVShows(tvGenreMap) {

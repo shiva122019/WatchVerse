@@ -229,18 +229,27 @@ export default function Detail() {
                     data-testid="spotify-embed"
                   />
                 </div>
-                {content.external_url && (
-                  <a
-                    href={content.external_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex w-fit items-center gap-2 rounded-full border border-[#1DB954]/40 bg-[#1DB954]/10 px-4 py-2 text-sm font-semibold text-[#1DB954] transition hover:bg-[#1DB954]/20"
-                    data-testid="spotify-open-link"
+                <div className="flex flex-wrap gap-3">
+                  {content.external_url && (
+                    <a
+                      href={content.external_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-fit items-center gap-2 rounded-full border border-[#1DB954]/40 bg-[#1DB954]/10 px-4 py-2 text-sm font-semibold text-[#1DB954] transition hover:bg-[#1DB954]/20"
+                      data-testid="spotify-open-link"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Open in Spotify
+                    </a>
+                  )}
+                  <Link
+                    to={`/content/song/${content.id}/karaoke`}
+                    className="flex w-fit items-center gap-2 rounded-full border border-[#00F0FF]/40 bg-[#00F0FF]/10 px-4 py-2 text-sm font-semibold text-[#00F0FF] transition hover:bg-[#00F0FF]/20"
+                    data-testid="karaoke-link"
                   >
-                    <ExternalLink className="h-4 w-4" />
-                    Open in Spotify
-                  </a>
-                )}
+                    🎤 Open Karaoke Mode
+                  </Link>
+                </div>
               </div>
             )}
 

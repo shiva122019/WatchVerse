@@ -121,17 +121,19 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] }),
 );
 
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect: `${frontendUrl}/login`,
   }),
   (req, res) => {
     if (req.user.onboardingCompleted) {
-      return res.redirect("http://localhost:5173");
+      return res.redirect(frontendUrl);
     }
 
-    return res.redirect("http://localhost:5173/onBoarding");
+    return res.redirect(`${frontendUrl}/onBoarding`);
   },
 );
 

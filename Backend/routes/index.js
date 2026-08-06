@@ -9,4 +9,5 @@ router.use("/reviews", require("./reviews.route.js"));
 router.use("/chat", require("./chat.route"));
 router.use("/comments", require("./comments.route.js"));
 router.use("/onboarding", require("./onboarding.route.js"));
+router.use("/karaoke", require("./karaoke.route.js"));
 module.exports = router;

@@ -193,9 +193,7 @@ router.post("/", async (req, res) => {
         tmdbId,
         mediaType,
         weight,
-      ).catch((err) =>
-        console.error("Preference update failed:", err.message),
-      );
+      ).catch((err) => console.error("Preference update failed:", err.message));
     }
   } catch (err) {
     console.error(err);
@@ -277,7 +275,12 @@ router.delete("/:tmdbId", async (req, res) => {
  * Fetch TMDB details + credits for a single item and incrementally
  * update the user's genre / actor preference scores. Movie/TV only.
  */
-async function updatePreferencesFromWatchlist(userId, tmdbId, mediaType, weight) {
+async function updatePreferencesFromWatchlist(
+  userId,
+  tmdbId,
+  mediaType,
+  weight,
+) {
   const detailsEndpoint = `/${mediaType}/${tmdbId}`;
   const creditsEndpoint = `/${mediaType}/${tmdbId}/credits`;
 
