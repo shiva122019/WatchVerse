@@ -69,7 +69,14 @@ export default function Browse() {
       })
       .then((r) => {
         if (!active) return;
-        const newItems = r.data || [];
+
+        // The song endpoint returns { results, page, hasMore }.
+        // Movie/series/all endpoints return a bare array.
+        const isPaginatedShape =
+          r.data && !Array.isArray(r.data) && Array.isArray(r.data.results);
+
+        const newItems = isPaginatedShape ? r.data.results : r.data || [];
+
         setItems((prev) => {
           if (page === 1) {
             return newItems;
@@ -83,12 +90,16 @@ export default function Browse() {
             return true;
           });
         });
-        if (newItems.length === 0) {
+
+        if (isPaginatedShape) {
+          setHasMore(Boolean(r.data.hasMore));
+        } else if (newItems.length === 0) {
           setHasMore(false);
         }
       })
       .catch((err) => {
         console.error(err);
+        setHasMore(false);
       })
       .finally(() => {
         if (active) {

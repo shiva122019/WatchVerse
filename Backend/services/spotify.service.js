@@ -177,6 +177,35 @@ async function spotifySearchTracksBatch(query, total = 50, startOffset = 0) {
 
   return results.slice(0, total);
 }
+
+// Like spotifySearchTracksBatch, but also reports whether Spotify has run out
+// of results for this query, so callers (e.g. infinite scroll) know when to
+// stop requesting further pages instead of hitting the API forever.
+async function spotifySearchTracksBatchMeta(query, total, startOffset = 0) {
+  const results = [];
+  let offset = startOffset;
+  let exhausted = false;
+
+  while (results.length < total) {
+    const batch = await spotifySearchTracks(query, MAX_SPOTIFY_LIMIT, offset);
+
+    if (batch.length === 0) {
+      exhausted = true;
+      break;
+    }
+
+    results.push(...batch);
+    offset += MAX_SPOTIFY_LIMIT;
+
+    if (batch.length < MAX_SPOTIFY_LIMIT) {
+      exhausted = true; // partial page = Spotify has nothing more
+      break;
+    }
+  }
+
+  return { tracks: results.slice(0, total), exhausted };
+}
+
 async function searchTrack(query, limit = 5) {
   query = query
     .trim()
@@ -225,4 +254,5 @@ module.exports = {
   getArtistTopTracks,
   spotifySearchTracks,
   spotifySearchTracksBatch,
+  spotifySearchTracksBatchMeta,
 };
