@@ -6,7 +6,11 @@ import Navbar from "./components/Navbar";
 import SplashScreen from "./components/SplashScreen";
 import Home from "./pages/Home";
 import Browse from "./pages/Browser";
+import CreatorStudio from "./pages/CreatorStudio";
+import CreatorFeed from "./pages/CreatorFeed";
+import WatchCreatorPost from "./pages/WatchCreatorPost";
 import Detail from "./pages/Detail";
+import CreatorProtectedRoute from "./components/CreatorProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Watchlist from "./pages/Watchlist";
@@ -62,12 +66,14 @@ function AppShell({ splashDone }) {
               </ProtectedRoute>
             }
           />
+          <Route path="/creator-feed" element={<CreatorFeed />} />
+          <Route path="/watch-creator/:id" element={<WatchCreatorPost />} />
           <Route
-            path="/creator/dashboard"
+            path="/studio"
             element={
-              <ProtectedRoute>
-                <creatorDashboard />
-              </ProtectedRoute>
+              <CreatorProtectedRoute>
+                <CreatorStudio />
+              </CreatorProtectedRoute>
             }
           />
           <Route

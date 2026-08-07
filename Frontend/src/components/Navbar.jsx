@@ -132,8 +132,8 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { PrismoLogoMark, PrismoWordmark } from "@/components/PrismoLogo";
 import { useAuth } from "@/context/AuthContext";
-import { Search, LogOut } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Search, LogOut, ChevronDown, User as UserIcon, Video, List } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import api from "@/lib/api";
 
 const getLinkClass = (isActive) =>
@@ -149,6 +149,18 @@ export default function Navbar() {
   const currentType = searchParams.get("type");
   const [q, setQ] = useState("");
   const [onboardingCompleted, setOnboardingCompleted] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const submitSearch = (e) => {
     e.preventDefault();
@@ -212,21 +224,21 @@ export default function Navbar() {
             Music
           </NavLink>
           <NavLink
+            to="/creator-feed"
+            className={({ isActive }) => getLinkClass(isActive)}
+            data-testid="nav-creator-feed"
+          >
+            Creators Hub
+          </NavLink>
+          <NavLink
             to="/watchparty"
             className={({ isActive }) => getLinkClass(isActive)}
             data-testid="nav-watchparty"
           >
             Watch Party
           </NavLink>
-          {user && (
-            <NavLink
-              to="/watchlist"
-              className={({ isActive }) => getLinkClass(isActive)}
-              data-testid="nav-watchlist"
-            >
-              My List
-            </NavLink>
-          )}
+
+
           {user && !onboardingCompleted && (
             <NavLink
               to="/onBoarding"
@@ -255,25 +267,65 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <button
-                type="button"
-                onClick={() => navigate("/profile")}
-                className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-neutral-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white md:inline"
-                data-testid="nav-username"
-              >
-                {user.username}
-              </button>
-              <button
-                onClick={() => {
-                  logout();
-                  navigate("/");
-                }}
-                data-testid="nav-logout-btn"
-                className="rounded-full border border-white/10 bg-white/5 p-2 text-neutral-300 transition hover:border-[#FF0055]/60 hover:text-[#FF0055]"
-                aria-label="Log out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
+              <div className="relative hidden md:block" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-neutral-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                  data-testid="nav-username"
+                >
+                  {user.username}
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-[#121212]/95 shadow-xl backdrop-blur-md">
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate("/profile");
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
+                    >
+                      <UserIcon className="h-4 w-4" />
+                      Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate("/watchlist");
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
+                    >
+                      <List className="h-4 w-4" />
+                      My List
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate("/studio");
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
+                    >
+                      <Video className="h-4 w-4" />
+                      Studio
+                    </button>
+                    <div className="my-1 border-t border-white/10"></div>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        logout();
+                        navigate("/");
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#FF0055] transition hover:bg-[#FF0055]/10"
+                      data-testid="nav-logout-btn"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <>

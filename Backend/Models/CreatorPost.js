@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const POST_CATEGORIES = ["trailer", "announcement", "latestRelease"];
+const POST_TYPES = ["movie", "music"];
 
 const creatorPostSchema = new mongoose.Schema(
   {
@@ -10,11 +10,19 @@ const creatorPostSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    category: {
+    type: {
       type: String,
-      enum: POST_CATEGORIES,
+      enum: POST_TYPES,
       required: true,
+      default: "movie"
     },
+    format: {
+      type: String,
+      default: null, // "full movie", "short film", "trailer", "web series", etc.
+    },
+    category: [{
+      type: String,
+    }],
     title: {
       type: String,
       required: true,
@@ -24,6 +32,26 @@ const creatorPostSchema = new mongoose.Schema(
     thumbUrl: {
       type: String,
       default: null,
+    },
+    videoUrl: {
+      type: String,
+      default: null,
+    },
+    audioUrl: {
+      type: String,
+      default: null,
+    },
+    duration: {
+      type: Number, // in seconds
+      default: 0,
+    },
+    views: {
+      type: Number,
+      default: 0,
+    },
+    watchTime: {
+      type: Number, // in seconds
+      default: 0,
     },
   },
   {

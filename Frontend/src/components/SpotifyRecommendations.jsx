@@ -1,10 +1,10 @@
-// components/SpotifyRecommendations.jsx
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Music2 } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
 import MediaCard from "@/components/MediaCard";
+import MusicMediaCard from "@/components/MusicMediaCard";
 
 // ── Skeleton shimmer card ─────────────────────────────────────────────────────
 function SkeletonCard() {
@@ -18,7 +18,7 @@ function SkeletonCard() {
 }
 
 // ── Horizontal scroll row ─────────────────────────────────────────────────────
-function SpotifyRow({ title, items, badge, loading }) {
+function SpotifyRow({ title, items, loading, CardComponent = MediaCard }) {
   const scrollRef = useRef(null);
 
   const scroll = (dir) => {
@@ -58,7 +58,6 @@ function SpotifyRow({ title, items, badge, loading }) {
         </div>
       </div>
 
-      {/* Cards */}
       <div
         ref={scrollRef}
         className="flex gap-5 overflow-x-auto scroll-smooth scrollbar-hide"
@@ -66,7 +65,7 @@ function SpotifyRow({ title, items, badge, loading }) {
         {loading
           ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
           : items.map((item) => (
-              <MediaCard key={`${item.type}-${item.id}`} item={item} />
+              <CardComponent key={`${item.type}-${item.id}`} item={item} />
             ))}
       </div>
     </section>
@@ -118,6 +117,7 @@ export default function SpotifyRecommendations({ user }) {
           title={loading ? "Loading your taste…" : `Because you love ${moodLabel} music`}
           items={movies}
           loading={loading}
+          CardComponent={MediaCard}
         />
 
         {/* Music row */}
@@ -125,6 +125,7 @@ export default function SpotifyRecommendations({ user }) {
           title={loading ? "Finding your vibe…" : `More ${moodLabel} songs for you`}
           items={music}
           loading={loading}
+          CardComponent={MusicMediaCard}
         />
       </motion.div>
     </AnimatePresence>
