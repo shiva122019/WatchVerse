@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import api from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 import ProfileBanner from "../components/profile/ProfileBanner";
 import ProfileHeader from "../components/profile/ProfileHeader";
@@ -25,9 +26,13 @@ import { mockProfile } from "../data/mockProfile";
  */
 export default function Profile() {
   const { username } = useParams();
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Overview");
+
+  // If no username param is provided, it's the personal profile. Otherwise compare it with current user.
+  const isOwnProfile = !username || user?.username === username;
 
   useEffect(() => {
     let isMounted = true;
@@ -94,12 +99,18 @@ export default function Profile() {
 
         <ProfileStats stats={profile.stats} />
 
-        <ProfileActions role={profile.role} />
+        <ProfileActions 
+          role={profile.role} 
+          isOwnProfile={isOwnProfile} 
+          onViewContent={() => setActiveTab("Posts")}
+          profileUsername={profile.username}
+        />
 
         <ProfileTabs
           activeTab={activeTab}
           onChange={setActiveTab}
           role={profile.role}
+          hasPosts={profile.stats?.totalPosts > 0}
         />
 
         <AnimatePresence mode="wait">
@@ -131,7 +142,7 @@ export default function Profile() {
 
             {activeTab === "Favorites" && <FavoritesTab profile={profile} />}
 
-            {activeTab === "Posts" && profile.role === "creator" && (
+            {activeTab === "Posts" && (profile.role === "creator" || profile.stats?.totalPosts > 0) && (
               <CreatorPosts posts={profile.creatorPosts} />
             )}
           </motion.div>

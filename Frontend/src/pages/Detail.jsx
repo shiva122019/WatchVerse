@@ -671,12 +671,14 @@ export default function Detail() {
                     >
                       <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] font-bold text-black">
+                          <Link to={`/profile/${r.username}`} className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] font-bold text-black hover:opacity-80 transition-opacity">
                             {r.username?.charAt(0).toUpperCase()}
-                          </div>
+                          </Link>
                           <div>
                             <p className="font-medium text-white">
-                              {r.username}
+                              <Link to={`/profile/${r.username}`} className="hover:text-[#00F0FF] transition-colors">
+                                {r.username}
+                              </Link>
                             </p>
                             <p className="font-mono-alt text-[10px] uppercase text-neutral-500">
                               {new Date(r.created_at).toLocaleDateString()}

@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 
 const BASE_TABS = ["Overview", "Reviews", "Watchlist", "Activity", "Favorites"];
 
-export default function ProfileTabs({ activeTab, onChange, role }) {
-  const tabs = role === "creator" ? [...BASE_TABS, "Posts"] : BASE_TABS;
+export default function ProfileTabs({ activeTab, onChange, role, hasPosts }) {
+  const tabs = role === "creator" || hasPosts ? [...BASE_TABS, "Posts"] : BASE_TABS;
 
   return (
     <div className="mt-10 border-b border-white/10 relative z-10">

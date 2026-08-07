@@ -15,28 +15,12 @@ async function getCreatorPosts(userId) {
     .lean();
 
   const grouped = {
-    fullMovies: [],
-    shortMovies: [],
-    trailers: [],
-    webSeries: [],
+    movies: [],
     music: [],
   };
 
   for (const post of posts) {
-    let key;
-    if (post.type === "music") {
-      key = "music";
-    } else {
-      switch (post.format) {
-        case "full movie": key = "fullMovies"; break;
-        case "short film": key = "shortMovies"; break;
-        case "trailer": key = "trailers"; break;
-        case "web series": key = "webSeries"; break;
-        default: key = "fullMovies"; // fallback
-      }
-    }
-
-    if (!grouped[key]) grouped[key] = [];
+    const key = post.type === "music" ? "music" : "movies";
 
     grouped[key].push({
       id: post._id,

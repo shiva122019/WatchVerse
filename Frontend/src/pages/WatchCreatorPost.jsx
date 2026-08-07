@@ -1,30 +1,58 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Eye, Clock, User } from "lucide-react";
-import api from "../lib/api";
+import api, { formatApiError } from "../lib/api";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { StarRating, StarInput } from "@/components/StarRating";
+import ReviewComments from "@/components/ReviewComments";
 
 export default function WatchCreatorPost() {
   const { id } = useParams();
+  const { user } = useAuth();
+  
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const mediaRef = useRef(null);
   const [viewCounted, setViewCounted] = useState(false);
-  const [watchTime, setWatchTime] = useState(0);
+  
+  // Community Section States
+  const [activeTab, setActiveTab] = useState("reviews"); // 'reviews' | 'comments'
+  const [reviews, setReviews] = useState([]);
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+
+  const fetchPostAndReviews = async () => {
+    try {
+      const [postRes, reviewsRes] = await Promise.all([
+        api.get(`/creator/posts/${id}`),
+        api.get("/reviews", { params: { content_id: id } })
+      ]);
+      setPost(postRes.data.post);
+      setReviews(reviewsRes.data);
+      
+      // Auto-fill user's own review if it exists
+      if (user && reviewsRes.data) {
+        const mine = reviewsRes.data.find((r) => r.username === user.username);
+        if (mine) {
+          setRating(mine.rating);
+          setReviewText(mine.text);
+        }
+      }
+    } catch (err) {
+      setError("Failed to load content.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const res = await api.get(`/creator/posts/${id}`);
-        setPost(res.data.post);
-      } catch (err) {
-        setError("Failed to load content.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPost();
-  }, [id]);
+    fetchPostAndReviews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user]);
 
   // Track watch time every 5 seconds while playing
   useEffect(() => {
@@ -47,7 +75,6 @@ export default function WatchCreatorPost() {
   const handlePlay = async () => {
     if (viewCounted) return;
     try {
-      // Record a view as soon as they start playing
       await api.post(`/creator/posts/${id}/view`, { watchTime: 0 });
       setViewCounted(true);
     } catch (err) {
@@ -58,11 +85,32 @@ export default function WatchCreatorPost() {
   const handlePause = async () => {
     if (!mediaRef.current) return;
     try {
-      // Record incremental watch time on pause (currentTime)
-      // For simplicity in this demo, we'll just send 10 seconds of watch time per pause to simulate tracking
       await api.post(`/creator/posts/${id}/view`, { watchTime: 10 });
     } catch (err) {
       console.error("Failed to record watch time", err);
+    }
+  };
+
+  const submitReview = async (e) => {
+    e.preventDefault();
+    setReviewError("");
+    if (!user) return toast.error("Please login to review");
+    if (rating < 1) return setReviewError("Please select a rating.");
+    if (reviewText.trim().length < 5) return setReviewError("Review must be at least 5 characters.");
+    
+    setSubmittingReview(true);
+    try {
+      await api.post("/reviews", {
+        content_id: id,
+        rating,
+        text: reviewText.trim(),
+      });
+      toast.success("Review posted");
+      await fetchPostAndReviews();
+    } catch (e2) {
+      setReviewError(formatApiError(e2.response?.data?.error) || "Failed to submit");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -146,18 +194,124 @@ export default function WatchCreatorPost() {
           </div>
 
           {/* Creator Profile Card */}
-          <div className="flex w-full md:w-72 shrink-0 items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+          <Link to={`/profile/${post.userId?.username}`} className="group flex w-full md:w-72 shrink-0 items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md transition-all hover:bg-white/10 hover:border-[#00F0FF]/40">
             <img 
               src={post.userId?.profilePic || "https://placehold.co/100x100"} 
               alt="creator" 
-              className="h-14 w-14 rounded-full border-2 border-[#00F0FF]/30 object-cover"
+              className="h-14 w-14 rounded-full border-2 border-[#00F0FF]/30 object-cover group-hover:border-[#00F0FF] transition-colors"
             />
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">Creator</p>
-              <p className="text-lg font-medium text-white">{post.userId?.username}</p>
+              <p className="text-lg font-medium text-white group-hover:text-[#00F0FF] transition-colors">{post.userId?.username}</p>
             </div>
-          </div>
+          </Link>
         </div>
+
+        <div className="divider-line mt-12" />
+
+        {/* Community Section */}
+        <section className="mt-8" data-testid="reviews-section">
+          <div className="flex gap-8 border-b border-white/10 pb-4 mb-6">
+            <button
+              onClick={() => setActiveTab("reviews")}
+              className={`font-display text-2xl font-semibold tracking-tight transition ${activeTab === "reviews" ? "text-white" : "text-neutral-500 hover:text-neutral-300"}`}
+            >
+              Reviews
+            </button>
+            <button
+              onClick={() => setActiveTab("comments")}
+              className={`font-display text-2xl font-semibold tracking-tight transition ${activeTab === "comments" ? "text-white" : "text-neutral-500 hover:text-neutral-300"}`}
+            >
+              Comments
+            </button>
+          </div>
+
+          {activeTab === "reviews" ? (
+            <>
+              {user ? (
+                <form
+                  onSubmit={submitReview}
+                  className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6"
+                >
+                  <p className="label-caps mb-3">Your rating</p>
+                  <StarInput value={rating} onChange={setRating} />
+                  <textarea
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    rows={4}
+                    placeholder="Share your thoughts…"
+                    className="mt-4 w-full resize-none rounded-lg border border-white/10 bg-black/40 p-4 text-sm text-white placeholder:text-neutral-600 focus:border-[#00F0FF]/50 focus:outline-none"
+                    maxLength={1000}
+                  />
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs text-neutral-500">
+                      {reviewText.length}/1000
+                    </span>
+                    {reviewError && (
+                      <span className="text-xs text-[#FF0055]">
+                        {reviewError}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={submittingReview}
+                    className="mt-4 rounded-full bg-[#00F0FF] px-6 py-2.5 text-sm font-bold text-black transition hover:brightness-110 hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] disabled:opacity-50"
+                  >
+                    {submittingReview ? "Posting…" : "Post Review"}
+                  </button>
+                </form>
+              ) : (
+                <p className="mt-6 rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-sm text-neutral-400">
+                  <Link to="/login" className="text-[#00F0FF] underline">
+                    Log in
+                  </Link>{" "}
+                  to rate and review.
+                </p>
+              )}
+
+              <div className="mt-8 space-y-4">
+                {reviews.length === 0 ? (
+                  <p className="rounded-2xl border border-white/5 bg-white/[0.02] p-8 text-center text-sm text-neutral-500">
+                    No reviews yet. Be the first to write one.
+                  </p>
+                ) : (
+                  reviews.map((r) => (
+                    <div
+                      key={r.id}
+                      className="rounded-xl border border-white/5 bg-white/[0.03] p-5"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Link to={`/profile/${r.username}`} className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] font-bold text-black hover:opacity-80 transition-opacity">
+                            {r.username?.charAt(0).toUpperCase()}
+                          </Link>
+                          <div>
+                            <p className="font-medium text-white">
+                              <Link to={`/profile/${r.username}`} className="hover:text-[#00F0FF] transition-colors">
+                                {r.username}
+                              </Link>
+                            </p>
+                            <p className="font-mono-alt text-[10px] uppercase text-neutral-500">
+                              {new Date(r.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <StarRating value={r.rating} />
+                      </div>
+                      <p className="mt-2 leading-relaxed text-neutral-300">
+                        {r.text}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          ) : (
+            <ReviewComments contentId={id} />
+          )}
+        </section>
+
       </div>
     </div>
   );
