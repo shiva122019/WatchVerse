@@ -97,14 +97,14 @@ export default function Profile() {
 
         <ProfileHeader profile={profile} />
 
-        <ProfileStats stats={profile.stats} />
-
         <ProfileActions 
           role={profile.role} 
           isOwnProfile={isOwnProfile} 
           onViewContent={() => setActiveTab("Posts")}
           profileUsername={profile.username}
         />
+
+        <ProfileStats stats={profile.stats} />
 
         <ProfileTabs
           activeTab={activeTab}
