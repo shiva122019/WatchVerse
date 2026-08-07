@@ -432,16 +432,16 @@ export default function Detail() {
                     {favorited ? "Favorited" : "Add Favorite"}
                   </button>
 
-                  {["want", "watching", "watched"].map((s) => {
+                  {["want", "watching", "watched"]
+                    .filter((s) => !(content.type === "song" && s === "watching"))
+                    .map((s) => {
                     const isSong = content.type === "song";
                     const active = watchStatus === s;
 
                     const label = isSong
                       ? s === "want"
                         ? "Want to Listen"
-                        : s === "watching"
-                          ? "Listening"
-                          : "Listened"
+                        : "Listened"
                       : s === "want"
                         ? "Want to Watch"
                         : s === "watching"
