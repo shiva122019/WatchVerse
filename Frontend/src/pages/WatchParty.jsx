@@ -14,7 +14,9 @@ export default function WatchParty() {
     setCreating(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/watchparty/rooms`, { method: "POST" });
+      const res = await fetch(`${API_BASE}/watchparty/rooms`, {
+        method: "POST",
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Couldn't create a room");
 
@@ -52,7 +54,8 @@ export default function WatchParty() {
       <div
         className="pointer-events-none absolute right-0 top-0 h-[520px] w-[900px] opacity-20 blur-3xl"
         style={{
-          background: "radial-gradient(ellipse at top right, #5CF2E3 0%, transparent 65%)",
+          background:
+            "radial-gradient(ellipse at top right, #5CF2E3 0%, transparent 65%)",
         }}
       />
 
@@ -66,7 +69,10 @@ export default function WatchParty() {
           <Clapperboard className="h-6 w-6" style={{ color: "#5CF2E3" }} />
         </span>
 
-        <span className="label-caps mb-3 text-xs tracking-[0.3em]" style={{ color: "#5CF2E3" }}>
+        <span
+          className="label-caps mb-3 text-xs tracking-[0.3em]"
+          style={{ color: "#5CF2E3" }}
+        >
           Prismo · Watch Party
         </span>
 
@@ -74,22 +80,27 @@ export default function WatchParty() {
           Welcome to your virtual{" "}
           <span
             className="bg-clip-text text-transparent"
-            style={{ backgroundImage: "linear-gradient(90deg, #5CF2E3 0%, #8B5CF6 100%)" }}
+            style={{
+              backgroundImage:
+                "linear-gradient(90deg, #5CF2E3 0%, #8B5CF6 100%)",
+            }}
           >
             movie theatre
           </span>
         </h1>
 
         <p className="mt-5 max-w-md text-neutral-300">
-          Open a room, share one link, and watch together — synced play,
-          pause, chat, and reactions, no matter where everyone's sitting.
+          Open a room, share one link, and watch together — synced play, pause,
+          chat, and reactions, no matter where everyone's sitting.
         </p>
 
         <button
           onClick={hostParty}
           disabled={creating}
           className="mt-10 rounded-full px-8 py-4 text-base font-semibold text-[#04223a] transition hover:brightness-105 disabled:opacity-60"
-          style={{ background: "linear-gradient(90deg, #5CF2E3 0%, #8B5CF6 100%)" }}
+          style={{
+            background: "linear-gradient(90deg, #5CF2E3 0%, #8B5CF6 100%)",
+          }}
         >
           {creating ? "Setting up your room…" : "Host a Watch Party"}
         </button>

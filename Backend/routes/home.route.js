@@ -2,7 +2,7 @@ const router = require("express").Router();
 const tmdb = require("../lib/tmdb");
 const {
   spotifySearchTracks,
-  spotifySearchTracksBatch,
+  spotifySearchTracksBatchMeta,
   searchTrack,
 } = require("../services/spotify.service");
 const { spotifySearchTrack, musicCache } = require("../lib/spotify");
@@ -196,30 +196,49 @@ router.get("/queryContent", async (req, res) => {
       try {
         const pageNum = Math.max(1, Number(req.query.page) || 1);
         const pageSize = Number(limit) || 20;
-
-        const cacheKey = `song-${q || genre || "default"}`;
-        let results = musicCache.get(cacheKey);
-
-        if (!results) {
-          if (q) {
-            results = await spotifySearchTracks(q, 10, 0);
-          } else if (genre) {
-            results = await spotifySearchTracks(
-              `genre:"${genre.toLowerCase()}"`,
-              10,
-              0,
-            );
-          } else {
-            results = await spotifySearchTracks("a", 10, 0);
-          }
-
-          musicCache.set(cacheKey, results);
-        }
-
         const start = (pageNum - 1) * pageSize;
         const end = start + pageSize;
 
-        return res.json(results.slice(start, end));
+        const cacheKey = `song-${q || genre || "default"}`;
+        const cached = musicCache.get(cacheKey) || {
+          tracks: [],
+          exhausted: false,
+        };
+        let { tracks, exhausted } = cached;
+
+        // Only hit Spotify for more if we don't have enough cached
+        // and there's more to fetch.
+        if (tracks.length < end && !exhausted) {
+          const searchQuery = q
+            ? q
+            : genre
+              ? `genre:"${genre.toLowerCase()}"`
+              : "a";
+
+          const needed = end - tracks.length;
+          const { tracks: more, exhausted: nowExhausted } =
+            await spotifySearchTracksBatchMeta(
+              searchQuery,
+              needed,
+              tracks.length,
+            );
+
+          tracks = tracks.concat(more);
+          exhausted = nowExhausted;
+
+          musicCache.set(cacheKey, { tracks, exhausted });
+        }
+
+        const pageResults = tracks.slice(start, end);
+        const hasMore =
+          end < tracks.length ||
+          (!exhausted && pageResults.length === pageSize);
+
+        return res.json({
+          results: pageResults,
+          page: pageNum,
+          hasMore,
+        });
       } catch (err) {
         console.error("🔴 SPOTIFY ERROR MESSAGE:", err);
 

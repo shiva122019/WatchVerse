@@ -29,10 +29,21 @@ router.get("/:type/:id", async (req, res) => {
       // Merge review statistics from the database
       const cache = await reviewContent.findOne({ tmdbId: String(id) });
 
+      const platforms = track.external_url
+        ? [
+            {
+              name: "Spotify",
+              url: track.external_url,
+              logo: "https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png",
+            },
+          ]
+        : [];
+
       return res.json({
         ...track,
         avg_rating: cache?.averageRating ?? track.avg_rating ?? 0,
         review_count: cache?.totalReviews ?? track.review_count ?? 0,
+        platforms,
       });
     }
 
@@ -42,10 +53,11 @@ router.get("/:type/:id", async (req, res) => {
 
     const endpoint = type === "movie" ? "movie" : "tv";
 
-    const [details, credits, trailerUrl] = await Promise.all([
+    const [details, credits, trailerUrl, watchProviders] = await Promise.all([
       tmdb.get(`/${endpoint}/${id}`),
       tmdb.get(`/${endpoint}/${id}/credits`),
       getTrailerUrl(endpoint, id),
+      tmdb.get(`/${endpoint}/${id}/watch/providers`),
     ]);
 
     const item = details.data;
@@ -56,15 +68,66 @@ router.get("/:type/:id", async (req, res) => {
     let creator = null;
 
     if (type === "movie") {
-      creator = crew.find((p) => p.job === "Director")?.name || null;
+      const director = crew.find((p) => p.job === "Director");
+
+      if (director) {
+        creator = {
+          id: director.id,
+          name: director.name,
+          photoUrl: director.profile_path
+            ? `https://image.tmdb.org/t/p/w185${director.profile_path}`
+            : null,
+        };
+      }
     } else {
-      creator = item.created_by?.map((c) => c.name).join(", ") || null;
+      const showCreator = item.created_by?.[0];
+
+      if (showCreator) {
+        creator = {
+          id: showCreator.id,
+          name: showCreator.name,
+          photoUrl: showCreator.profile_path
+            ? `https://image.tmdb.org/t/p/w185${showCreator.profile_path}`
+            : null,
+        };
+      }
     }
 
     // Cached review statistics
     const cache = await reviewContent.findOne({
       tmdbId: String(id),
     });
+
+    // Build the "Available On" list from TMDB watch/providers (region: US)
+    const region = watchProviders.data.results?.US;
+
+    let platforms = [];
+
+    if (region) {
+      const combined = [
+        ...(region.flatrate || []),
+        ...(region.free || []),
+        ...(region.ads || []),
+      ];
+
+      const seen = new Set();
+
+      platforms = combined
+        .filter((p) => {
+          if (seen.has(p.provider_id)) return false;
+          seen.add(p.provider_id);
+          return true;
+        })
+        .map((p) => ({
+          name: p.provider_name,
+          logo: p.logo_path
+            ? `https://image.tmdb.org/t/p/w92${p.logo_path}`
+            : null,
+          // TMDB doesn't give a deep link per-provider, only one link to
+          // its own watch page listing all of them
+          url: region.link,
+        }));
+    }
 
     res.json({
       id: item.id,
@@ -102,11 +165,20 @@ router.get("/:type/:id", async (req, res) => {
 
       creator,
 
-      cast: cast.slice(0, 10).map((person) => person.name),
+      cast: cast.slice(0, 10).map((person) => ({
+        id: person.id,
+        name: person.name,
+        character: person.character,
+        photoUrl: person.profile_path
+          ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
+          : null,
+      })),
 
       avg_rating: cache?.averageRating ?? 0,
 
       review_count: cache?.totalReviews ?? 0,
+
+      platforms,
     });
   } catch (err) {
     console.error(err);

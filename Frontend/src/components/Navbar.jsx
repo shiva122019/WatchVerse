@@ -129,7 +129,6 @@
 //   );
 // }
 
-
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { PrismoLogoMark, PrismoWordmark } from "@/components/PrismoLogo";
 import { useAuth } from "@/context/AuthContext";
@@ -248,12 +247,14 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <span
-                className="hidden text-sm text-neutral-300 md:inline"
+              <button
+                type="button"
+                onClick={() => navigate("/profile")}
+                className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-neutral-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white md:inline"
                 data-testid="nav-username"
               >
                 {user.username}
-              </span>
+              </button>
               <button
                 onClick={() => {
                   logout();

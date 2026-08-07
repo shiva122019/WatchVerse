@@ -1,7 +1,15 @@
 // Backend/sockets/watchparty.socket.js
 const rooms = require("../lib/watchpartyRooms");
 const tmdb = require("../services/tmdb.service");
-const AVATAR_COLORS = ["#5CF2E3", "#f472b6", "#a78bfa", "#fb7185", "#fbbf24", "#60a5fa", "#34d399"];
+const AVATAR_COLORS = [
+  "#5CF2E3",
+  "#f472b6",
+  "#a78bfa",
+  "#fb7185",
+  "#fbbf24",
+  "#60a5fa",
+  "#34d399",
+];
 
 function colorFor(index) {
   return AVATAR_COLORS[index % AVATAR_COLORS.length];
@@ -30,8 +38,13 @@ function leaveCurrentRoom(io, socket) {
   // clean up this participant's genre pick and re-broadcast
   if (room.genrePicks) {
     delete room.genrePicks[socket.id];
-    const allGenres = Array.from(new Set(Object.values(room.genrePicks).flat()));
-    io.to(code).emit("genre-picks-update", { picks: room.genrePicks, allGenres });
+    const allGenres = Array.from(
+      new Set(Object.values(room.genrePicks).flat()),
+    );
+    io.to(code).emit("genre-picks-update", {
+      picks: room.genrePicks,
+      allGenres,
+    });
   }
 
   if (room.hostSocketId === socket.id) {
@@ -108,7 +121,9 @@ module.exports = function registerWatchPartySocket(io) {
       room.genrePicks = room.genrePicks || {};
       room.genrePicks[socket.id] = genres;
 
-      const allGenres = Array.from(new Set(Object.values(room.genrePicks).flat()));
+      const allGenres = Array.from(
+        new Set(Object.values(room.genrePicks).flat()),
+      );
 
       io.to(code).emit("genre-picks-update", {
         picks: room.genrePicks,
@@ -197,7 +212,10 @@ socket.on("select-movie", async ({ roomCode, movie }) => {
       const room = rooms.get(code);
       if (!room || !emoji) return;
 
-      io.to(code).emit("reaction", { emoji, by: socket.data.name || "Someone" });
+      io.to(code).emit("reaction", {
+        emoji,
+        by: socket.data.name || "Someone",
+      });
     });
 
     // ---- leave / disconnect ----

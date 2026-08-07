@@ -109,7 +109,10 @@
 // //   getSimilar,
 // // };
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 829676b78d741f2c2526b14c18999b471e5a412a
 // const axios = require("axios");
 // const rax = require("retry-axios");
 // const https = require("https");
@@ -554,7 +557,13 @@ function mapDiscoverItem(r, mediaType, genreName) {
     mediaType,
     title: r.title || r.name,
     year: (r.release_date || r.first_air_date || "").slice(0, 4),
+<<<<<<< HEAD
     posterUrl: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : null,
+=======
+    posterUrl: r.poster_path
+      ? `https://image.tmdb.org/t/p/w342${r.poster_path}`
+      : null,
+>>>>>>> 829676b78d741f2c2526b14c18999b471e5a412a
     rating: toRating5(r.vote_average),
     popularity: r.popularity,
     genre: genreName,
@@ -584,7 +593,13 @@ async function discoverGenre(genreName) {
           },
         })
         .then((res) =>
+<<<<<<< HEAD
           (res.data.results || []).slice(0, 8).map((r) => mapDiscoverItem(r, "movie", genreName)),
+=======
+          (res.data.results || [])
+            .slice(0, 8)
+            .map((r) => mapDiscoverItem(r, "movie", genreName)),
+>>>>>>> 829676b78d741f2c2526b14c18999b471e5a412a
         ),
     );
     latestPromises.push(
@@ -598,7 +613,13 @@ async function discoverGenre(genreName) {
           },
         })
         .then((res) =>
+<<<<<<< HEAD
           (res.data.results || []).slice(0, 8).map((r) => mapDiscoverItem(r, "movie", genreName)),
+=======
+          (res.data.results || [])
+            .slice(0, 8)
+            .map((r) => mapDiscoverItem(r, "movie", genreName)),
+>>>>>>> 829676b78d741f2c2526b14c18999b471e5a412a
         ),
     );
   }
@@ -614,7 +635,13 @@ async function discoverGenre(genreName) {
           },
         })
         .then((res) =>
+<<<<<<< HEAD
           (res.data.results || []).slice(0, 8).map((r) => mapDiscoverItem(r, "tv", genreName)),
+=======
+          (res.data.results || [])
+            .slice(0, 8)
+            .map((r) => mapDiscoverItem(r, "tv", genreName)),
+>>>>>>> 829676b78d741f2c2526b14c18999b471e5a412a
         ),
     );
     latestPromises.push(
@@ -628,7 +655,13 @@ async function discoverGenre(genreName) {
           },
         })
         .then((res) =>
+<<<<<<< HEAD
           (res.data.results || []).slice(0, 8).map((r) => mapDiscoverItem(r, "tv", genreName)),
+=======
+          (res.data.results || [])
+            .slice(0, 8)
+            .map((r) => mapDiscoverItem(r, "tv", genreName)),
+>>>>>>> 829676b78d741f2c2526b14c18999b471e5a412a
         ),
     );
   }
@@ -650,7 +683,13 @@ async function getTrailerKey(tmdbId, mediaType) {
   const { data } = await tmdb.get(`/${mediaType}/${tmdbId}/videos`);
   const vids = data.results || [];
   const trailer =
+<<<<<<< HEAD
     vids.find((v) => v.site === "YouTube" && v.type === "Trailer" && v.official) ||
+=======
+    vids.find(
+      (v) => v.site === "YouTube" && v.type === "Trailer" && v.official,
+    ) ||
+>>>>>>> 829676b78d741f2c2526b14c18999b471e5a412a
     vids.find((v) => v.site === "YouTube" && v.type === "Trailer") ||
     vids.find((v) => v.site === "YouTube" && v.type === "Teaser");
   return trailer ? trailer.key : null;
@@ -698,4 +737,8 @@ module.exports = {
   getSurprisePick,
   getTrendingPosters,
   getTrailerKey,
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 829676b78d741f2c2526b14c18999b471e5a412a

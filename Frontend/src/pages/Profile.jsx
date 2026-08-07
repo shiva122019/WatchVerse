@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import api from "@/lib/api";
 
 import ProfileBanner from "../components/profile/ProfileBanner";
 import ProfileHeader from "../components/profile/ProfileHeader";
@@ -16,16 +18,54 @@ import CreatorPosts from "../components/profile/CreatorPosts";
 import { mockProfile } from "../data/mockProfile";
 
 /**
- * Public user profile page.
+ * Public & Personal user profile page.
  *
- * Currently backed by mock data (see ./data/mockProfile.js). Replace the
- * `profile` value below with a fetched response from GET /profile/me —
- * every component here expects the same shape, so no prop changes are
- * needed. See the notes at the bottom of the README/summary for details.
+ * Connected to GET /profile/me (for authenticated user profile) or GET /profile/:username.
+ * Falls back to mockProfile if unauthenticated or endpoint fails during offline testing.
  */
 export default function Profile() {
-  const profile = mockProfile;
+  const { username } = useParams();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Overview");
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+
+    const endpoint = username ? `/profile/${username}` : "/profile/me";
+
+    api
+      .get(endpoint)
+      .then((res) => {
+        if (isMounted && res.data) {
+          setProfile(res.data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load profile from API, falling back to mock:", err);
+        if (isMounted) {
+          setProfile(mockProfile);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [username]);
+
+  if (loading || !profile) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center text-neutral-400">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#00F0FF] border-t-transparent" />
+          <p className="text-xs uppercase tracking-widest text-neutral-500">Loading Profile…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -75,7 +115,7 @@ export default function Profile() {
 
             {activeTab === "Reviews" && (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {profile.allReviews.map((review) => (
+                {(profile.allReviews || []).map((review) => (
                   <ReviewCard key={review.id} review={review} />
                 ))}
               </div>
@@ -86,7 +126,7 @@ export default function Profile() {
             )}
 
             {activeTab === "Activity" && (
-              <ActivityTimeline groups={profile.activityTimeline} />
+              <ActivityTimeline groups={profile.activityTimeline || []} />
             )}
 
             {activeTab === "Favorites" && <FavoritesTab profile={profile} />}
