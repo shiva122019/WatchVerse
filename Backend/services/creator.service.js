@@ -48,9 +48,11 @@ async function getCreatorPosts(userId) {
  * @returns {Promise<{totalViews: number, totalWatchTime: number, totalPosts: number, followers: number, following: number}>}
  */
 async function getCreatorStats(userId) {
+  const mongoose = require("mongoose");
+  
   const [stats, followerCount, followingCount] = await Promise.all([
     CreatorPost.aggregate([
-      { $match: { userId: userId } },
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       {
         $group: {
           _id: null,
@@ -81,7 +83,7 @@ async function getCreatorStats(userId) {
   const analytics = await PostAnalytic.aggregate([
     {
       $match: {
-        creatorId: userId,
+        creatorId: new mongoose.Types.ObjectId(userId),
         date: { $gte: pastYearString }
       }
     },

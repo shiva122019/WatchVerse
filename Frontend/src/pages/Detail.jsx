@@ -77,7 +77,14 @@ export default function Detail() {
           type === "series" ? "tv" : type === "song" ? "song" : "movie",
       });
       setWatchStatus(status);
-      toast.success(`Added to ${status.replace("_", " ")}`);
+      let displayStatus = status.replace("_", " ");
+      if (type === "song") {
+        if (status === "want") displayStatus = "want to listen";
+        if (status === "watched") displayStatus = "listened";
+      } else {
+        if (status === "want") displayStatus = "want to watch";
+      }
+      toast.success(`Added to ${displayStatus}`);
     } catch (e) {
       toast.error(formatApiError(e.response?.data?.error) || "Failed");
     }
@@ -86,8 +93,16 @@ export default function Detail() {
   const removeFromList = async () => {
     try {
       await api.delete(`/watchlist/${id}`);
+      let removeMsg = "Removed from list";
+      if (type === "song") {
+        removeMsg = watchStatus === "want" ? "Removed from want to listen" : "Removed from listened";
+      } else {
+        if (watchStatus === "want") removeMsg = "Removed from want to watch";
+        else if (watchStatus === "watching") removeMsg = "Removed from currently watching";
+        else if (watchStatus === "watched") removeMsg = "Removed from watched";
+      }
       setWatchStatus(null);
-      toast.success("Removed from list");
+      toast.success(removeMsg);
     } catch (e) {
       toast.error(
         formatApiError(e.response?.data?.error) || "Failed to remove",
