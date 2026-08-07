@@ -1,13 +1,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const rooms = require("../lib/watchpartyRooms");
-const {
-  searchTitle,
-  getGenres,
-  discoverByGenres,
-  getSurprisePick,
-  getTrendingPosters,
-} = require("../services/tmdb.service");
+const tmdb = require("../services/tmdb.service");
 
 const router = express.Router();
 
@@ -62,7 +56,7 @@ router.get("/search", async (req, res) => {
   if (!query) return res.json({ results: [] });
 
   try {
-    const results = await searchTitle(query);
+    const results = await tmdb.searchTitle(query);
     res.json({
       results: results.slice(0, 12).map((r) => ({
         id: r.id,
@@ -83,7 +77,7 @@ router.get("/search", async (req, res) => {
 // GET /watchparty/genres — full genre list for the picker UI
 router.get("/genres", async (req, res) => {
   try {
-    const genres = await getGenres();
+    const genres = await tmdb.getGenres();
     res.json({ genres: genres.map((g) => g.name) });
   } catch (err) {
     console.error("Failed to fetch genres:", err.message);
@@ -105,7 +99,7 @@ router.get("/suggestions", async (req, res) => {
     .filter(Boolean);
 
   try {
-    const suggestions = await discoverByGenres(genreNames);
+    const suggestions = await tmdb.discoverByGenres(genreNames);
     res.json({ suggestions });
   } catch (err) {
     console.error("Failed to fetch suggestions:", err.message);
@@ -130,7 +124,7 @@ router.get("/surprise", async (req, res) => {
     : DEFAULT_SURPRISE_GENRES;
 
   try {
-    const pick = await getSurprisePick(genreNames);
+    const pick = await tmdb.getSurprisePick(genreNames);
     if (!pick) {
       return res
         .status(404)
@@ -149,11 +143,33 @@ router.get("/surprise", async (req, res) => {
 // to build the mosaic background on the watch-party landing page.
 router.get("/posters", async (req, res) => {
   try {
-    const posters = await getTrendingPosters(30);
+    const posters = await tmdb.getTrendingPosters(30);
     res.json({ posters });
   } catch (err) {
     console.error("Failed to fetch posters:", err.message);
     res.status(502).json({ error: "Couldn't load posters." });
+  }
+});
+
+// GET /watchparty/trailer/:mediaType/:id — YouTube trailer key for a title,
+// looked up right before it's broadcast to the room as the selected movie.
+router.get("/trailer/:mediaType/:id", async (req, res) => {
+  const { mediaType, id } = req.params;
+  if (!["movie", "tv"].includes(mediaType)) {
+    return res.status(400).json({ error: "Invalid media type" });
+  }
+  try {
+    const trailerKey = await tmdb.getTrailerKey(id, mediaType);
+    if (!trailerKey)
+      return res
+        .status(404)
+        .json({ error: "No trailer found for this title." });
+    res.json({ trailerKey });
+  } catch (err) {
+    console.error("Failed to fetch trailer:", err.message);
+    res
+      .status(502)
+      .json({ error: "Couldn't load trailer. Try again in a moment." });
   }
 });
 

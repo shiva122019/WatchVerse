@@ -23,25 +23,39 @@ export default function SpotifyCard({ spotify }) {
           </div>
           <div>
             <h3 className="font-semibold text-white">Spotify Not Connected</h3>
-            <p className="text-xs text-zinc-500">Link your account to unlock more</p>
+            <p className="text-xs text-zinc-500">
+              Link your account to unlock more
+            </p>
           </div>
         </div>
 
         <ul className="mt-4 space-y-2 text-sm text-zinc-400">
           <li className="flex items-center gap-2">
-            <Sparkles size={14} className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" /> Import your favorite artists
+            <Sparkles
+              size={14}
+              className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]"
+            />{" "}
+            Import your favorite artists
           </li>
           <li className="flex items-center gap-2">
-            <Sparkles size={14} className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" /> Get better recommendations
+            <Sparkles
+              size={14}
+              className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]"
+            />{" "}
+            Get better recommendations
           </li>
           <li className="flex items-center gap-2">
-            <Sparkles size={14} className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" /> Sync your listening history
+            <Sparkles
+              size={14}
+              className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]"
+            />{" "}
+            Sync your listening history
           </li>
         </ul>
 
         <motion.button
           type="button"
-          onClick={() => navigate("/settings/account")}
+          onClick={() => navigate("/connect-spotify")}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.97 }}
           className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#1DB954] hover:bg-[#1ed760] px-5 py-2.5 text-sm font-bold text-black transition-all hover:shadow-[0_0_15px_rgba(29,185,84,0.4)]"
@@ -77,15 +91,21 @@ export default function SpotifyCard({ spotify }) {
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Top Artists</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Top Artists
+          </p>
           <ul className="mt-2 space-y-1.5">
             {spotify.topArtists.map((artist) => (
-              <li key={artist} className="text-sm text-zinc-300">{artist}</li>
+              <li key={artist} className="text-sm text-zinc-300">
+                {artist}
+              </li>
             ))}
           </ul>
         </div>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Top Genres</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Top Genres
+          </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {spotify.topGenres.map((genre) => (
               <span

@@ -1,6 +1,6 @@
 // Backend/sockets/watchparty.socket.js
 const rooms = require("../lib/watchpartyRooms");
-const { getVideo } = require("../services/tmdb.service");
+const tmdb = require("../services/tmdb.service");
 const AVATAR_COLORS = [
   "#5CF2E3",
   "#f472b6",
@@ -139,7 +139,7 @@ module.exports = function registerWatchPartySocket(io) {
 
       let trailerKey = null;
       try {
-        trailerKey = await getVideo(movie.id, movie.mediaType);
+        trailerKey = await tmdb.getTrailerKey(movie.id, movie.mediaType); // was tmdb.getVideos
       } catch (err) {
         console.error("Failed to fetch trailer:", err.message);
       }
