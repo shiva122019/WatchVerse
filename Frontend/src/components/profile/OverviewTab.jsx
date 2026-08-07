@@ -14,7 +14,10 @@ function SectionCard({ title, icon: Icon, children }) {
       className="glass rounded-2xl p-5 sm:p-6 shadow-xl"
     >
       <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
-        <Icon size={16} className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]" />
+        <Icon
+          size={16}
+          className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.4)]"
+        />
         {title}
       </div>
       {children}
@@ -23,7 +26,8 @@ function SectionCard({ title, icon: Icon, children }) {
 }
 
 function activityLabel(entry) {
-  if (entry.type === "rating") return `Rated ${entry.title} ${"★".repeat(entry.rating)}`;
+  if (entry.type === "rating")
+    return `Rated ${entry.title} ${"★".repeat(entry.rating)}`;
   if (entry.type === "watchlist") return `Added ${entry.title} to Watchlist`;
   if (entry.type === "review") return `Reviewed ${entry.title}`;
   return entry.title;

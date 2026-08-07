@@ -7,7 +7,7 @@ const activityService = require("./activity");
 const spotifyProfileService = require("./spotify.profile.service");
 const creatorService = require("./creator.service");
 const AppError = require("../lib/AppError");
-
+let { tmdb } = require("./tmdb.service");
 /**
  * Assemble the full profile object that the frontend expects.
  *
@@ -210,7 +210,6 @@ async function getWatchlist(userId) {
     watched: [],
   };
 
-  // Map DB status values to the frontend's expected keys
   const statusKeyMap = {
     want: "wantToWatch",
     watching: "watching",
@@ -219,14 +218,26 @@ async function getWatchlist(userId) {
 
   for (const entry of entries) {
     const key = statusKeyMap[entry.status];
-    if (key) {
-      watchlist[key].push({
-        id: entry._id,
-        title: entry.tmdbId, // Will be enriched by TMDB in a future enhancement
-        year: null,
-        posterUrl: null,
-      });
-    }
+    if (!key) continue;
+
+    watchlist[key].push({
+      id: entry.tmdbId,
+      type:
+        entry.mediaType === "tv"
+          ? "series"
+          : entry.mediaType === "song"
+            ? "song"
+            : "movie",
+
+      title: entry.title,
+      cover_url: entry.posterUrl || "",
+      backdrop_url: entry.posterUrl || "",
+      avg_rating: 0,
+      release_year: null,
+      genres: [],
+      language: "",
+      description: "",
+    });
   }
 
   return watchlist;

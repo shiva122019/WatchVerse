@@ -46,7 +46,7 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { content_id, rating, text } = req.body;
+    const { content_id, mediaType, rating, text } = req.body;
 
     if (!req.user) {
       return res.status(401).json({
@@ -54,13 +54,24 @@ router.post("/", async (req, res) => {
       });
     }
 
-    if (!content_id) {
+    if (!content_id || !mediaType) {
       return res.status(400).json({
-        error: "content_id is required",
+        error: "content_id and mediaType are required",
       });
     }
 
-    if (rating < 1 || rating > 5) {
+    if (!["movie", "tv", "song"].includes(mediaType)) {
+      return res.status(400).json({
+        error: "Invalid media type",
+      });
+    }
+
+    if (
+      typeof rating !== "number" ||
+      Number.isNaN(rating) ||
+      rating < 1 ||
+      rating > 5
+    ) {
       return res.status(400).json({
         error: "Rating must be between 1 and 5",
       });
@@ -83,75 +94,90 @@ router.post("/", async (req, res) => {
       });
     }
 
-    // Fetch title from TMDB so it's stored on the review, not left undefined
-    let title;
-    try {
-      const tmdbRes = await tmdb.get(`/movie/${content_id}`);
-      title = tmdbRes.data.title || tmdbRes.data.name;
-    } catch (tmdbErr) {
-      console.error("Failed to fetch title from TMDB:", tmdbErr);
-      return res.status(400).json({
-        error: "Could not find that title on TMDB",
-      });
+    let title = null;
+    let posterUrl = null;
+
+    if (mediaType === "movie" || mediaType === "tv") {
+      try {
+        const tmdbRes = await tmdb.get(`/${mediaType}/${content_id}`);
+
+        title = tmdbRes.data.title || tmdbRes.data.name;
+
+        posterUrl = tmdbRes.data.poster_path
+          ? `https://image.tmdb.org/t/p/w500${tmdbRes.data.poster_path}`
+          : null;
+      } catch (err) {
+        console.error("Failed to fetch TMDB details:", err);
+
+        return res.status(400).json({
+          error: "Could not find that title on TMDB",
+        });
+      }
+    }
+
+    // TODO: Replace with Spotify lookup for songs.
+    if (mediaType === "song") {
+      title = "Unknown Song";
+      posterUrl = null;
     }
 
     const review = await Review.create({
       tmdbId: String(content_id),
-      userId: req.user._id,
+      mediaType,
       title,
+      posterUrl,
+      userId: req.user._id,
       rating,
       comment: text.trim(),
     });
 
     let content = await reviewContent.findOne({
       tmdbId: String(content_id),
+      mediaType,
     });
 
     if (!content) {
-      // First review for this movie
       content = await reviewContent.create({
         tmdbId: String(content_id),
+        mediaType,
         title,
         averageRating: rating,
         totalReviews: 1,
       });
     } else {
-      const oldAverage = content.averageRating;
-      const oldCount = content.totalReviews;
+      const newCount = content.totalReviews + 1;
 
-      const newCount = oldCount + 1;
+      content.averageRating = Number(
+        (
+          (content.averageRating * content.totalReviews + rating) /
+          newCount
+        ).toFixed(1),
+      );
 
-      const newAverage = (oldAverage * oldCount + rating) / newCount;
-
-      content.averageRating = Number(newAverage.toFixed(1));
       content.totalReviews = newCount;
 
-      if (!content.title) content.title = title;
+      if (!content.title) {
+        content.title = title;
+      }
 
       await content.save();
     }
 
     res.status(201).json({
       success: true,
-
       review: {
         id: review._id,
-
         user_id: req.user._id,
-
         username: req.user.username,
-
+        tmdbId: review.tmdbId,
+        mediaType: review.mediaType,
         title: review.title,
-
+        posterUrl: review.posterUrl,
         rating: review.rating,
-
         text: review.comment,
-
         created_at: review.createdAt,
       },
-
       average_rating: content.averageRating.toFixed(1),
-
       review_count: content.totalReviews,
     });
   } catch (err) {

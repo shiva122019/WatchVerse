@@ -156,6 +156,8 @@ export default function Detail() {
       await api.post("/reviews", {
         content_id: id,
         rating,
+        mediaType:
+          type === "series" ? "tv" : type === "song" ? "song" : "movie",
         text: reviewText.trim(),
       });
       toast.success("Review posted");

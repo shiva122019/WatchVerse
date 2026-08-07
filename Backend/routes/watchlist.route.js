@@ -161,14 +161,20 @@ router.post("/", async (req, res) => {
     }
 
     let title = null;
+    let posterUrl = null;
 
-    // Fetch title from TMDB
-    if (mediaType !== "song") {
-      const endpoint = mediaType === "tv" ? "tv" : "movie";
-
-      const { data } = await tmdb.get(`/${endpoint}/${tmdbId}`);
+    if (mediaType === "movie" || mediaType === "tv") {
+      const { data } = await tmdb.get(`/${mediaType}/${tmdbId}`);
 
       title = data.title || data.name || null;
+
+      posterUrl = data.poster_path
+        ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
+        : null;
+    } else {
+      // TODO: Replace with Spotify lookup when song watchlists are supported.
+      title = "Unknown Song";
+      posterUrl = null;
     }
 
     const watchlist = await WatchList.findOneAndUpdate(
@@ -182,6 +188,7 @@ router.post("/", async (req, res) => {
         mediaType,
         status,
         title,
+        posterUrl,
       },
       {
         new: true,

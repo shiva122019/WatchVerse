@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Film, Star } from "lucide-react";
+import MediaCard from "../MediaCard";
 
 export default function MediaCarousel({ items }) {
   return (
@@ -16,7 +17,11 @@ export default function MediaCarousel({ items }) {
         >
           <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-white/5 bg-neutral-900 shadow-md">
             {item.posterUrl ? (
-              <img src={item.posterUrl} alt={item.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.06]" />
+              <img
+                src={item.posterUrl}
+                alt={item.title}
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.06]"
+              />
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-neutral-800 to-neutral-900 text-neutral-600 transition duration-500 group-hover:scale-[1.06]">
                 <Film size={22} />
@@ -29,7 +34,9 @@ export default function MediaCarousel({ items }) {
               </div>
             )}
           </div>
-          <p className="mt-2 truncate text-sm font-medium text-neutral-200 font-display group-hover:text-[#00F0FF] transition-colors">{item.title}</p>
+          <p className="mt-2 truncate text-sm font-medium text-neutral-200 font-display group-hover:text-[#00F0FF] transition-colors">
+            {item.title}
+          </p>
           {item.year && <p className="text-xs text-neutral-500">{item.year}</p>}
         </motion.div>
       ))}

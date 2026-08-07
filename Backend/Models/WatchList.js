@@ -30,6 +30,15 @@ const watchlistSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    posterUrl: {
+      type: String,
+      default: null,
+    },
+    mediaType: {
+      type: String,
+      enum: ["movie", "tv", "song"],
+      default: null,
+    },
   },
   {
     timestamps: true,
