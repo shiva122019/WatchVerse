@@ -134,6 +134,23 @@ router.get("/posters", async (req, res) => {
   }
 });
 
+// GET /watchparty/trailer/:mediaType/:id — YouTube trailer key for a title,
+// looked up right before it's broadcast to the room as the selected movie.
+router.get("/trailer/:mediaType/:id", async (req, res) => {
+  const { mediaType, id } = req.params;
+  if (!["movie", "tv"].includes(mediaType)) {
+    return res.status(400).json({ error: "Invalid media type" });
+  }
+  try {
+    const trailerKey = await tmdb.getTrailerKey(id, mediaType);
+    if (!trailerKey) return res.status(404).json({ error: "No trailer found for this title." });
+    res.json({ trailerKey });
+  } catch (err) {
+    console.error("Failed to fetch trailer:", err.message);
+    res.status(502).json({ error: "Couldn't load trailer. Try again in a moment." });
+  }
+});
+
 // NOTE: trailer/video lookup (GET /watchparty/trailer/:mediaType/:id) is
 // intentionally left out for now — will be added once we wire up the
 // actual synced player. For now "select-movie" just stores the title's

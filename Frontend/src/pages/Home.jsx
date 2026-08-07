@@ -116,6 +116,7 @@ function Row({ title, items: initialItems = [], section, testid }) {
 
       <div
         ref={scrollRef}
+Updated upstream
         onScroll={handleScroll}
         className="flex gap-5 overflow-x-auto scroll-smooth scrollbar-hide"
       >
