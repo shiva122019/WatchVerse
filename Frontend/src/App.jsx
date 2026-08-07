@@ -23,6 +23,8 @@ import Karaoke from "./pages/Karaoke";
 import "./App.css";
 import Onboarding from "./pages/onBoarding";
 import ConnectSpotify from "./pages/ConnectSpotify";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
+import OfflineIndicator from "./components/ui/OfflineIndicator";
 
 function AppShell({ splashDone }) {
   const location = useLocation();
@@ -31,7 +33,8 @@ function AppShell({ splashDone }) {
   const isImmersive = location.pathname.startsWith("/watch-room");
 
   return (
-    <>
+    <ErrorBoundary>
+      <OfflineIndicator />
       {!isImmersive && <Navbar />}
       <main className={isImmersive ? "" : "relative z-[2]"}>
         <Routes>
@@ -123,7 +126,7 @@ function AppShell({ splashDone }) {
           Prismo · Movies · Series · Music
         </footer>
       )}
-    </>
+    </ErrorBoundary>
   );
 }
 

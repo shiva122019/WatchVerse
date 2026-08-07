@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import ReviewComments from "@/components/ReviewComments";
+import SEO from "@/components/SEO";
+import DetailSkeleton from "@/components/ui/DetailSkeleton";
 
 const typeIcon = { movie: Film, series: Tv, song: Music2 };
 
@@ -183,11 +185,7 @@ export default function Detail() {
   };
 
   if (!content) {
-    return (
-      <div className="flex min-h-[70vh] items-center justify-center text-neutral-500">
-        Loading…
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   const Icon = typeIcon[content.type] || Film;
@@ -195,7 +193,14 @@ export default function Detail() {
   const favorited = !!favoriteMap[`${favCategory}:${content.id}`];
 
   return (
-    <div data-testid="detail-page" className="pb-24">
+    <>
+      <SEO 
+        title={content.title} 
+        description={content.description || `Watch ${content.title} on WatchVerse.`}
+        image={content.cover_url || content.backdrop_url}
+        type={content.type === "movie" ? "video.movie" : "website"}
+      />
+      <div data-testid="detail-page" className="pb-24">
       {/* Backdrop */}
       <div className="relative h-[60vh] min-h-[420px] w-full overflow-hidden">
         <img
@@ -716,5 +721,6 @@ export default function Detail() {
         </section>
       </div>
     </div>
+    </>
   );
 }

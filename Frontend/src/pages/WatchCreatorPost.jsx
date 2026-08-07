@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { StarRating, StarInput } from "@/components/StarRating";
 import ReviewComments from "@/components/ReviewComments";
+import SEO from "@/components/SEO";
+import DetailSkeleton from "@/components/ui/DetailSkeleton";
 
 export default function WatchCreatorPost() {
   const { id } = useParams();
@@ -115,11 +117,7 @@ export default function WatchCreatorPost() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-neutral-950">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-neutral-800 border-t-[#00F0FF]"></div>
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (error || !post) {
@@ -132,7 +130,14 @@ export default function WatchCreatorPost() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <>
+      <SEO 
+        title={`${post.title} by ${post.userId?.username}`} 
+        description={`Watch ${post.title}, an original creation by ${post.userId?.username} on WatchVerse Creator Hub.`}
+        image={post.thumbUrl}
+        type="video.other"
+      />
+      <div className="min-h-screen bg-neutral-950 text-white">
       {/* Navbar/Back button */}
       <div className="border-b border-white/10 bg-black/50 p-4 backdrop-blur-md">
         <Link to="/creator-feed" className="flex w-fit items-center gap-2 text-neutral-400 hover:text-white transition-colors">
@@ -314,5 +319,6 @@ export default function WatchCreatorPost() {
 
       </div>
     </div>
+    </>
   );
 }

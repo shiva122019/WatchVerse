@@ -6,18 +6,19 @@ import {
   BarChart3, 
   Users, 
   Clock, 
-  Eye, 
+  Eye,
   Upload,
   UserPlus,
   User,
   Film,
-  Music,
+  Music
 } from "lucide-react";
 import api from "@/lib/api";
 import ContentTable from "@/components/studio/ContentTable";
 import CreatePostModal from "@/components/studio/CreatePostModal";
 import ViewsChart from "@/components/studio/ViewsChart";
 import ChannelAnalyticsCard from "@/components/studio/ChannelAnalyticsCard";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function CreatorStudio() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -96,15 +97,15 @@ export default function CreatorStudio() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-7xl pt-20 bg-neutral-950">
+    <div className="mx-auto flex flex-col md:flex-row min-h-screen max-w-7xl pt-20 bg-neutral-950">
       
-      {/* Sidebar Navigation */}
-      <aside className="w-64 border-r border-white/5 p-6 hidden md:block bg-black/20 backdrop-blur-3xl">
-        <div className="mb-10 px-4">
+      {/* Navigation (Sidebar on Desktop, Top Bar on Mobile) */}
+      <aside className="w-full md:w-64 md:border-r border-b md:border-b-0 border-white/5 p-4 md:p-6 bg-black/20 backdrop-blur-3xl shrink-0">
+        <div className="hidden md:block mb-10 px-4">
           <h2 className="text-xl font-bold text-white tracking-widest uppercase opacity-90">Studio</h2>
         </div>
         
-        <nav className="space-y-3">
+        <nav className="flex md:flex-col gap-2 overflow-x-auto scrollbar-none pb-2 md:pb-0 space-y-0 md:space-y-3">
           {[
             { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
             { id: "content", icon: Video, label: "Content" },
@@ -113,7 +114,7 @@ export default function CreatorStudio() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`group flex w-full items-center gap-4 rounded-2xl px-5 py-3.5 font-medium transition-all duration-300 ${
+              className={`group flex shrink-0 w-auto md:w-full items-center gap-2 md:gap-4 rounded-full md:rounded-2xl px-4 py-2 md:px-5 md:py-3.5 text-sm md:text-base font-medium transition-all duration-300 ${
                 activeTab === tab.id
                   ? "bg-gradient-to-r from-[#00F0FF]/10 to-transparent border border-[#00F0FF]/20 text-[#00F0FF] shadow-[0_0_15px_rgba(0,240,255,0.05)]"
                   : "border border-transparent text-neutral-400 hover:bg-white/5 hover:text-white"
@@ -127,7 +128,7 @@ export default function CreatorStudio() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 relative overflow-hidden">
+      <main className="flex-1 p-4 md:p-6 lg:p-10 relative overflow-hidden w-full">
         {/* Glow Effects */}
         <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-[#00F0FF]/5 blur-[120px]" />
         <div className="pointer-events-none absolute -bottom-40 -left-20 h-80 w-80 rounded-full bg-[#FFB300]/5 blur-[100px]" />
@@ -230,7 +231,14 @@ export default function CreatorStudio() {
                       <h3 className="text-lg font-bold text-white tracking-wide mb-5">Top Content</h3>
                       <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur-lg space-y-5">
                         {topContent.length === 0 ? (
-                          <p className="text-sm text-neutral-500 text-center py-6 font-medium">No content yet</p>
+                          <EmptyState 
+                            icon={Video} 
+                            title="No Content Yet" 
+                            description="Upload your first video or track to start generating analytics." 
+                            actionLabel="Upload Now"
+                            onAction={() => setIsModalOpen(true)}
+                            minHeight="200px" 
+                          />
                         ) : (
                           topContent.map((post) => (
                             <div key={post.id} className="group flex items-center gap-4 rounded-xl transition-all hover:bg-white/5 p-2 -mx-2">
@@ -259,7 +267,14 @@ export default function CreatorStudio() {
                       <h3 className="text-lg font-bold text-white tracking-wide mb-5">Recently Posted</h3>
                       <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur-lg space-y-5">
                         {recentContent.length === 0 ? (
-                          <p className="text-sm text-neutral-500 text-center py-6 font-medium">No content yet</p>
+                          <EmptyState 
+                            icon={Video} 
+                            title="No Content Yet" 
+                            description="Upload your first video or track to start generating analytics." 
+                            actionLabel="Upload Now"
+                            onAction={() => setIsModalOpen(true)}
+                            minHeight="200px" 
+                          />
                         ) : (
                           recentContent.map((post) => (
                             <div key={post.id} className="group flex items-center gap-4 rounded-xl transition-all hover:bg-white/5 p-2 -mx-2">

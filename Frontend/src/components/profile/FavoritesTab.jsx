@@ -1,5 +1,6 @@
-import { Film, Tv, User } from "lucide-react";
+import { Film, Tv, User, Heart } from "lucide-react";
 import MediaCarousel from "./MediaCarousel";
+import EmptyState from "../ui/EmptyState";
 
 function PersonRow({ people }) {
   return (
@@ -38,16 +39,32 @@ export default function FavoritesTab({ profile }) {
   return (
     <div className="space-y-5">
       <Section title="Favorite Movies" icon={Film}>
-        <MediaCarousel items={profile.favoriteMovies} />
+        {profile.favoriteMovies?.length > 0 ? (
+          <MediaCarousel items={profile.favoriteMovies} />
+        ) : (
+          <EmptyState icon={Heart} title="No Favorite Movies" minHeight="150px" />
+        )}
       </Section>
       <Section title="Favorite TV Shows" icon={Tv}>
-        <MediaCarousel items={profile.favoriteShows} />
+        {profile.favoriteShows?.length > 0 ? (
+          <MediaCarousel items={profile.favoriteShows} />
+        ) : (
+          <EmptyState icon={Heart} title="No Favorite Shows" minHeight="150px" />
+        )}
       </Section>
       <Section title="Favorite Actors" icon={User}>
-        <PersonRow people={profile.favoriteActors} />
+        {profile.favoriteActors?.length > 0 ? (
+          <PersonRow people={profile.favoriteActors} />
+        ) : (
+          <EmptyState icon={Heart} title="No Favorite Actors" minHeight="150px" />
+        )}
       </Section>
       <Section title="Favorite Directors" icon={User}>
-        <PersonRow people={profile.favoriteDirectors} />
+        {profile.favoriteDirectors?.length > 0 ? (
+          <PersonRow people={profile.favoriteDirectors} />
+        ) : (
+          <EmptyState icon={Heart} title="No Favorite Directors" minHeight="150px" />
+        )}
       </Section>
     </div>
   );

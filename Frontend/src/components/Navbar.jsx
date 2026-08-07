@@ -132,7 +132,7 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { PrismoLogoMark, PrismoWordmark } from "@/components/PrismoLogo";
 import { useAuth } from "@/context/AuthContext";
-import { Search, LogOut, ChevronDown, User as UserIcon, Video, List } from "lucide-react";
+import { Search, LogOut, ChevronDown, User as UserIcon, Video, List, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import api from "@/lib/api";
 
@@ -150,7 +150,13 @@ export default function Navbar() {
   const [q, setQ] = useState("");
   const [onboardingCompleted, setOnboardingCompleted] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  // Close mobile menu when navigating
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -344,6 +350,63 @@ export default function Navbar() {
                 Join
               </Link>
             </>
+          )}
+
+          {/* Hamburger Menu Button */}
+          <button 
+            className="md:hidden p-2 text-neutral-300 hover:text-white"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Slide-down Menu */}
+      <div className={`md:hidden absolute top-[100%] left-0 w-full bg-[#0a0a0a]/95 backdrop-blur-3xl border-b border-white/10 transition-all duration-300 overflow-hidden ${isMobileMenuOpen ? 'max-h-screen py-4 border-b' : 'max-h-0 border-b-0 py-0'}`}>
+        <div className="flex flex-col px-6 space-y-6">
+          {/* Main Links */}
+          <nav className="flex flex-col space-y-4">
+            <NavLink to="/" end className={({ isActive }) => getLinkClass(isActive)}>Discover</NavLink>
+            <NavLink to="/browse?type=movie" className={({ isActive }) => getLinkClass(isActive && currentType === "movie")}>Movies</NavLink>
+            <NavLink to="/browse?type=series" className={({ isActive }) => getLinkClass(isActive && currentType === "series")}>Series</NavLink>
+            <NavLink to="/browse?type=song" className={({ isActive }) => getLinkClass(isActive && currentType === "song")}>Music</NavLink>
+            <NavLink to="/creator-feed" className={({ isActive }) => getLinkClass(isActive)}>Creators Hub</NavLink>
+            <NavLink to="/watchparty" className={({ isActive }) => getLinkClass(isActive)}>Watch Party</NavLink>
+            {user && !onboardingCompleted && (
+              <NavLink to="/onBoarding" className={({ isActive }) => getLinkClass(isActive)}>Get to Know you</NavLink>
+            )}
+          </nav>
+          
+          <div className="border-t border-white/10"></div>
+          
+          {/* Mobile Profile Actions */}
+          {user ? (
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] flex items-center justify-center font-bold text-black">
+                  {user.username.charAt(0).toUpperCase()}
+                </div>
+                <span className="font-bold text-white">{user.username}</span>
+              </div>
+              <button onClick={() => navigate("/profile")} className="flex items-center gap-3 text-sm font-medium text-neutral-300 hover:text-white">
+                <UserIcon className="h-5 w-5" /> Profile
+              </button>
+              <button onClick={() => navigate("/watchlist")} className="flex items-center gap-3 text-sm font-medium text-neutral-300 hover:text-white">
+                <List className="h-5 w-5" /> My List
+              </button>
+              <button onClick={() => navigate("/studio")} className="flex items-center gap-3 text-sm font-medium text-[#00F0FF]">
+                <Video className="h-5 w-5" /> Creator Studio
+              </button>
+              <button onClick={() => { logout(); navigate("/"); }} className="flex items-center gap-3 text-sm font-medium text-[#FF0055]">
+                <LogOut className="h-5 w-5" /> Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col space-y-4">
+              <Link to="/login" className="text-center rounded-full border border-white/20 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Log in</Link>
+              <Link to="/register" className="text-center rounded-full border border-[#00F0FF] bg-[#00F0FF]/10 py-2.5 text-sm font-semibold text-[#00F0FF] transition hover:bg-[#00F0FF] hover:text-black">Join WatchVerse</Link>
+            </div>
           )}
         </div>
       </div>

@@ -6,6 +6,7 @@ import MediaCard from "@/components/MediaCard";
 import { StarRating } from "@/components/StarRating";
 import { ChevronLeft, ChevronRight, Play, Plus } from "lucide-react";
 import SpotifyRecommendations from "@/components/SpotifyRecommendations";
+import HomeSkeleton from "@/components/ui/HomeSkeleton";
 
 function Row({ title, items: initialItems = [], section, testid }) {
   const scrollRef = useRef(null);
@@ -207,11 +208,7 @@ export default function Home() {
   }, [page]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-neutral-400">
-        Loading catalog...
-      </div>
-    );
+    return <HomeSkeleton />;
   }
 
   if (!home) {

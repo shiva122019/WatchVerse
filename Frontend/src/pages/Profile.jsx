@@ -15,6 +15,7 @@ import WatchlistTab from "../components/profile/WatchlistTab";
 import ActivityTimeline from "../components/profile/ActivityTimeline";
 import FavoritesTab from "../components/profile/FavoritesTab";
 import CreatorPosts from "../components/profile/CreatorPosts";
+import SEO from "@/components/SEO";
 
 import { mockProfile } from "../data/mockProfile";
 
@@ -73,8 +74,15 @@ export default function Profile() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
+    <>
+      <SEO 
+        title={`${profile.displayName || profile.username}'s Profile`}
+        description={profile.bio || `Check out ${profile.username}'s favorite movies, music, and reviews on WatchVerse.`}
+        image={profile.avatarUrl}
+        type="profile"
+      />
+      <motion.div
+        initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
       className="relative min-h-screen pb-20 overflow-hidden"
@@ -149,5 +157,6 @@ export default function Profile() {
         </AnimatePresence>
       </div>
     </motion.div>
+    </>
   );
 }
