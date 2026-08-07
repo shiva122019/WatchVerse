@@ -6,11 +6,22 @@ export default function ProfileActions({ role }) {
   const navigate = useNavigate();
 
   const buttons = [
-    { key: "edit", label: "Edit Profile", icon: Pencil, to: "/profile/edit", variant: "primary" },
-    { key: "settings", label: "Account Settings", icon: Settings, to: "/settings/account", variant: "secondary" },
-    ...(role === "creator"
-      ? [{ key: "dashboard", label: "Creator Dashboard", icon: LayoutDashboard, to: "/creator/dashboard", variant: "secondary" }]
-      : []),
+    {
+      key: "edit",
+      label: "Edit Profile",
+      icon: Pencil,
+      to: "/profile/edit",
+      variant: "primary",
+    },
+
+    {
+      key: "dashboard",
+      label: "Creator Dashboard",
+      icon: LayoutDashboard,
+      to: "/creator/dashboard",
+      variant: "secondary",
+    },
+    ,
   ];
 
   return (

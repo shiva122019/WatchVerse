@@ -709,4 +709,5 @@ module.exports = {
   getSurprisePick,
   getTrendingPosters,
   getTrailerKey,
+  tmdb,
 };

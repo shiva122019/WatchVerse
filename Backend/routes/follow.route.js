@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const User = require("../Models/User");
 const Follow = require("../Models/Follow");
-const activityService = require("../services/activity.service");
+const activityService = require("../services/activity");
 const { isAuthenticated } = require("../middleware/auth");
 const AppError = require("../lib/AppError");
 
@@ -39,7 +39,9 @@ router.post("/:username", isAuthenticated, async (req, res, next) => {
         targetUser: targetUser.username,
         targetId: targetUser._id.toString(),
       })
-      .catch((err) => console.error("Follow activity log failed:", err.message));
+      .catch((err) =>
+        console.error("Follow activity log failed:", err.message),
+      );
 
     res.status(201).json({
       success: true,
@@ -57,7 +59,9 @@ router.post("/:username", isAuthenticated, async (req, res, next) => {
  */
 router.delete("/:username", isAuthenticated, async (req, res, next) => {
   try {
-    const targetUser = await User.findOne({ username: req.params.username.trim() });
+    const targetUser = await User.findOne({
+      username: req.params.username.trim(),
+    });
     if (!targetUser) {
       throw new AppError("User not found", 404);
     }
@@ -86,7 +90,9 @@ router.delete("/:username", isAuthenticated, async (req, res, next) => {
  */
 router.get("/followers/:username", async (req, res, next) => {
   try {
-    const targetUser = await User.findOne({ username: req.params.username.trim() });
+    const targetUser = await User.findOne({
+      username: req.params.username.trim(),
+    });
     if (!targetUser) {
       throw new AppError("User not found", 404);
     }
@@ -111,7 +117,9 @@ router.get("/followers/:username", async (req, res, next) => {
  */
 router.get("/following/:username", async (req, res, next) => {
   try {
-    const targetUser = await User.findOne({ username: req.params.username.trim() });
+    const targetUser = await User.findOne({
+      username: req.params.username.trim(),
+    });
     if (!targetUser) {
       throw new AppError("User not found", 404);
     }

@@ -27,29 +27,50 @@ export default function Profile() {
   const { username } = useParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activity, setActivity] = useState(null);
+  const [activityLoading, setActivityLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Overview");
 
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
+    setActivityLoading(true);
 
     const endpoint = username ? `/profile/${username}` : "/profile/me";
+    const activityEndpoint = username
+      ? `/profile/${username}/activity`
+      : "/profile/me/activity";
 
-    api
-      .get(endpoint)
-      .then((res) => {
-        if (isMounted && res.data) {
-          setProfile(res.data);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load profile from API, falling back to mock:", err);
-        if (isMounted) {
+    Promise.allSettled([api.get(endpoint), api.get(activityEndpoint)]).then(
+      ([profileResult, activityResult]) => {
+        if (!isMounted) return;
+
+        if (profileResult.status === "fulfilled" && profileResult.value.data) {
+          setProfile(profileResult.value.data);
+        } else {
+          console.error(
+            "Failed to load profile from API, falling back to mock:",
+            profileResult.reason,
+          );
           setProfile(mockProfile);
-          setLoading(false);
         }
-      });
+        setLoading(false);
+
+        if (
+          activityResult.status === "fulfilled" &&
+          activityResult.value.data
+        ) {
+          setActivity(activityResult.value.data);
+        } else {
+          console.error(
+            "Failed to load activity from API, falling back to mock:",
+            activityResult.reason,
+          );
+          setActivity(mockActivity);
+        }
+        setActivityLoading(false);
+      },
+    );
 
     return () => {
       isMounted = false;
@@ -61,7 +82,9 @@ export default function Profile() {
       <div className="flex min-h-[70vh] items-center justify-center text-neutral-400">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#00F0FF] border-t-transparent" />
-          <p className="text-xs uppercase tracking-widest text-neutral-500">Loading Profile…</p>
+          <p className="text-xs uppercase tracking-widest text-neutral-500">
+            Loading Profile…
+          </p>
         </div>
       </div>
     );
@@ -94,7 +117,7 @@ export default function Profile() {
 
         <ProfileStats stats={profile.stats} />
 
-        <ProfileActions role={profile.role} />
+        <ProfileActions />
 
         <ProfileTabs
           activeTab={activeTab}
@@ -125,9 +148,14 @@ export default function Profile() {
               <WatchlistTab watchlist={profile.watchlist} />
             )}
 
-            {activeTab === "Activity" && (
-              <ActivityTimeline groups={profile.activityTimeline || []} />
-            )}
+            {activeTab === "Activity" &&
+              (activityLoading ? (
+                <div className="flex justify-center py-10 text-neutral-500">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#00F0FF] border-t-transparent" />
+                </div>
+              ) : (
+                <ActivityTimeline groups={activity?.activityTimeline || []} />
+              ))}
 
             {activeTab === "Favorites" && <FavoritesTab profile={profile} />}
 

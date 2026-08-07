@@ -36,8 +36,12 @@ const commentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    title: {
+      type: String,
+      default: null,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Index for fast lookup of all comments on a given movie
@@ -46,5 +50,6 @@ commentSchema.index({ tmdbId: 1, createdAt: 1 });
 // Index for fast lookup of replies to a parent comment
 commentSchema.index({ parentId: 1 });
 
-const Comment = mongoose.models.Comment || mongoose.model("Comment", commentSchema);
+const Comment =
+  mongoose.models.Comment || mongoose.model("Comment", commentSchema);
 module.exports = Comment;

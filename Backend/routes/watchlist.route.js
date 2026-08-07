@@ -129,78 +129,77 @@ router.get("/content", async (req, res) => {
 
 //to add new things to watchlist
 router.post("/", async (req, res) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "Please log in.",
-      });
-    }
+  if (!req.isAuthenticated() || !req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
 
+  try {
     const { tmdbId, mediaType, status } = req.body;
 
     if (!tmdbId || !mediaType || !status) {
       return res.status(400).json({
         success: false,
-        message: "tmdbId, mediaType and status are required.",
+        message: "tmdbId, mediaType and status are required",
       });
     }
 
-    // Songs now supported alongside movie/tv
     if (!["movie", "tv", "song"].includes(mediaType)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid media type.",
+        message: "Invalid media type",
       });
     }
 
-    // Validate status
     if (!["want", "watching", "watched"].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid status.",
+        message: "Invalid watch status",
       });
     }
 
-    const watchlistEntry = await WatchList.findOneAndUpdate(
+    let title = null;
+
+    // Fetch title from TMDB
+    if (mediaType !== "song") {
+      const endpoint = mediaType === "tv" ? "tv" : "movie";
+
+      const { data } = await tmdb.get(`/${endpoint}/${tmdbId}`);
+
+      title = data.title || data.name || null;
+    }
+
+    const watchlist = await WatchList.findOneAndUpdate(
       {
         user: req.user._id,
-        tmdbId: String(tmdbId),
+        tmdbId,
+      },
+      {
+        user: req.user._id,
+        tmdbId,
         mediaType,
-      },
-      {
         status,
+        title,
       },
       {
-        upsert: true,
         new: true,
+        upsert: true,
         setDefaultsOnInsert: true,
       },
     );
 
-    res.status(201).json({
+    return res.json({
       success: true,
-      message: "Added to watchlist.",
-      watchlist: watchlistEntry,
+      watchlist,
     });
-
-    // Preference learning is TMDB-genre/actor based and doesn't apply
-    // to songs yet, so only run it for movie/tv.
-    if (mediaType !== "song") {
-      const weight = status === "watched" ? 1.5 : 1;
-      updatePreferencesFromWatchlist(
-        req.user._id,
-        tmdbId,
-        mediaType,
-        weight,
-      ).catch((err) => console.error("Preference update failed:", err.message));
-    }
   } catch (err) {
     console.error(err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Internal server error.",
+      message: "Failed to update watchlist",
     });
   }
 });

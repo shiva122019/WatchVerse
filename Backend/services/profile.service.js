@@ -3,7 +3,7 @@ const Review = require("../Models/Review");
 const WatchList = require("../Models/WatchList");
 const UserFavorite = require("../Models/UserFavorite");
 const statisticsService = require("./statistics.service");
-const activityService = require("./activity.service");
+const activityService = require("./activity");
 const spotifyProfileService = require("./spotify.profile.service");
 const creatorService = require("./creator.service");
 const AppError = require("../lib/AppError");
@@ -20,9 +20,7 @@ const AppError = require("../lib/AppError");
  * @returns {Promise<Object>} - the complete profile object
  */
 async function buildProfile(userId) {
-  const user = await User.findById(userId)
-    .select("-hash -__v")
-    .lean();
+  const user = await User.findById(userId).select("-hash -__v").lean();
 
   if (!user) {
     throw new AppError("User not found", 404);

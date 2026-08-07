@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const Comment = require("../Models/Comment.js");
 const Review = require("../Models/Review.js");
-
+let { tmdb } = require("../services/tmdb.service.js");
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
 function formatComment(comment) {
@@ -87,6 +87,7 @@ router.post("/", async (req, res) => {
     }
 
     // If replying, verify the parent comment exists and belongs to the same movie
+    let title;
     if (parent_id) {
       const parent = await Comment.findById(parent_id);
       if (!parent) {
@@ -97,11 +98,26 @@ router.post("/", async (req, res) => {
           .status(400)
           .json({ error: "Parent comment does not belong to this movie" });
       }
+      // Reuse the parent's title instead of re-fetching from TMDB
+      title = parent.title;
+    }
+
+    if (!title) {
+      try {
+        const tmdbRes = await tmdb.get(`/movie/${content_id}`);
+        title = tmdbRes.data.title || tmdbRes.data.name;
+      } catch (tmdbErr) {
+        console.error("Failed to fetch title from TMDB:", tmdbErr);
+        return res.status(400).json({
+          error: "Could not find that title on TMDB",
+        });
+      }
     }
 
     const comment = await Comment.create({
       tmdbId: String(content_id),
       userId: req.user._id,
+      title,
       text: text.trim(),
       parentId: parent_id || null,
     });
@@ -114,6 +130,7 @@ router.post("/", async (req, res) => {
         parent_id: comment.parentId || null,
         user_id: req.user._id,
         username: req.user.username,
+        title: comment.title,
         text: comment.text,
         is_deleted: false,
         created_at: comment.createdAt,
@@ -159,7 +176,9 @@ router.patch("/:id", async (req, res) => {
 
     // Only the author may edit
     if (comment.userId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: "Not authorised to edit this comment" });
+      return res
+        .status(403)
+        .json({ error: "Not authorised to edit this comment" });
     }
 
     comment.text = text.trim();

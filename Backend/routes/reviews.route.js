@@ -2,7 +2,7 @@ const router = require("express").Router();
 const mongoose = require("mongoose");
 const Review = require("../models/Review.js");
 const reviewContent = require("../Models/reviewContent.js");
-
+let { tmdb } = require("../services/tmdb.service.js");
 // get all reviews for one item
 router.get("/", async (req, res) => {
   try {
@@ -83,9 +83,22 @@ router.post("/", async (req, res) => {
       });
     }
 
+    // Fetch title from TMDB so it's stored on the review, not left undefined
+    let title;
+    try {
+      const tmdbRes = await tmdb.get(`/movie/${content_id}`);
+      title = tmdbRes.data.title || tmdbRes.data.name;
+    } catch (tmdbErr) {
+      console.error("Failed to fetch title from TMDB:", tmdbErr);
+      return res.status(400).json({
+        error: "Could not find that title on TMDB",
+      });
+    }
+
     const review = await Review.create({
       tmdbId: String(content_id),
       userId: req.user._id,
+      title,
       rating,
       comment: text.trim(),
     });
@@ -98,6 +111,7 @@ router.post("/", async (req, res) => {
       // First review for this movie
       content = await reviewContent.create({
         tmdbId: String(content_id),
+        title,
         averageRating: rating,
         totalReviews: 1,
       });
@@ -112,6 +126,8 @@ router.post("/", async (req, res) => {
       content.averageRating = Number(newAverage.toFixed(1));
       content.totalReviews = newCount;
 
+      if (!content.title) content.title = title;
+
       await content.save();
     }
 
@@ -124,6 +140,8 @@ router.post("/", async (req, res) => {
         user_id: req.user._id,
 
         username: req.user.username,
+
+        title: review.title,
 
         rating: review.rating,
 

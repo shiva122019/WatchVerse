@@ -2,16 +2,25 @@ import { motion } from "framer-motion";
 import { Star, Plus, Heart } from "lucide-react";
 
 function EntryIcon({ text }) {
-  if (text.toLowerCase().includes("rated") || text.toLowerCase().includes("reviewed")) {
+  const lower = text.toLowerCase();
+  if (lower.includes("rated") || lower.includes("reviewed")) {
     return <Star size={13} />;
   }
-  if (text.toLowerCase().includes("liked")) return <Heart size={13} />;
+  if (lower.includes("liked")) return <Heart size={13} />;
   return <Plus size={13} />;
 }
 
 export default function ActivityTimeline({ groups }) {
+  if (!groups || groups.length === 0) {
+    return (
+      <div className="py-10 text-center text-sm text-zinc-500">
+        No activity yet.
+      </div>
+    );
+  }
+
   return (
-    <div className="relative pl-6 relative z-10">
+    <div className="relative z-10 pl-6">
       <div className="absolute left-[9px] top-1 bottom-1 w-px bg-white/10" />
 
       <div className="space-y-8">
@@ -26,7 +35,10 @@ export default function ActivityTimeline({ groups }) {
                   key={entry.id}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: (gIdx * group.entries.length + eIdx) * 0.04 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: (gIdx * group.entries.length + eIdx) * 0.04,
+                  }}
                   className="relative flex items-start gap-3"
                 >
                   <span className="absolute -left-6 mt-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border border-[#00F0FF]/30 bg-[#050505] text-[#00F0FF] shadow-[0_0_8px_rgba(0,240,255,0.2)]">
@@ -34,8 +46,10 @@ export default function ActivityTimeline({ groups }) {
                   </span>
                   <div className="flex-1 rounded-xl glass px-4 py-2.5 text-sm text-neutral-300">
                     {entry.text}
-                    {entry.rating && (
-                      <span className="ml-2 text-[#FFB300] drop-shadow-[0_0_4px_rgba(255,179,0,0.2)] font-mono-alt">{"★".repeat(entry.rating)}</span>
+                    {entry.rating != null && entry.rating > 0 && (
+                      <span className="ml-2 text-[#FFB300] drop-shadow-[0_0_4px_rgba(255,179,0,0.2)] font-mono-alt">
+                        {"★".repeat(entry.rating)}
+                      </span>
                     )}
                   </div>
                 </motion.div>

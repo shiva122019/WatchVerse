@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const User = require("../Models/User");
-const activityService = require("../services/activity.service");
+const activityService = require("../services/activity.js");
 const AppError = require("../lib/AppError");
 
 /**
@@ -9,7 +9,7 @@ const AppError = require("../lib/AppError");
  */
 router.get("/:username/activity", async (req, res, next) => {
   try {
-    const targetUser = await User.findOne({ username: req.params.username.trim() });
+    const targetUser = await User.findById(req.user._id);
     if (!targetUser) {
       throw new AppError("User not found", 404);
     }
@@ -18,7 +18,10 @@ router.get("/:username/activity", async (req, res, next) => {
       activityService.getRecentActivity(targetUser._id, 10),
       activityService.getActivityTimeline(targetUser._id, 50),
     ]);
-
+    console.log({
+      recentActivity,
+      activityTimeline,
+    });
     res.json({
       recentActivity,
       activityTimeline,
