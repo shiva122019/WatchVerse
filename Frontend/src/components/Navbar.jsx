@@ -129,14 +129,14 @@
 //   );
 // }
 
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { PrismoLogoMark, PrismoWordmark } from "@/components/PrismoLogo";
 import { useAuth } from "@/context/AuthContext";
 import { Search, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 
-const linkClass = ({ isActive }) =>
+const getLinkClass = (isActive) =>
   `text-sm font-medium tracking-wide transition-colors ${
     isActive ? "text-white" : "text-neutral-400 hover:text-white"
   }`;
@@ -144,6 +144,9 @@ const linkClass = ({ isActive }) =>
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const currentType = searchParams.get("type");
   const [q, setQ] = useState("");
   const [onboardingCompleted, setOnboardingCompleted] = useState(true);
 
@@ -179,33 +182,38 @@ export default function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          <NavLink to="/" end className={linkClass} data-testid="nav-home">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) => getLinkClass(isActive)}
+            data-testid="nav-home"
+          >
             Discover
           </NavLink>
           <NavLink
             to="/browse?type=movie"
-            className={linkClass}
+            className={({ isActive }) => getLinkClass(isActive && currentType === "movie")}
             data-testid="nav-movies"
           >
             Movies
           </NavLink>
           <NavLink
             to="/browse?type=series"
-            className={linkClass}
+            className={({ isActive }) => getLinkClass(isActive && currentType === "series")}
             data-testid="nav-series"
           >
             Series
           </NavLink>
           <NavLink
             to="/browse?type=song"
-            className={linkClass}
+            className={({ isActive }) => getLinkClass(isActive && currentType === "song")}
             data-testid="nav-songs"
           >
             Music
           </NavLink>
           <NavLink
             to="/watchparty"
-            className={linkClass}
+            className={({ isActive }) => getLinkClass(isActive)}
             data-testid="nav-watchparty"
           >
             Watch Party
@@ -213,7 +221,7 @@ export default function Navbar() {
           {user && (
             <NavLink
               to="/watchlist"
-              className={linkClass}
+              className={({ isActive }) => getLinkClass(isActive)}
               data-testid="nav-watchlist"
             >
               My List
@@ -222,7 +230,7 @@ export default function Navbar() {
           {user && !onboardingCompleted && (
             <NavLink
               to="/onBoarding"
-              className={linkClass}
+              className={({ isActive }) => getLinkClass(isActive)}
               data-testid="nav-onBoarding"
             >
               Get to Know you
