@@ -75,7 +75,6 @@ async function askGemini(history, systemContext) {
       : undefined,
     generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
   };
-  console.log("Payload:", JSON.stringify(payload, null, 2));
 
   try {
     // 4. FIX: Remove the invalid "gemini - 3 - flash" line. Use the defined modelId.

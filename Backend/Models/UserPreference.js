@@ -42,6 +42,27 @@ const actorPreferenceSchema = new mongoose.Schema(
   { _id: false },
 );
 
+const directorPreferenceSchema = new mongoose.Schema(
+  {
+    directorId: {
+      type: Number,
+      required: true,
+    },
+    directorName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    score: {
+      type: Number,
+      default: 0,
+      min: -100,
+      max: 100,
+    },
+  },
+  { _id: false },
+);
+
 const userPreferenceSchema = new mongoose.Schema(
   {
     user: {
@@ -59,6 +80,11 @@ const userPreferenceSchema = new mongoose.Schema(
 
     actorPreferences: {
       type: [actorPreferenceSchema],
+      default: [],
+    },
+
+    directorPreferences: {
+      type: [directorPreferenceSchema],
       default: [],
     },
 

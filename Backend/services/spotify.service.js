@@ -66,6 +66,30 @@ async function getAccessToken() {
   return cachedToken;
 }
 
+async function getRecentlyPlayedTracks(refreshToken, limit = 20) {
+  try {
+    const accessToken = await refreshUserAccessToken(refreshToken);
+    const response = await spotifyApi.get("/me/player/recently-played", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      params: { limit: Math.min(limit, 50) },
+    });
+    return (response.data.items || [])
+      .filter((item) => item.track)
+      .map((item) => ({
+        name: item.track.name,
+        artist: item.track.artists?.map((a) => a.name).join(", ") || "",
+        album: item.track.album?.name || "",
+        playedAt: item.played_at,
+      }));
+  } catch (err) {
+    console.error(
+      "Failed to get recently played Spotify tracks:",
+      err.response?.data || err.message,
+    );
+    return [];
+  }
+}
+
 // Attach a response interceptor to handle 401 token expiry mid-flight.
 // retry-axios handles 5xx/network errors; this interceptor handles auth refresh.
 let isRefreshing = false;
@@ -266,6 +290,7 @@ module.exports = {
   getArtistTopTracks,
   spotifySearchTracks,
   spotifySearchTracksBatch,
+  getRecentlyPlayedTracks,
   spotifySearchTracksBatchMeta,
   refreshUserAccessToken,
   getUserTopTracks,
