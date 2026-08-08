@@ -62,7 +62,12 @@ async function buildProfile(userId) {
     bannerUrl: user.bannerUrl || null,
     avatarUrl: user.avatar || null,
 
-    stats,
+    stats: {
+      ...stats,
+      totalPosts:
+        (creatorPosts.movies?.length || 0) +
+        (creatorPosts.music?.length || 0),
+    },
     spotify,
     recentActivity,
 

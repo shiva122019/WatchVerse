@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import ReviewComments from "@/components/ReviewComments";
+import SEO from "@/components/SEO";
+import DetailSkeleton from "@/components/ui/DetailSkeleton";
 
 const typeIcon = { movie: Film, series: Tv, song: Music2 };
 
@@ -77,7 +79,14 @@ export default function Detail() {
           type === "series" ? "tv" : type === "song" ? "song" : "movie",
       });
       setWatchStatus(status);
-      toast.success(`Added to ${status.replace("_", " ")}`);
+      let displayStatus = status.replace("_", " ");
+      if (type === "song") {
+        if (status === "want") displayStatus = "want to listen";
+        if (status === "watched") displayStatus = "listened";
+      } else {
+        if (status === "want") displayStatus = "want to watch";
+      }
+      toast.success(`Added to ${displayStatus}`);
     } catch (e) {
       toast.error(formatApiError(e.response?.data?.error) || "Failed");
     }
@@ -86,8 +95,16 @@ export default function Detail() {
   const removeFromList = async () => {
     try {
       await api.delete(`/watchlist/${id}`);
+      let removeMsg = "Removed from list";
+      if (type === "song") {
+        removeMsg = watchStatus === "want" ? "Removed from want to listen" : "Removed from listened";
+      } else {
+        if (watchStatus === "want") removeMsg = "Removed from want to watch";
+        else if (watchStatus === "watching") removeMsg = "Removed from currently watching";
+        else if (watchStatus === "watched") removeMsg = "Removed from watched";
+      }
       setWatchStatus(null);
-      toast.success("Removed from list");
+      toast.success(removeMsg);
     } catch (e) {
       toast.error(
         formatApiError(e.response?.data?.error) || "Failed to remove",
@@ -170,11 +187,7 @@ export default function Detail() {
   };
 
   if (!content) {
-    return (
-      <div className="flex min-h-[70vh] items-center justify-center text-neutral-500">
-        Loading…
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   const Icon = typeIcon[content.type] || Film;
@@ -182,7 +195,14 @@ export default function Detail() {
   const favorited = !!favoriteMap[`${favCategory}:${content.id}`];
 
   return (
-    <div data-testid="detail-page" className="pb-24">
+    <>
+      <SEO 
+        title={content.title} 
+        description={content.description || `Watch ${content.title} on WatchVerse.`}
+        image={content.cover_url || content.backdrop_url}
+        type={content.type === "movie" ? "video.movie" : "website"}
+      />
+      <div data-testid="detail-page" className="pb-24">
       {/* Backdrop */}
       <div className="relative h-[60vh] min-h-[420px] w-full overflow-hidden">
         <img
@@ -404,16 +424,16 @@ export default function Detail() {
                     {favorited ? "Favorited" : "Add Favorite"}
                   </button>
 
-                  {["want", "watching", "watched"].map((s) => {
+                  {["want", "watching", "watched"]
+                    .filter((s) => !(content.type === "song" && s === "watching"))
+                    .map((s) => {
                     const isSong = content.type === "song";
                     const active = watchStatus === s;
 
                     const label = isSong
                       ? s === "want"
                         ? "Want to Listen"
-                        : s === "watching"
-                          ? "Listening"
-                          : "Listened"
+                        : "Listened"
                       : s === "want"
                         ? "Want to Watch"
                         : s === "watching"
@@ -643,12 +663,14 @@ export default function Detail() {
                     >
                       <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] font-bold text-black">
+                          <Link to={`/profile/${r.username}`} className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] font-bold text-black hover:opacity-80 transition-opacity">
                             {r.username?.charAt(0).toUpperCase()}
-                          </div>
+                          </Link>
                           <div>
                             <p className="font-medium text-white">
-                              {r.username}
+                              <Link to={`/profile/${r.username}`} className="hover:text-[#00F0FF] transition-colors">
+                                {r.username}
+                              </Link>
                             </p>
                             <p className="font-mono-alt text-[10px] uppercase text-neutral-500">
                               {new Date(r.created_at).toLocaleDateString()}
@@ -671,5 +693,6 @@ export default function Detail() {
         </section>
       </div>
     </div>
+    </>
   );
 }

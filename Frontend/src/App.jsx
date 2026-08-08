@@ -6,7 +6,11 @@ import Navbar from "./components/Navbar";
 import SplashScreen from "./components/SplashScreen";
 import Home from "./pages/Home";
 import Browse from "./pages/Browser";
+import CreatorStudio from "./pages/CreatorStudio";
+import CreatorFeed from "./pages/CreatorFeed";
+import WatchCreatorPost from "./pages/WatchCreatorPost";
 import Detail from "./pages/Detail";
+import CreatorProtectedRoute from "./components/CreatorProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Watchlist from "./pages/Watchlist";
@@ -19,6 +23,8 @@ import Karaoke from "./pages/Karaoke";
 import "./App.css";
 import Onboarding from "./pages/onBoarding";
 import ConnectSpotify from "./pages/ConnectSpotify";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
+import OfflineIndicator from "./components/ui/OfflineIndicator";
 
 function AppShell({ splashDone }) {
   const location = useLocation();
@@ -27,7 +33,8 @@ function AppShell({ splashDone }) {
   const isImmersive = location.pathname.startsWith("/watch-room");
 
   return (
-    <>
+    <ErrorBoundary>
+      <OfflineIndicator />
       {!isImmersive && <Navbar />}
       <main className={isImmersive ? "" : "relative z-[2]"}>
         <Routes>
@@ -62,12 +69,14 @@ function AppShell({ splashDone }) {
               </ProtectedRoute>
             }
           />
+          <Route path="/creator-feed" element={<CreatorFeed />} />
+          <Route path="/watch-creator/:id" element={<WatchCreatorPost />} />
           <Route
-            path="/creator/dashboard"
+            path="/studio"
             element={
-              <ProtectedRoute>
-                <creatorDashboard />
-              </ProtectedRoute>
+              <CreatorProtectedRoute>
+                <CreatorStudio />
+              </CreatorProtectedRoute>
             }
           />
           <Route
@@ -117,7 +126,7 @@ function AppShell({ splashDone }) {
           Prismo · Movies · Series · Music
         </footer>
       )}
-    </>
+    </ErrorBoundary>
   );
 }
 

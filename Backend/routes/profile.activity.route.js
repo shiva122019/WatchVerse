@@ -18,10 +18,7 @@ router.get("/:username/activity", async (req, res, next) => {
       activityService.getRecentActivity(targetUser._id, 10),
       activityService.getActivityTimeline(targetUser._id, 50),
     ]);
-    console.log({
-      recentActivity,
-      activityTimeline,
-    });
+
     res.json({
       recentActivity,
       activityTimeline,

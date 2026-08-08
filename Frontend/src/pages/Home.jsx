@@ -5,6 +5,8 @@ import api from "@/lib/api";
 import MediaCard from "@/components/MediaCard";
 import { StarRating } from "@/components/StarRating";
 import { ChevronLeft, ChevronRight, Play, Plus } from "lucide-react";
+import SpotifyRecommendations from "@/components/SpotifyRecommendations";
+import HomeSkeleton from "@/components/ui/HomeSkeleton";
 
 function Row({ title, items: initialItems = [], section, testid }) {
   const scrollRef = useRef(null);
@@ -142,6 +144,12 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [user, setUser] = useState(null);
+
+  // Fetch current user for Spotify connection status
+  useEffect(() => {
+    api.get("/auth/me").then((res) => setUser(res.data)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     api
@@ -200,11 +208,7 @@ export default function Home() {
   }, [page]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-neutral-400">
-        Loading catalog...
-      </div>
-    );
+    return <HomeSkeleton />;
   }
 
   if (!home) {
@@ -302,6 +306,9 @@ export default function Home() {
             testid="row-recommended"
           />
         )}
+
+        {/* ── Spotify Personalized Recommendations ── */}
+        <SpotifyRecommendations user={user} />
 
         {home.becauseYouWatched?.items?.length > 0 && (
           <Row

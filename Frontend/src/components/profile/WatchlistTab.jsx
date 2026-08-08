@@ -1,5 +1,8 @@
 import { useState } from "react";
 import MediaCarousel from "./MediaCarousel";
+import { motion } from "framer-motion";
+import { Film, Play } from "lucide-react";
+import EmptyState from "../ui/EmptyState";
 
 const FILTERS = [
   { key: "wantToWatch", label: "Want to Watch" },
@@ -36,7 +39,14 @@ export default function WatchlistTab({ watchlist = {} }) {
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-8 text-sm text-zinc-500">Nothing here yet.</p>
+        <div className="mt-8">
+          <EmptyState
+            icon={Play}
+            title={`Your ${FILTERS.find((f) => f.key === active)?.label || "Watchlist"} is Empty`}
+            description="Discover new movies and shows to add to your list."
+            minHeight="250px"
+          />
+        </div>
       ) : (
         <div className="mt-6">
           <MediaCarousel items={items} />

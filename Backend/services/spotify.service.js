@@ -255,4 +255,60 @@ module.exports = {
   spotifySearchTracks,
   spotifySearchTracksBatch,
   spotifySearchTracksBatchMeta,
+  refreshUserAccessToken,
+  getUserTopTracks,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// User-scoped Spotify helpers (use stored refresh token, not client credentials)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Exchanges a user's stored refresh token for a fresh access token.
+ * @param {string} refreshToken - Stored refresh token from user.spotify.refreshToken
+ * @returns {string} Fresh access token
+ */
+async function refreshUserAccessToken(refreshToken) {
+  const basicAuth = Buffer.from(
+    `${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`
+  ).toString("base64");
+
+  const { data } = await axios.post(
+    "https://accounts.spotify.com/api/token",
+    new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }).toString(),
+    {
+      headers: {
+        Authorization: `Basic ${basicAuth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      timeout: 8000,
+    }
+  );
+
+  return data.access_token;
+}
+
+/**
+ * Fetches the user's top tracks from Spotify using their personal access token.
+ * @param {string} refreshToken - Stored refresh token from user.spotify.refreshToken
+ * @param {number} limit - Number of top tracks to fetch (max 50)
+ * @returns {Array} Array of track objects { name, artist, genres }
+ */
+async function getUserTopTracks(refreshToken, limit = 20) {
+  const accessToken = await refreshUserAccessToken(refreshToken);
+
+  const { data } = await axios.get("https://api.spotify.com/v1/me/top/tracks", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    params: { limit, time_range: "short_term" }, // last 4 weeks
+    timeout: 8000,
+  });
+
+  return (data.items || []).map((track) => ({
+    name: track.name,
+    artist: (track.artists || []).map((a) => a.name).join(", "),
+    album: track.album?.name || "",
+  }));
+}

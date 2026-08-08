@@ -3,6 +3,7 @@ import api, { formatApiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { MessageSquare, Send, Trash2, Edit2, X, CornerDownRight } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 export default function ReviewComments({ contentId }) {
   const { user } = useAuth();
@@ -87,12 +88,14 @@ export default function ReviewComments({ contentId }) {
     return (
       <div key={c.id} className={`flex flex-col gap-2 ${isReply ? "ml-8 mt-3" : "mt-4"}`}>
         <div className="flex gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] text-xs font-bold text-black">
+          <Link to={`/profile/${c.username}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#FFB300] text-xs font-bold text-black hover:opacity-80 transition-opacity">
             {c.username?.charAt(0).toUpperCase() || "?"}
-          </div>
+          </Link>
           <div className="flex-1 rounded-xl bg-white/[0.02] p-3 text-sm border border-white/5">
             <div className="flex items-center justify-between mb-1">
-              <span className="font-medium text-white">{c.username || "Unknown"}</span>
+              <Link to={`/profile/${c.username}`} className="font-medium text-white hover:text-[#00F0FF] transition-colors">
+                {c.username || "Unknown"}
+              </Link>
               <span className="text-xs text-neutral-500">
                 {new Date(c.created_at).toLocaleDateString()}
               </span>

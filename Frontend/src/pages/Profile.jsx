@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import api from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 import ProfileBanner from "../components/profile/ProfileBanner";
 import ProfileHeader from "../components/profile/ProfileHeader";
@@ -14,6 +15,7 @@ import WatchlistTab from "../components/profile/WatchlistTab";
 import ActivityTimeline from "../components/profile/ActivityTimeline";
 import FavoritesTab from "../components/profile/FavoritesTab";
 import CreatorPosts from "../components/profile/CreatorPosts";
+import SEO from "@/components/SEO";
 
 import { mockProfile } from "../data/mockProfile";
 
@@ -25,11 +27,15 @@ import { mockProfile } from "../data/mockProfile";
  */
 export default function Profile() {
   const { username } = useParams();
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activity, setActivity] = useState(null);
   const [activityLoading, setActivityLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Overview");
+
+  // If no username param is provided, it's the personal profile. Otherwise compare it with current user.
+  const isOwnProfile = !username || user?.username === username;
 
   useEffect(() => {
     let isMounted = true;
@@ -91,80 +97,99 @@ export default function Profile() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
-      className="relative min-h-screen pb-20 overflow-hidden"
-    >
-      {/* Background Glow */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-30 z-0"
-        style={{
-          background:
-            "radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.12), transparent 45%), radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.08), transparent 50%)",
-        }}
+    <>
+      <SEO
+        title={`${profile.displayName || profile.username}'s Profile`}
+        description={
+          profile.bio ||
+          `Check out ${profile.username}'s favorite movies, music, and reviews on WatchVerse.`
+        }
+        image={profile.avatarUrl}
+        type="profile"
       />
-
-      <div className="relative z-10 mx-auto max-w-7xl px-6 pt-6 md:px-10">
-        <ProfileBanner
-          bannerUrl={profile.bannerUrl}
-          avatarUrl={profile.avatarUrl}
-          displayName={profile.displayName}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
+        className="relative min-h-screen pb-20 overflow-hidden"
+      >
+        {/* Background Glow */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-30 z-0"
+          style={{
+            background:
+              "radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.12), transparent 45%), radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.08), transparent 50%)",
+          }}
         />
 
-        <ProfileHeader profile={profile} />
+        <div className="relative z-10 mx-auto max-w-7xl px-6 pt-6 md:px-10">
+          <ProfileBanner
+            bannerUrl={profile.bannerUrl}
+            avatarUrl={profile.avatarUrl}
+            displayName={profile.displayName}
+          />
 
-        <ProfileStats stats={profile.stats} />
+          <ProfileHeader profile={profile} />
 
-        <ProfileActions />
+          <ProfileActions
+            role={profile.role}
+            isOwnProfile={isOwnProfile}
+            onViewContent={() => setActiveTab("Posts")}
+            profileUsername={profile.username}
+          />
 
-        <ProfileTabs
-          activeTab={activeTab}
-          onChange={setActiveTab}
-          role={profile.role}
-        />
+          <ProfileStats stats={profile.stats} />
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="pt-6"
-          >
-            {activeTab === "Overview" && <OverviewTab profile={profile} />}
+          <ProfileTabs
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            role={profile.role}
+            hasPosts={profile.stats?.totalPosts > 0}
+          />
 
-            {activeTab === "Reviews" && (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {(profile.allReviews || []).map((review) => (
-                  <ReviewCard key={review.id} review={review} />
-                ))}
-              </div>
-            )}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="pt-6"
+            >
+              {activeTab === "Overview" && <OverviewTab profile={profile} />}
 
-            {activeTab === "Watchlist" && (
-              <WatchlistTab watchlist={profile.watchlist} />
-            )}
-
-            {activeTab === "Activity" &&
-              (activityLoading ? (
-                <div className="flex justify-center py-10 text-neutral-500">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#00F0FF] border-t-transparent" />
+              {activeTab === "Reviews" && (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {(profile.allReviews || []).map((review) => (
+                    <ReviewCard key={review.id} review={review} />
+                  ))}
                 </div>
-              ) : (
-                <ActivityTimeline groups={activity?.activityTimeline || []} />
-              ))}
+              )}
 
-            {activeTab === "Favorites" && <FavoritesTab profile={profile} />}
+              {activeTab === "Watchlist" && (
+                <WatchlistTab watchlist={profile.watchlist} />
+              )}
 
-            {activeTab === "Posts" && profile.role === "creator" && (
-              <CreatorPosts posts={profile.creatorPosts} />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </motion.div>
+              {activeTab === "Activity" &&
+                (activityLoading ? (
+                  <div className="flex justify-center py-10 text-neutral-500">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#00F0FF] border-t-transparent" />
+                  </div>
+                ) : (
+                  <ActivityTimeline groups={activity?.activityTimeline || []} />
+                ))}
+
+              {activeTab === "Favorites" && <FavoritesTab profile={profile} />}
+
+              {activeTab === "Posts" &&
+                (profile.role === "creator" ||
+                  profile.stats?.totalPosts > 0) && (
+                  <CreatorPosts posts={profile.creatorPosts} />
+                )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.div>
+    </>
   );
 }

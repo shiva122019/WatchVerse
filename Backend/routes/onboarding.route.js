@@ -22,26 +22,30 @@ router.get("/content", async (req, res, next) => {
 
     const responses = await Promise.all(requests);
 
-    const unique = new Map();
+    const movies = new Map();
+    const tvShows = new Map();
 
     responses.forEach((response, index) => {
       const isMovie = index < 5;
+      const targetMap = isMovie ? movies : tvShows;
 
       response.data.results.forEach((item) => {
-        const key = `${isMovie ? "movie" : "tv"}-${item.id}`;
-
-        if (!unique.has(key)) {
-          unique.set(key, {
+        if (!targetMap.has(item.id)) {
+          targetMap.set(item.id, {
             id: item.id,
             mediaType: isMovie ? "movie" : "tv",
 
             title: isMovie ? item.title : item.name,
 
-            overview: item.overview,
+            overview: item.overview || "",
 
-            poster: item.poster_path,
+            poster: item.poster_path
+              ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+              : null,
 
-            backdrop: item.backdrop_path,
+            backdrop: item.backdrop_path
+              ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}`
+              : null,
 
             rating: item.vote_average,
 
@@ -51,13 +55,25 @@ router.get("/content", async (req, res, next) => {
       });
     });
 
-    const content = Array.from(unique.values());
+    // Convert maps to arrays and shuffle them
+    const movieList = Array.from(movies.values()).sort(
+      () => Math.random() - 0.5,
+    );
 
-    content.sort(() => Math.random() - 0.5);
+    const tvList = Array.from(tvShows.values()).sort(() => Math.random() - 0.5);
+
+    // Take 10 movies and 10 TV shows
+    const selectedMovies = movieList.slice(0, 10);
+    const selectedTV = tvList.slice(0, 10);
+
+    // Combine and shuffle the final 20
+    const content = [...selectedMovies, ...selectedTV].sort(
+      () => Math.random() - 0.5,
+    );
 
     res.json({
       success: true,
-      content: content.slice(0, 30),
+      content,
     });
   } catch (err) {
     next(err);

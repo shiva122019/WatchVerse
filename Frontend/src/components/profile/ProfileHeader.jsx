@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck, MapPin, Link as LinkIcon, Calendar, Clapperboard, Pencil } from "lucide-react";
+import FollowListModal from "./FollowListModal";
+import UploadListModal from "./UploadListModal";
 
 const ROLE_META = {
   creator: { label: "Creator", icon: Clapperboard },
@@ -12,7 +15,9 @@ function formatJoinDate(iso) {
   return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
-export default function ProfileHeader({ profile }) {
+export default function ProfileHeader({ profile, onViewContent }) {
+  const [modalType, setModalType] = useState(null); // 'followers' or 'following'
+
   const roleMeta = ROLE_META[profile.role] ?? ROLE_META.member;
   const RoleIcon = roleMeta.icon;
 
@@ -36,6 +41,20 @@ export default function ProfileHeader({ profile }) {
             )}
           </div>
           <p className="mt-0.5 text-zinc-400">@{profile.username}</p>
+
+          <div className="mt-2 text-sm font-semibold text-neutral-300 flex items-center gap-2">
+            <button onClick={() => setModalType("uploads")} className="hover:text-white hover:underline transition-all">
+              {profile.stats?.totalPosts || 0} Uploads
+            </button>
+            <span className="text-neutral-500">•</span>
+            <button onClick={() => setModalType("followers")} className="hover:text-white hover:underline transition-all">
+              {profile.stats?.followers || 0} Followers
+            </button>
+            <span className="text-neutral-500">•</span>
+            <button onClick={() => setModalType("following")} className="hover:text-white hover:underline transition-all">
+              {profile.stats?.following || 0} Following
+            </button>
+          </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#00F0FF]/30 bg-[#00F0FF]/10 px-3 py-1 text-xs font-medium text-[#00F0FF]">
@@ -62,17 +81,36 @@ export default function ProfileHeader({ profile }) {
           </span>
         )}
         {profile.website && (
-          <a
-            href={`https://${profile.website}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 transition-colors hover:text-[#00F0FF]"
-          >
+          <span className="inline-flex items-center gap-1.5">
             <LinkIcon size={14} />
-            {profile.website}
-          </a>
+            <a
+              href={
+                profile.website.startsWith("http")
+                  ? profile.website
+                  : `https://${profile.website}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#00F0FF] hover:underline"
+            >
+              {profile.website.replace(/^https?:\/\//, "")}
+            </a>
+          </span>
         )}
       </div>
+
+      <FollowListModal
+        isOpen={modalType === "followers" || modalType === "following"}
+        onClose={() => setModalType(null)}
+        username={profile.username}
+        type={modalType}
+      />
+
+      <UploadListModal
+        isOpen={modalType === "uploads"}
+        onClose={() => setModalType(null)}
+        posts={profile.creatorPosts}
+      />
     </motion.div>
   );
 }

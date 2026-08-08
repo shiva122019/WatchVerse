@@ -27,5 +27,7 @@ router.use("/creator", require("./creator.route.js"));
 
 // Spotify profile integration
 router.use("/spotify", require("./spotify.profile.route.js"));
+router.use("/spotify", require("./spotify.personalization.route.js"));
+
 
 module.exports = router;

@@ -24,8 +24,6 @@ export default function ProfileStats({ stats }) {
     { key: "moviesWatched", label: "Movies Watched", icon: Film, value: stats.moviesWatched },
     { key: "showsWatched", label: "TV Shows Watched", icon: Tv, value: stats.showsWatched },
     { key: "reviews", label: "Reviews", icon: Star, value: stats.reviews },
-    { key: "followers", label: "Followers", icon: Users, value: stats.followers },
-    { key: "following", label: "Following", icon: UserPlus, value: stats.following },
   ];
 
   return (
