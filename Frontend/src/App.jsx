@@ -117,7 +117,7 @@ function AppShell({ splashDone }) {
       {splashDone && !isImmersive && (
         <AudioVisualizer
           siteName="WatchVerse"
-          chatUrl="http://localhost:5001/chat"
+          chatUrl={`${import.meta.env.VITE_API_URL}/chat`}
         />
       )}
 

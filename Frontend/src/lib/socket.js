@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 
 // NOTE: was defaulting to :5000 — server.js listens on :5001. Set
 // VITE_SOCKET_URL in your .env if you ever change the backend port.
-const SOCKET_URL = "http://localhost:5001";
+const SOCKET_URL = import.meta.env.VITE_API_URL;
 
 let socket;
 
