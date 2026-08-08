@@ -158,6 +158,26 @@ async function spotifySearchTracks(query, limit = 20, offset = 0) {
   }
 }
 
+// Fetches up to `total` tracks by making sequential limit=10 requests,
+// since single requests above that limit get rejected.
+async function spotifySearchTracksBatch(query, total = 50, startOffset = 0) {
+  const results = [];
+  let offset = startOffset;
+
+  while (results.length < total) {
+    const batch = await spotifySearchTracks(query, MAX_SPOTIFY_LIMIT, offset);
+
+    if (batch.length === 0) break; // no more matches from Spotify
+
+    results.push(...batch);
+    offset += MAX_SPOTIFY_LIMIT;
+
+    if (batch.length < MAX_SPOTIFY_LIMIT) break; // partial page = end of results
+  }
+
+  return results.slice(0, total);
+}
+
 // Like spotifySearchTracksBatch, but also reports whether Spotify has run out
 // of results for this query, so callers (e.g. infinite scroll) know when to
 // stop requesting further pages instead of hitting the API forever.
@@ -184,37 +204,6 @@ async function spotifySearchTracksBatchMeta(query, total, startOffset = 0) {
   }
 
   return { tracks: results.slice(0, total), exhausted };
-}
-
-async function getRecentlyPlayedTracks(refreshToken, limit = 20) {
-  try {
-    const accessToken = await getSpotifyAccessToken(refreshToken);
-
-    const response = await spotifyApi.get("/me/player/recently-played", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      params: {
-        limit: Math.min(limit, 50),
-      },
-    });
-
-    return (response.data.items || [])
-      .filter((item) => item.track)
-      .map((item) => ({
-        name: item.track.name,
-        artist: item.track.artists?.map((a) => a.name).join(", ") || "",
-        album: item.track.album?.name || "",
-        playedAt: item.played_at,
-      }));
-  } catch (err) {
-    console.error(
-      "Failed to get recently played Spotify tracks:",
-      err.response?.data || err.message,
-    );
-
-    return [];
-  }
 }
 
 async function searchTrack(query, limit = 5) {
@@ -260,11 +249,23 @@ async function getArtistTopTracks(artistId, market = "US") {
   }
 }
 
+async function getTrack(trackId) {
+  if (!trackId) return null;
+  try {
+    const { data } = await spotifyApi.get(`/tracks/${trackId}`);
+    return mapTrack(data);
+  } catch (e) {
+    console.error("🔴 SPOTIFY TRACK ERROR:", trackId, e.message);
+    return null;
+  }
+}
+
 module.exports = {
   searchTrack,
+  getTrack,
   getArtistTopTracks,
   spotifySearchTracks,
-  getRecentlyPlayedTracks,
+  spotifySearchTracksBatch,
   spotifySearchTracksBatchMeta,
   refreshUserAccessToken,
   getUserTopTracks,

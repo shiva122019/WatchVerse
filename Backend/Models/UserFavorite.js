@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const FAVORITE_CATEGORIES = ["movie", "show", "actor", "director"];
+const FAVORITE_CATEGORIES = ["movie", "show", "song", "actor", "director"];
 
 const userFavoriteSchema = new mongoose.Schema(
   {

@@ -6,6 +6,8 @@ const statisticsService = require("./statistics.service");
 const activityService = require("./activity");
 const spotifyProfileService = require("./spotify.profile.service");
 const creatorService = require("./creator.service");
+const tmdbService = require("./tmdb.service");
+const spotifyService = require("./spotify.service");
 const AppError = require("../lib/AppError");
 let { tmdb } = require("./tmdb.service");
 /**
@@ -65,14 +67,14 @@ async function buildProfile(userId) {
     stats: {
       ...stats,
       totalPosts:
-        (creatorPosts.movies?.length || 0) +
-        (creatorPosts.music?.length || 0),
+        (creatorPosts.movies?.length || 0) + (creatorPosts.music?.length || 0),
     },
     spotify,
     recentActivity,
 
     favoriteMovies: favorites.movies,
     favoriteShows: favorites.shows,
+    favoriteMusic: favorites.songs,
     favoriteActors: favorites.actors,
     favoriteDirectors: favorites.directors,
 
@@ -156,6 +158,7 @@ async function getFavorites(userId) {
   const result = {
     movies: [],
     shows: [],
+    songs: [],
     actors: [],
     directors: [],
   };
@@ -173,6 +176,15 @@ async function getFavorites(userId) {
         break;
       case "show":
         result.shows.push({
+          id: fav._id,
+          title: fav.title,
+          year: fav.year,
+          posterUrl: fav.posterUrl || null,
+          rating: fav.rating,
+        });
+        break;
+      case "song":
+        result.songs.push({
           id: fav._id,
           title: fav.title,
           year: fav.year,
@@ -213,6 +225,7 @@ async function getWatchlist(userId) {
     wantToWatch: [],
     watching: [],
     watched: [],
+    music: [],
   };
 
   const statusKeyMap = {
@@ -221,29 +234,52 @@ async function getWatchlist(userId) {
     watched: "watched",
   };
 
-  for (const entry of entries) {
-    const key = statusKeyMap[entry.status];
-    if (!key) continue;
-
-    watchlist[key].push({
-      id: entry.tmdbId,
-      type:
-        entry.mediaType === "tv"
-          ? "series"
-          : entry.mediaType === "song"
-            ? "song"
-            : "movie",
-
-      title: entry.title,
-      cover_url: entry.posterUrl || "",
-      backdrop_url: entry.posterUrl || "",
-      avg_rating: 0,
-      release_year: null,
-      genres: [],
-      language: "",
-      description: "",
-    });
-  }
+  await Promise.all(
+    entries.map(async (entry) => {
+      if (entry.mediaType === "song") {
+        const track = await spotifyService.getTrack(entry.tmdbId);
+        if (track) {
+          // Keep the entry ID so we can remove it from watchlist if needed
+          watchlist.music.push({ ...track, entryId: entry._id });
+        }
+      } else {
+        const key = statusKeyMap[entry.status];
+        if (key) {
+          try {
+            const details = await tmdbService.getDetails(
+              entry.tmdbId,
+              entry.mediaType,
+            );
+            watchlist[key].push({
+              id: entry._id,
+              tmdbId: entry.tmdbId,
+              title: details.title || details.name,
+              year: (
+                details.release_date ||
+                details.first_air_date ||
+                ""
+              ).slice(0, 4),
+              posterUrl: details.poster_path
+                ? `https://image.tmdb.org/t/p/w342${details.poster_path}`
+                : null,
+              rating: details.vote_average
+                ? Number((details.vote_average / 2).toFixed(1))
+                : null,
+            });
+          } catch (e) {
+            // Fallback if TMDB fails
+            watchlist[key].push({
+              id: entry._id,
+              tmdbId: entry.tmdbId,
+              title: `Unknown ${entry.mediaType} (${entry.tmdbId})`,
+              year: null,
+              posterUrl: null,
+            });
+          }
+        }
+      }
+    }),
+  );
 
   return watchlist;
 }

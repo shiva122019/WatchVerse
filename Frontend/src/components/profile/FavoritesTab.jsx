@@ -1,4 +1,4 @@
-import { Film, Tv, User, Heart } from "lucide-react";
+import { Film, Tv, Music, User, Heart } from "lucide-react";
 import MediaCarousel from "./MediaCarousel";
 import EmptyState from "../ui/EmptyState";
 
@@ -45,11 +45,18 @@ export default function FavoritesTab({ profile }) {
           <EmptyState icon={Heart} title="No Favorite Movies" minHeight="150px" />
         )}
       </Section>
-      <Section title="Favorite TV Shows" icon={Tv}>
+      <Section title="Favorite Webseries" icon={Tv}>
         {profile.favoriteShows?.length > 0 ? (
           <MediaCarousel items={profile.favoriteShows} />
         ) : (
-          <EmptyState icon={Heart} title="No Favorite Shows" minHeight="150px" />
+          <EmptyState icon={Heart} title="No Favorite Webseries" minHeight="150px" />
+        )}
+      </Section>
+      <Section title="Favorite Music" icon={Music}>
+        {profile.favoriteMusic?.length > 0 ? (
+          <MediaCarousel items={profile.favoriteMusic} />
+        ) : (
+          <EmptyState icon={Heart} title="No Favorite Music" minHeight="150px" />
         )}
       </Section>
       <Section title="Favorite Actors" icon={User}>
