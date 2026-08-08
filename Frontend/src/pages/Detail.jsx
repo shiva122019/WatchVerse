@@ -131,7 +131,7 @@ export default function Detail() {
       }
 
       const payload =
-        category === "movie" || category === "show"
+        category === "movie" || category === "show" || category === "song"
           ? {
               category,
               externalId: item.id,
@@ -189,7 +189,7 @@ export default function Detail() {
   }
 
   const Icon = typeIcon[content.type] || Film;
-  const favCategory = type === "movie" ? "movie" : "show";
+  const favCategory = content.type === "series" ? "show" : content.type;
   const favorited = !!favoriteMap[`${favCategory}:${content.id}`];
 
   return (

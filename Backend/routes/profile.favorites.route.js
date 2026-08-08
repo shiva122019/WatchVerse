@@ -70,7 +70,7 @@ router.post("/favorites/toggle", isAuthenticated, async (req, res, next) => {
       throw new AppError("Category and externalId are required", 400);
     }
 
-    if (!["movie", "show", "actor", "director"].includes(category)) {
+    if (!["movie", "show", "song", "actor", "director"].includes(category)) {
       throw new AppError("Invalid category type", 400);
     }
 

@@ -249,8 +249,20 @@ async function getArtistTopTracks(artistId, market = "US") {
   }
 }
 
+async function getTrack(trackId) {
+  if (!trackId) return null;
+  try {
+    const { data } = await spotifyApi.get(`/tracks/${trackId}`);
+    return mapTrack(data);
+  } catch (e) {
+    console.error("🔴 SPOTIFY TRACK ERROR:", trackId, e.message);
+    return null;
+  }
+}
+
 module.exports = {
   searchTrack,
+  getTrack,
   getArtistTopTracks,
   spotifySearchTracks,
   spotifySearchTracksBatch,

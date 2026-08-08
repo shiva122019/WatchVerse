@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Activity, Film, Tv, MessageSquareText } from "lucide-react";
+import { Activity, Film, Tv, Music, MessageSquareText } from "lucide-react";
 import SpotifyCard from "./SpotifyCard";
 import MediaCarousel from "./MediaCarousel";
 import ReviewCard from "./ReviewCard";
@@ -47,13 +47,19 @@ export default function OverviewTab({ profile }) {
 
       <SpotifyCard spotify={profile.spotify} />
 
-      <SectionCard title="Favorite Movies" icon={Film}>
-        <MediaCarousel items={profile.favoriteMovies} />
-      </SectionCard>
+      <div className="lg:col-span-2 grid grid-cols-1 gap-5 md:grid-cols-3">
+        <SectionCard title="Favorite Movies" icon={Film}>
+          <MediaCarousel items={profile.favoriteMovies} />
+        </SectionCard>
 
-      <SectionCard title="Favorite TV Shows" icon={Tv}>
-        <MediaCarousel items={profile.favoriteShows} />
-      </SectionCard>
+        <SectionCard title="Favorite Webseries" icon={Tv}>
+          <MediaCarousel items={profile.favoriteShows} />
+        </SectionCard>
+
+        <SectionCard title="Favorite Music" icon={Music}>
+          <MediaCarousel items={profile.favoriteMusic} />
+        </SectionCard>
+      </div>
 
       <div className="lg:col-span-2">
         <SectionCard title="Recent Reviews" icon={MessageSquareText}>

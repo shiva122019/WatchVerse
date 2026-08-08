@@ -11,7 +11,6 @@ import ProfileActions from "../components/profile/ProfileActions";
 import ProfileTabs from "../components/profile/ProfileTabs";
 import OverviewTab from "../components/profile/OverviewTab";
 import ReviewCard from "../components/profile/ReviewCard";
-import WatchlistTab from "../components/profile/WatchlistTab";
 import ActivityTimeline from "../components/profile/ActivityTimeline";
 import FavoritesTab from "../components/profile/FavoritesTab";
 import CreatorPosts from "../components/profile/CreatorPosts";
@@ -124,24 +123,25 @@ export default function Profile() {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="pt-6"
+            transition={{ duration: 0.3 }}
+            className="mt-8"
           >
             {activeTab === "Overview" && <OverviewTab profile={profile} />}
 
             {activeTab === "Reviews" && (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {(profile.allReviews || []).map((review) => (
-                  <ReviewCard key={review.id} review={review} />
-                ))}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 relative z-10">
+                {profile.allReviews?.length > 0 ? (
+                  profile.allReviews.map((review) => (
+                    <ReviewCard key={review.id} review={review} />
+                  ))
+                ) : (
+                  <div className="col-span-full py-12 text-center text-zinc-500">
+                    No reviews yet.
+                  </div>
+                )}
               </div>
-            )}
-
-            {activeTab === "Watchlist" && (
-              <WatchlistTab watchlist={profile.watchlist} />
             )}
 
             {activeTab === "Activity" && (
