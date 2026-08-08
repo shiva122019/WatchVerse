@@ -497,7 +497,7 @@ async function getReviews(tmdbId, mediaType) {
 
 async function getSimilar(tmdbId, mediaType) {
   const { data } = await tmdb.get(`/${mediaType}/${tmdbId}/similar`);
-  return (data.results || []).slice(0, 8).map((r) => ({
+  return (data.results || []).slice(0, 5).map((r) => ({
     tmdbId: r.id,
     mediaType: r.media_type || mediaType,
     title: r.title || r.name,
