@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const mongoose = require("mongoose");
-const Review = require("../models/Review.js");
+const Review = require("../Models/Review.js");
 const reviewContent = require("../Models/reviewContent.js");
 let { tmdb } = require("../services/tmdb.service.js");
 // get all reviews for one item
