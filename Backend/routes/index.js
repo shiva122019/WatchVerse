@@ -13,10 +13,9 @@ router.use("/karaoke", require("./karaoke.route.js"));
 
 // Profile & related sub-routes
 router.use("/profile", require("./profile.route.js"));
-router.use("/profile", require("./profile.reviews.route.js"));
+
 router.use("/profile", require("./profile.activity.route.js"));
-router.use("/profile", require("./profile.favorites.route.js"));
-router.use("/profile", require("./profile.watchlist.route.js"));
+router.use("/profile", require("./favorites.route.js"));
 
 // Follow & social relationships
 router.use("/follow", require("./follow.route.js"));
@@ -28,6 +27,5 @@ router.use("/creator", require("./creator.route.js"));
 // Spotify profile integration
 router.use("/spotify", require("./spotify.profile.route.js"));
 router.use("/spotify", require("./spotify.personalization.route.js"));
-
 
 module.exports = router;
