@@ -216,7 +216,11 @@ router.get("/posts/:id", async (req, res, next) => {
 router.post("/posts/:id/view", async (req, res, next) => {
   try {
     const watchTime = req.body.watchTime ? Number(req.body.watchTime) : 0;
-    const post = await creatorService.incrementView(req.params.id, watchTime);
+    
+    // Extract viewer identifier for unique viewers metric
+    const viewerId = req.ip || req.headers['x-forwarded-for'] || "unknown";
+    
+    const post = await creatorService.incrementView(req.params.id, watchTime, viewerId);
     
     res.json({
       success: true,

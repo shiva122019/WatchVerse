@@ -53,6 +53,9 @@ const creatorPostSchema = new mongoose.Schema(
       type: Number, // in seconds
       default: 0,
     },
+    uniqueViewers: [{
+      type: String, // Storing IPs or User IDs
+    }],
   },
   {
     timestamps: true,

@@ -13,7 +13,7 @@ function formatComment(comment) {
     username: comment.userId.username || null,
     text: comment.isDeleted ? "[deleted]" : comment.text,
     is_deleted: comment.isDeleted,
-    created_at: comment.createdAt,
+    created_at: comment.createdAt || new Date(),
     updated_at: comment.updatedAt,
   };
 }

@@ -50,29 +50,31 @@ async function getCreatorPosts(userId) {
 async function getCreatorStats(userId) {
   const mongoose = require("mongoose");
   
-  const [stats, followerCount, followingCount] = await Promise.all([
-    CreatorPost.aggregate([
-      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
-      {
-        $group: {
-          _id: null,
-          totalViews: { $sum: "$views" },
-          totalWatchTime: { $sum: "$watchTime" },
-          totalPosts: { $sum: 1 },
-        },
-      },
-    ]),
+  const [posts, followerCount, followingCount] = await Promise.all([
+    CreatorPost.find({ userId: new mongoose.Types.ObjectId(userId) }).lean(),
     Follow.countDocuments({ following: userId }),
     Follow.countDocuments({ follower: userId }),
   ]);
 
-  const baseStats = stats.length === 0 
-    ? { totalViews: 0, totalWatchTime: 0, totalPosts: 0 } 
-    : {
-        totalViews: stats[0].totalViews,
-        totalWatchTime: stats[0].totalWatchTime,
-        totalPosts: stats[0].totalPosts,
-      };
+  let totalViews = 0;
+  let totalWatchTime = 0;
+  let totalPosts = posts.length;
+  const uniqueViewersSet = new Set();
+
+  for (const post of posts) {
+    totalViews += post.views || 0;
+    totalWatchTime += post.watchTime || 0;
+    if (post.uniqueViewers) {
+      post.uniqueViewers.forEach(v => uniqueViewersSet.add(v));
+    }
+  }
+
+  const baseStats = {
+    totalViews,
+    totalWatchTime,
+    totalPosts,
+    uniqueViewers: uniqueViewersSet.size
+  };
 
   // Fetch real analytics from the database for the last 365 days
   const now = new Date();
@@ -243,13 +245,18 @@ async function deletePost(postId, userId) {
  * @param {string} postId
  * @param {number} watchTimeIncrement (in seconds)
  */
-async function incrementView(postId, watchTimeIncrement = 0) {
+async function incrementView(postId, watchTimeIncrement = 0, viewerId = null) {
   const post = await CreatorPost.findById(postId);
   if (!post) throw new AppError("Post not found", 404);
 
   // Update total post stats
   post.views += 1;
   post.watchTime += watchTimeIncrement;
+  
+  if (viewerId && viewerId !== "unknown" && !post.uniqueViewers.includes(viewerId)) {
+    post.uniqueViewers.push(viewerId);
+  }
+  
   await post.save();
 
   // Update daily analytics

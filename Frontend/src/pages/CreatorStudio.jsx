@@ -217,8 +217,7 @@ export default function CreatorStudio() {
                         <div className="absolute inset-0 bg-[#00F0FF]/0 transition-colors group-hover:bg-[#00F0FF]/5" />
                         <User size={22} className="text-zinc-500 transition-colors group-hover:text-[#00F0FF] group-hover:drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]" />
                         <div className="flex items-end gap-3 mt-4">
-                          <div className="text-2xl font-bold text-white tracking-tight">{Math.floor((stats.totalViews || 0) * 0.7).toLocaleString()}</div>
-                          <span className="text-xs font-bold text-[#00F0FF] mb-1.5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]">+12% this month</span>
+                          <div className="text-2xl font-bold text-white tracking-tight">{stats.uniqueViewers?.toLocaleString() || "0"}</div>
                         </div>
                         <div className="mt-1 text-[11px] text-zinc-400 uppercase tracking-widest font-semibold">Unique Viewers</div>
                       </motion.div>
