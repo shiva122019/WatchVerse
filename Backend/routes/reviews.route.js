@@ -16,7 +16,9 @@ router.get("/", async (req, res) => {
 
     const reviews = await Review.find({
       tmdbId: String(content_id),
-    }).sort({ createdAt: -1 });
+    })
+      .populate("userId", "username profilePicture")
+      .sort({ createdAt: -1 });
 
     const formatted = reviews.map((review) => ({
       id: review._id,
@@ -31,7 +33,7 @@ router.get("/", async (req, res) => {
 
       text: review.comment,
 
-      created_at: review.createdAt,
+      created_at: review.createdAt || new Date(),
     }));
 
     res.json(formatted);

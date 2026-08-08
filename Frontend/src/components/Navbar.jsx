@@ -137,7 +137,7 @@ import { useState, useEffect, useRef } from "react";
 import api from "@/lib/api";
 
 const getLinkClass = (isActive) =>
-  `text-sm font-medium tracking-wide transition-colors ${
+  `text-sm font-medium tracking-wide whitespace-nowrap transition-colors ${
     isActive ? "text-white" : "text-neutral-400 hover:text-white"
   }`;
 

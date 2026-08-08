@@ -84,7 +84,7 @@ export default function ContentTable({ posts, category, onPostDeleted }) {
                   {post.title}
                 </div>
                 <div className="text-xs text-neutral-500 mt-2">
-                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(post.date || post.created_at || new Date()), { addSuffix: true })}
                 </div>
               </div>
             </div>
@@ -182,7 +182,7 @@ export default function ContentTable({ posts, category, onPostDeleted }) {
                 </td>
                 
                 <td className="px-6 py-4 text-neutral-400">
-                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(post.date || post.created_at || new Date()), { addSuffix: true })}
                 </td>
                 
                 <td className="px-6 py-4 text-right">
