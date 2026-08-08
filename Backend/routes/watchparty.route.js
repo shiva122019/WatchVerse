@@ -160,16 +160,11 @@ router.get("/trailer/:mediaType/:id", async (req, res) => {
   }
   try {
     const trailerKey = await tmdb.getTrailerKey(id, mediaType);
-    if (!trailerKey)
-      return res
-        .status(404)
-        .json({ error: "No trailer found for this title." });
+    if (!trailerKey) return res.status(404).json({ error: "No trailer found for this title." });
     res.json({ trailerKey });
   } catch (err) {
     console.error("Failed to fetch trailer:", err.message);
-    res
-      .status(502)
-      .json({ error: "Couldn't load trailer. Try again in a moment." });
+    res.status(502).json({ error: "Couldn't load trailer. Try again in a moment." });
   }
 });
 

@@ -132,28 +132,28 @@ module.exports = function registerWatchPartySocket(io) {
     });
 
     // ---- pick / change what's playing ----
-    socket.on("select-movie", async ({ roomCode, movie }) => {
-      const code = String(roomCode).toLowerCase();
-      const room = rooms.get(code);
-      if (!room || !movie) return;
+socket.on("select-movie", async ({ roomCode, movie }) => {
+  const code = String(roomCode).toLowerCase();
+  const room = rooms.get(code);
+  if (!room || !movie) return;
 
-      let trailerKey = null;
-      try {
-        trailerKey = await tmdb.getTrailerKey(movie.id, movie.mediaType); // was tmdb.getVideos
-      } catch (err) {
-        console.error("Failed to fetch trailer:", err.message);
-      }
+  let trailerKey = null;
+  try {
+    trailerKey = await tmdb.getTrailerKey(movie.id, movie.mediaType); // was tmdb.getVideos
+  } catch (err) {
+    console.error("Failed to fetch trailer:", err.message);
+  }
 
-      room.movie = { ...movie, trailerKey }; // now carries trailerKey for playback
-      room.playing = false;
-      room.time = 0;
-      room.updatedAt = Date.now();
+  room.movie = { ...movie, trailerKey }; // now carries trailerKey for playback
+  room.playing = false;
+  room.time = 0;
+  room.updatedAt = Date.now();
 
-      io.to(code).emit("movie-selected", {
-        movie: room.movie,
-        by: socket.data.name || "Someone",
-      });
-    });
+  io.to(code).emit("movie-selected", {
+    movie: room.movie,
+    by: socket.data.name || "Someone",
+  });
+});
 
     // ---- play / pause ----
     socket.on("play-pause", ({ roomCode, playing }) => {
