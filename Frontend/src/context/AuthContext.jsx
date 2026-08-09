@@ -16,9 +16,13 @@ export function AuthProvider({ children }) {
   // Check whether the user already has a valid session
   const refresh = useCallback(async () => {
     try {
-      const { data } = await api.get("/auth/me");
+      const { data } = await api.get("/auth/me", {
+        withCredentials: true,
+      });
+
       setUser(data);
     } catch (e) {
+      console.error("Auth refresh failed:", e.response?.data || e.message);
       setUser(null);
     } finally {
       setLoading(false);
