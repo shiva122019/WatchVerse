@@ -202,6 +202,49 @@ async function spotifySearchTracksBatch(query, total = 50, startOffset = 0) {
   return results.slice(0, total);
 }
 
+function normalizeTrackTitle(title) {
+  return title
+    .split(/[\(\[]/)[0]        // keep only what's before the first ( or [
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ") // collapse punctuation/quotes/dashes to spaces
+    .trim();
+}
+ 
+async function getArtistTracksBySearch(artistName, limit = 10, excludeTitle = null) {
+  if (!artistName) return [];
+  try {
+    const { data } = await spotifyApi.get("/search", {
+      params: {
+        q: `artist:"${artistName}"`,
+        type: "track",
+        limit: MAX_SPOTIFY_LIMIT,
+      },
+    });
+    const items = data.tracks?.items || [];
+
+    const sorted = [...items].sort(
+      (a, b) => (b.popularity || 0) - (a.popularity || 0),
+    );
+
+    const excludeKey = excludeTitle ? normalizeTrackTitle(excludeTitle) : null;
+    const seenTitles = new Set();
+    const deduped = [];
+    for (const track of sorted) {
+      const key = normalizeTrackTitle(track.name);
+      if (key === excludeKey) continue;        // NEW: skip the currently playing song
+      if (seenTitles.has(key)) continue;
+      if (/mashup|medley/i.test(track.name)) continue;
+      seenTitles.add(key);
+      deduped.push(track);
+    }
+
+    return deduped.slice(0, limit).map(mapTrack);
+  } catch (e) {
+    console.error("🔴 SPOTIFY ARTIST SEARCH ERROR:", artistName, e.response?.status, e.response?.data || e.message);
+    return [];
+  }
+}
+
 // Like spotifySearchTracksBatch, but also reports whether Spotify has run out
 // of results for this query, so callers (e.g. infinite scroll) know when to
 // stop requesting further pages instead of hitting the API forever.
@@ -294,6 +337,7 @@ module.exports = {
   spotifySearchTracksBatchMeta,
   refreshUserAccessToken,
   getUserTopTracks,
+  getArtistTracksBySearch,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

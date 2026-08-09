@@ -561,6 +561,68 @@ async function selectTitle(req, res) {
   }
 }
 
+// ADD this function to controllers/chat.controller.js, and add
+// `suggestTitles` to the module.exports at the bottom of that file.
+//
+// This mirrors the option-shaping logic already in searchTitle() above,
+// but is a lightweight, session-less lookup meant to be called on every
+// keystroke (debounced on the frontend) - so it skips the "resolve to a
+// single card" and "not_found" branching entirely and just always returns
+// a short ranked list, same shape as the existing "ambiguous" options.
+
+async function suggestTitles(req, res) {
+  try {
+    const { query, mode } = req.body;
+
+    if (!query || query.trim().length < 2) {
+      return res.json({ options: [] });
+    }
+    if (!["song", "media"].includes(mode)) {
+      return res.status(400).json({ error: "mode must be 'song' or 'media'" });
+    }
+
+    if (mode === "song") {
+      const songMatches = await spotifyService.searchTrack(query.trim(), 6);
+      const options = (songMatches || []).map((s) => ({
+        deezerId: s.deezerId,
+        artistId: s.artistId,
+        mediaType: "song",
+        title: s.title,
+        artist: s.artist,
+        album: s.album,
+        year: s.year,
+        poster: s.cover,
+        overview: `by ${s.artist}${s.album ? ` · ${s.album}` : ""}`,
+        previewUrl: s.previewUrl,
+        deezerUrl: s.deezerUrl,
+        durationMs: s.durationMs,
+      }));
+      return res.json({ options });
+    }
+
+    const tmdbMatches = await tmdbService.searchTitle(query.trim());
+    const options = tmdbMatches.slice(0, 6).map((r) => ({
+      tmdbId: r.id,
+      mediaType: tagAnime(r) ? "anime" : r.media_type,
+      title: r.title || r.name,
+      year: (r.release_date || r.first_air_date || "").slice(0, 4),
+      poster: r.poster_path
+        ? `https://image.tmdb.org/t/p/w200${r.poster_path}`
+        : null,
+      overview: r.overview,
+    }));
+    return res.json({ options });
+  } catch (err) {
+    console.error("suggestTitles error:", err.message);
+    // Typeahead is a nice-to-have - fail quiet with an empty list rather
+    // than a hard error, so a flaky TMDB call doesn't interrupt typing.
+    return res.json({ options: [] });
+  }
+}
+
+// Update the existing export line at the bottom of chat.controller.js to:
+// module.exports = { searchTitle, selectTitle, handleMessage, suggestTitles };
+
 async function handleMessage(req, res) {
   try {
     const { sessionId, message, buttonIntent } = req.body;
@@ -576,10 +638,10 @@ async function handleMessage(req, res) {
     const intent = detectIntent(buttonIntent, message);
 
     if (ctx.mediaType === "song") {
-      if (intent === "similar") {
-        const tracks = await spotifyService.getArtistTopTracks(ctx.artistId);
-        return res.json({ intent, source: "spotify", data: tracks });
-      }
+    if (intent === "similar") {
+    const tracks = await spotifyService.getArtistTracksBySearch(ctx.artist, 5);
+    return res.json({ intent, source: "spotify", data: tracks });
+  } 
 
       const cacheKey = `${ctx.deezerId}-about`;
       if (intent === "about" && session.history.length === 0) {
@@ -691,4 +753,4 @@ async function handleMessage(req, res) {
   }
 }
 
-module.exports = { searchTitle, selectTitle, handleMessage };
+module.exports = { searchTitle, selectTitle, handleMessage, suggestTitles};

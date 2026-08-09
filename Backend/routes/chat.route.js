@@ -12,4 +12,6 @@ router.post("/select", chatController.selectTitle);
 // Button taps (cast/rating/reviews/similar/storyline) AND free-text follow-ups
 router.post("/message", chatController.handleMessage);
 
+router.post("/suggest", chatController.suggestTitles);
+
 module.exports = router;
