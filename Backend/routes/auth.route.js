@@ -148,25 +148,68 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] }),
 );
 
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: `${frontendUrl}/login`,
-  }),
-  (req, res) => {
-    // 1. Check if user has connected Spotify (spotify.refreshToken exists)
-    if (!hasSpotifyToken(req.user)) {
-      return res.redirect(`${frontendUrl}/connect-spotify`);
-    }
+router.get("/google/callback", (req, res, next) => {
+  passport.authenticate(
+    "google",
+    {
+      failureRedirect: `${frontendUrl}/login?error=google_failed`,
+    },
+    async (err, user, info) => {
+      try {
+        if (err) {
+          console.error("Google authentication error:", err);
+          return next(err);
+        }
 
-    // 2. Check if user has completed movie onboarding
-    if (!req.user.onboardingCompleted) {
-      return res.redirect(`${frontendUrl}/onBoarding`);
-    }
+        if (!user) {
+          console.error("Google authentication failed:", info);
+          return res.redirect(`${frontendUrl}/login?error=google_failed`);
+        }
 
-    return res.redirect(frontendUrl);
-  },
-);
+        // Explicitly log the user in and create the Passport session
+        req.logIn(user, async (loginErr) => {
+          if (loginErr) {
+            console.error("Google session login error:", loginErr);
+            return next(loginErr);
+          }
+
+          console.log("========== GOOGLE LOGIN ==========");
+          console.log("User ID:", user._id);
+          console.log("Email:", user.email);
+          console.log("Authenticated:", req.isAuthenticated());
+          console.log("Session ID:", req.sessionID);
+          console.log("===================================");
+
+          // IMPORTANT:
+          // Explicitly save the session before redirecting
+          req.session.save((sessionErr) => {
+            if (sessionErr) {
+              console.error("Failed to save Google login session:", sessionErr);
+              return next(sessionErr);
+            }
+
+            console.log("Google session successfully saved.");
+
+            // User already has Spotify connected
+            if (!hasSpotifyToken(user)) {
+              return res.redirect(`${frontendUrl}/connect-spotify`);
+            }
+
+            // User has not completed onboarding
+            if (!user.onboardingCompleted) {
+              return res.redirect(`${frontendUrl}/onBoarding`);
+            }
+
+            // Everything is complete
+            return res.redirect(frontendUrl);
+          });
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+  )(req, res, next);
+});
 
 // --- Spotify OAuth Routes ---
 
