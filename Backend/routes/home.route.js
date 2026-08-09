@@ -472,7 +472,6 @@
 
 // module.exports = router;
 
-
 const router = require("express").Router();
 const tmdb = require("../lib/tmdb");
 const {
@@ -496,7 +495,7 @@ const {
   getTrending,
   getContinueWatching,
 } = require("../services/home.service");
-const Review = require("../models/Review");
+const Review = require("../Models/Review");
 
 router.get("/", async (req, res) => {
   try {
@@ -588,16 +587,55 @@ router.get("/", async (req, res) => {
 
     return res.json({
       trending: [
-        { id: 1, title: "Dune: Part Two", type: "movie", poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2JGqqUTc5.jpg", rating: 8.5, genres: ["Sci-Fi", "Adventure"] },
-        { id: 2, title: "Oppenheimer", type: "movie", poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg", rating: 8.1, genres: ["Drama", "History"] },
-        { id: 3, title: "Shogun", type: "series", poster: "https://image.tmdb.org/t/p/w500/7O4iVfOMQmdCSxhOg1Wf8MCWwG0.jpg", rating: 8.7, genres: ["Drama"] },
+        {
+          id: 1,
+          title: "Dune: Part Two",
+          type: "movie",
+          poster:
+            "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2JGqqUTc5.jpg",
+          rating: 8.5,
+          genres: ["Sci-Fi", "Adventure"],
+        },
+        {
+          id: 2,
+          title: "Oppenheimer",
+          type: "movie",
+          poster:
+            "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+          rating: 8.1,
+          genres: ["Drama", "History"],
+        },
+        {
+          id: 3,
+          title: "Shogun",
+          type: "series",
+          poster:
+            "https://image.tmdb.org/t/p/w500/7O4iVfOMQmdCSxhOg1Wf8MCWwG0.jpg",
+          rating: 8.7,
+          genres: ["Drama"],
+        },
       ],
       upcoming: [],
-      genreRows: [{ title: "Popular Right Now", items: [ { id: 4, title: "Deadpool & Wolverine", type: "movie", poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg", rating: 7.9, genres: ["Action"] } ] }],
+      genreRows: [
+        {
+          title: "Popular Right Now",
+          items: [
+            {
+              id: 4,
+              title: "Deadpool & Wolverine",
+              type: "movie",
+              poster:
+                "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+              rating: 7.9,
+              genres: ["Action"],
+            },
+          ],
+        },
+      ],
       tvShows: [],
       continueWatching: [],
       recommended: [],
-      becauseYouWatched: { source: null, items: [] }
+      becauseYouWatched: { source: null, items: [] },
     });
   }
 });
@@ -729,7 +767,9 @@ async function getSiteRatingsMap(mediaType, ids) {
 
   const rows = await Review.aggregate([
     { $match: { mediaType, tmdbId: { $in: cleanIds } } },
-    { $group: { _id: "$tmdbId", avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+    {
+      $group: { _id: "$tmdbId", avg: { $avg: "$rating" }, count: { $sum: 1 } },
+    },
   ]);
 
   const map = {};
@@ -825,9 +865,7 @@ router.get("/queryContent", async (req, res) => {
 
     const selectedGenres = Array.from(
       new Set(
-        [genre, ...genresParam.split(",")]
-          .map((g) => g.trim())
-          .filter(Boolean),
+        [genre, ...genresParam.split(",")].map((g) => g.trim()).filter(Boolean),
       ),
     );
 
@@ -867,8 +905,8 @@ router.get("/queryContent", async (req, res) => {
             ? q
             : primaryGenre
               ? primaryGenre // plain text — Spotify track search doesn't
-                              // reliably honor a genre:"..." field filter
-              : "a";
+              : // reliably honor a genre:"..." field filter
+                "a";
 
           const needed = end - tracks.length;
           const { tracks: more, exhausted: nowExhausted } =
@@ -1057,7 +1095,9 @@ router.get("/queryContent", async (req, res) => {
 
       if (q) {
         const yearParamKey =
-          mediaType === "movie" ? "primary_release_year" : "first_air_date_year";
+          mediaType === "movie"
+            ? "primary_release_year"
+            : "first_air_date_year";
 
         data = await tmdbFetch(`/search/${mediaType}`, {
           params: {
@@ -1091,7 +1131,9 @@ router.get("/queryContent", async (req, res) => {
         if (!data) {
           const todayISO = new Date().toISOString().slice(0, 10);
           const dateLteKey =
-            mediaType === "movie" ? "primary_release_date.lte" : "first_air_date.lte";
+            mediaType === "movie"
+              ? "primary_release_date.lte"
+              : "first_air_date.lte";
 
           data = await tmdbFetch(`/discover/${mediaType}`, {
             params: {
@@ -1162,7 +1204,9 @@ router.get("/queryContent", async (req, res) => {
       if (selectedGenres.length) {
         mapped = mapped.filter((item) =>
           item.genres.some((g) =>
-            translatedGenreNames.some((tg) => tg.toLowerCase() === g.toLowerCase()),
+            translatedGenreNames.some(
+              (tg) => tg.toLowerCase() === g.toLowerCase(),
+            ),
           ),
         );
       }
@@ -1224,7 +1268,9 @@ router.get("/queryContent", async (req, res) => {
           if (
             selectedGenres.length &&
             !mapped.genres.some((g) =>
-              creditTranslatedGenres.some((tg) => tg.toLowerCase() === g.toLowerCase()),
+              creditTranslatedGenres.some(
+                (tg) => tg.toLowerCase() === g.toLowerCase(),
+              ),
             )
           ) {
             continue;
@@ -1280,11 +1326,12 @@ router.get("/queryContent", async (req, res) => {
     // Sort
     //--------------------------------------------------
 
-    const userPickedSort = req.query.sortBy && req.query.sortBy !== "popularity";
+    const userPickedSort =
+      req.query.sortBy && req.query.sortBy !== "popularity";
 
-if (!q || userPickedSort) {
-  results.sort(sorter);
-}
+    if (!q || userPickedSort) {
+      results.sort(sorter);
+    }
 
     res.json(results.slice(0, Number(limit)));
   } catch (err) {
