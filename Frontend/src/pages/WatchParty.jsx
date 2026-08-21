@@ -77,7 +77,7 @@ export default function WatchParty() {
         </span>
 
         <h1 className="font-display text-4xl font-semibold leading-tight text-white sm:text-5xl">
-          Welcome to your virtual{" "}
+          Your screen.{" "}
           <span
             className="bg-clip-text text-transparent"
             style={{
@@ -85,13 +85,13 @@ export default function WatchParty() {
                 "linear-gradient(90deg, #5CF2E3 0%, #8B5CF6 100%)",
             }}
           >
-            movie theatre
+          <br />Your people. Your vibe.
           </span>
         </h1>
 
         <p className="mt-5 max-w-md text-neutral-300">
-          Open a room, share one link, and watch together — synced play, pause,
-          chat, and reactions, no matter where everyone's sitting.
+          From blockbusters to hidden gems, rising creators to your favorite tracks — bring it all into one room.<br />
+          <b>Pick something. Hit play. Bring your people.</b>
         </p>
 
         <button
@@ -105,13 +105,6 @@ export default function WatchParty() {
           {creating ? "Setting up your room…" : "Host a Watch Party"}
         </button>
 
-        <button
-          onClick={() => navigate("/watchparty/how-it-works")}
-          className="mt-4 flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-200"
-        >
-          How it works
-          <Play className="h-3 w-3" />
-        </button>
 
         {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
       </motion.div>
