@@ -131,20 +131,44 @@ module.exports = function registerWatchPartySocket(io) {
       });
     });
 
-    // ---- pick / change what's playing ----
+        // ---- pick / change what's playing ----
 socket.on("select-movie", async ({ roomCode, movie }) => {
   const code = String(roomCode).toLowerCase();
   const room = rooms.get(code);
   if (!room || !movie) return;
 
-  let trailerKey = null;
-  try {
-    trailerKey = await tmdb.getTrailerKey(movie.id, movie.mediaType); // was tmdb.getVideos
-  } catch (err) {
-    console.error("Failed to fetch trailer:", err.message);
+  let picked;
+
+  // Creator Hub picks (uploaded by a user in the Creator Hub) already carry
+  // their own playable file straight from Cloudinary — videoUrl for movies/
+  // shorts, audioUrl for music. There's no TMDB id to look a trailer up
+  // for, so we skip that lookup entirely and just pass the pick through.
+  if (movie.source === "creator") {
+    picked = {
+      source: "creator",
+      id: movie.id,
+      mediaKind: movie.mediaKind, // "movie" | "music"
+      title: movie.title,
+      posterUrl: movie.posterUrl || movie.thumbUrl || null,
+      thumbUrl: movie.thumbUrl || null,
+      videoUrl: movie.videoUrl || null,
+      audioUrl: movie.audioUrl || null,
+      duration: movie.duration || 0,
+      creatorName: movie.creatorName || "Creator",
+      creatorAvatar: movie.creatorAvatar || null,
+      trailerKey: null,
+    };
+  } else {
+    let trailerKey = null;
+    try {
+      trailerKey = await tmdb.getTrailerKey(movie.id, movie.mediaType); // was tmdb.getVideos
+    } catch (err) {
+      console.error("Failed to fetch trailer:", err.message);
+    }
+    picked = { ...movie, source: "tmdb", trailerKey }; // now carries trailerKey for playback
   }
 
-  room.movie = { ...movie, trailerKey }; // now carries trailerKey for playback
+  room.movie = picked;
   room.playing = false;
   room.time = 0;
   room.updatedAt = Date.now();

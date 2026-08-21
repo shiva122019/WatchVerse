@@ -449,7 +449,7 @@ export default function Register() {
 
   return (
     <div
-      className="relative flex min-h-screen items-start justify-center overflow-hidden px-6 pt-4 md:pt-4.5"
+      className="relative flex min-h-screen items-start justify-center overflow-hidden px-6 pt-4 md:pt-4.3"
       data-testid="register-page"
     >
       {/* Looping background video — plain native loop, no fade */}

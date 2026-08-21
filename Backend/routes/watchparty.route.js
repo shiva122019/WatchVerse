@@ -9,6 +9,30 @@ const router = express.Router();
 // keeps "Surprise us" a true one-tap action instead of requiring the
 // genre picker first.
 const DEFAULT_SURPRISE_GENRES = ["Action", "Comedy", "Drama", "Thriller"];
+const CreatorPost = require("../Models/CreatorPost");
+const User = require("../Models/User"); // adjust path/name if your User model lives elsewhere
+
+// Shared shape-normalizer for Creator Hub posts so both /creator-search and
+// /creator-feed below (and the room's "select-movie" payload) always agree
+// on the same field names — mirrors the TMDB result shape (id, title,
+// posterUrl) but adds the fields a creator post actually needs to play:
+// mediaKind ("movie" | "music"), videoUrl/audioUrl, and creator info.
+function toCreatorResult(post) {
+  return {
+    id: post._id,
+    source: "creator",
+    mediaKind: post.type, // "movie" | "music"
+    title: post.title,
+    format: post.format || null,
+    posterUrl: post.thumbUrl || null,
+    thumbUrl: post.thumbUrl || null,
+    videoUrl: post.videoUrl || null,
+    audioUrl: post.audioUrl || null,
+    duration: post.duration || 0,
+    creatorName: post.userId?.username || "Creator",
+    creatorAvatar: post.userId?.profilePic || null,
+  };
+}
 
 function makeRoomCode() {
   const chars = "abcdefghjkmnpqrstuvwxyz23456789";
@@ -70,6 +94,62 @@ router.get("/search", async (req, res) => {
     });
   } catch (err) {
     console.error("TMDB search failed:", err.message);
+    res.status(502).json({ error: "Search failed. Try again in a moment." });
+  }
+});
+
+// GET /watchparty/creator-feed — most recent Creator Hub uploads (movies,
+// shorts, music), used to let a room *browse* creator content, the same way
+// the watch-party landing page's poster mosaic lets people browse TMDB
+// titles. No query needed — this is the "find something new" equivalent
+// for creator content.
+router.get("/creator-feed", async (req, res) => {
+  try {
+    const posts = await CreatorPost.find()
+      .populate("userId", "username profilePic")
+      .sort({ createdAt: -1 })
+      .limit(24)
+      .lean();
+
+    res.json({ results: posts.map(toCreatorResult) });
+  } catch (err) {
+    console.error("Failed to load creator feed:", err.message);
+    res.status(502).json({ error: "Couldn't load creator content." });
+  }
+});
+
+// GET /watchparty/creator-search?query=... — search Creator Hub uploads by
+// title OR by the uploading creator's username, used by the room's
+// "Creator Hub" search box. Matching on creator name pulls back everything
+// that creator has posted — movies, shorts, and music alike — not just
+// posts whose title happens to contain the query text.
+router.get("/creator-search", async (req, res) => {
+  const query = (req.query.query || "").trim();
+  if (!query) return res.json({ results: [] });
+
+  try {
+    // Find creators whose username matches, so we can pull in all of their
+    // posts regardless of what each post is titled.
+    const matchingUsers = await User.find(
+      { username: { $regex: query, $options: "i" } },
+      "_id",
+    ).lean();
+    const matchingUserIds = matchingUsers.map((u) => u._id);
+
+    const posts = await CreatorPost.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { userId: { $in: matchingUserIds } },
+      ],
+    })
+      .populate("userId", "username profilePic")
+      .sort({ createdAt: -1 })
+      .limit(40) // raised from 20 — a creator-name hit can span many posts
+      .lean();
+
+    res.json({ results: posts.map(toCreatorResult) });
+  } catch (err) {
+    console.error("Creator search failed:", err.message);
     res.status(502).json({ error: "Search failed. Try again in a moment." });
   }
 });
