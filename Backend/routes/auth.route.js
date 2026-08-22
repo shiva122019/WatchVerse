@@ -35,6 +35,7 @@ router.post("/login", (req, res, next) => {
           id: user._id,
           username: user.username,
           email: user.email,
+          role: user.role || "member",
           onboardingCompleted: user.onboardingCompleted || false,
           spotify: user.spotify || {
             connected: false,
@@ -43,6 +44,7 @@ router.post("/login", (req, res, next) => {
           },
         },
       });
+
     });
   })(req, res, next);
 });
@@ -129,6 +131,7 @@ router.get("/me", (req, res) => {
     id: req.user._id,
     username: req.user.username,
     email: req.user.email,
+    role: req.user.role || "member",
     avatar: req.user.avatar || null,
     displayName: req.user.displayName || null,
     provider: req.user.provider || "local",
@@ -139,6 +142,7 @@ router.get("/me", (req, res) => {
       refreshToken: null,
     },
   });
+
 });
 
 // --- Google OAuth Routes ---
@@ -251,6 +255,14 @@ router.get("/spotify", (req, res) => {
 // 2. Spotify OAuth Callback Endpoint
 router.get("/spotify/callback", async (req, res, next) => {
   try {
+    console.log("========== SPOTIFY CALLBACK ==========");
+    console.log("Query:", req.query);
+    console.log("Authenticated:", req.isAuthenticated());
+    console.log("Session ID:", req.sessionID);
+    console.log("User:", req.user?._id);
+    console.log("State:", req.query.state);
+    console.log("======================================");
+
     const { code, error, state } = req.query;
 
     if (error) {

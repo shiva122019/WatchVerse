@@ -2,6 +2,7 @@ const NodeCache = require("node-cache");
 const tmdb = require("../lib/tmdb");
 const WatchList = require("../Models/WatchList");
 const UserPreference = require("../Models/UserPreference");
+const UserFavorite = require("../Models/UserFavorite");
 const homeCache = new NodeCache({
   stdTTL: 900,
   checkperiod: 120,
@@ -119,17 +120,61 @@ async function getRecommendedForUser(userId, page = 1) {
 
   if (!preferences) return [];
 
+  // ---------------------------------------------------------
+  // 1. Gather top preferences (sorted by score, positive only)
+  // ---------------------------------------------------------
+
   const topGenres = preferences.genrePreferences
-    .filter((genre) => genre.score > 0)
+    .filter((g) => g.score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
+    .slice(0, 3);
 
   const topActors = preferences.actorPreferences
-    .filter((actor) => actor.score > 0)
+    .filter((a) => a.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
 
-  const genreIds = topGenres.map((genre) => genre.genreId).join(",");
+  const topDirectors = (preferences.directorPreferences || [])
+    .filter((d) => d.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  // Nothing to recommend from
+  if (!topGenres.length && !topActors.length && !topDirectors.length) {
+    return [];
+  }
+
+  // ---------------------------------------------------------
+  // 2. Build exclusion set (watchlist + favorites)
+  // ---------------------------------------------------------
+
+  const [watchlistItems, favoriteItems] = await Promise.all([
+    WatchList.find({ user: userId, mediaType: { $in: ["movie", "tv"] } })
+      .select("tmdbId mediaType")
+      .lean(),
+    UserFavorite.find({
+      userId,
+      category: { $in: ["movie", "show"] },
+    })
+      .select("externalId category")
+      .lean(),
+  ]);
+
+  const excludeSet = new Set();
+
+  watchlistItems.forEach((item) => {
+    excludeSet.add(`${item.mediaType}-${item.tmdbId}`);
+  });
+
+  favoriteItems.forEach((item) => {
+    // UserFavorite uses "show" but TMDB uses "tv"
+    const mediaType = item.category === "show" ? "tv" : item.category;
+    excludeSet.add(`${mediaType}-${item.externalId}`);
+  });
+
+  // ---------------------------------------------------------
+  // 3. Build TMDB fetch requests in parallel
+  // ---------------------------------------------------------
 
   const { movieGenreMap, tvGenreMap } = await getGenreMaps();
 
@@ -138,69 +183,162 @@ async function getRecommendedForUser(userId, page = 1) {
     ...tvGenreMap,
   };
 
-  const requests = [
-    tmdb.get("/discover/movie", {
-      params: {
-        with_genres: genreIds,
-        sort_by: "popularity.desc",
-        vote_count_gte: 1000,
-      },
-    }),
-
-    tmdb.get("/discover/tv", {
-      params: {
-        with_genres: genreIds,
-        sort_by: "popularity.desc",
-        vote_count_gte: 500,
-      },
-    }),
-
-    ...topActors.map((actor) =>
-      tmdb.get(`/person/${actor.actorId}/combined_credits`),
-    ),
-  ];
-
-  const responses = await Promise.all(requests);
-
-  const unique = new Map();
-
-  responses[0].data.results.forEach((movie) => {
-    const key = `movie-${movie.id}`;
-
-    if (!unique.has(key)) {
-      unique.set(key, mapTMDBItem(movie, "movie", genreMap));
-    }
+  // Look up preference scores by id for fast access during scoring
+  const genreScoreMap = {};
+  preferences.genrePreferences.forEach((g) => {
+    genreScoreMap[g.genreId] = g.score;
   });
 
-  responses[1].data.results.forEach((show) => {
-    const key = `tv-${show.id}`;
-
-    if (!unique.has(key)) {
-      unique.set(key, mapTMDBItem(show, "tv", genreMap));
-    }
+  const actorScoreMap = {};
+  preferences.actorPreferences.forEach((a) => {
+    actorScoreMap[a.actorId] = a.score;
   });
 
-  for (let i = 2; i < responses.length; i++) {
-    responses[i].data.cast
-      .filter((item) => item.media_type === "movie" || item.media_type === "tv")
-      .sort((a, b) => b.popularity - a.popularity)
-      .forEach((item) => {
-        const key = `${item.media_type}-${item.id}`;
+  const directorScoreMap = {};
+  (preferences.directorPreferences || []).forEach((d) => {
+    directorScoreMap[d.directorId] = d.score;
+  });
 
-        if (!unique.has(key)) {
-          unique.set(key, mapTMDBItem(item, item.media_type, genreMap));
-        }
-      });
+  const requests = [];
+  const requestMeta = []; // track what each request is for
+
+  // --- Genre discover (per-genre, movie + tv, pages 1-2) ---
+  for (const genre of topGenres) {
+    for (const mediaType of ["movie", "tv"]) {
+      for (const pg of [1, 2]) {
+        requests.push(
+          tmdb.get(`/discover/${mediaType}`, {
+            params: {
+              with_genres: genre.genreId,
+              sort_by: "popularity.desc",
+              "vote_count.gte": mediaType === "movie" ? 100 : 50,
+              page: pg,
+            },
+          }),
+        );
+        requestMeta.push({ type: "genre-discover", mediaType });
+      }
+    }
   }
 
-  const recommendations = Array.from(unique.values()).sort(
-    (a, b) => b.avg_rating - a.avg_rating,
-  );
+  // --- Director discover (per-director, movie + tv) ---
+  for (const director of topDirectors) {
+    for (const mediaType of ["movie", "tv"]) {
+      requests.push(
+        tmdb.get(`/discover/${mediaType}`, {
+          params: {
+            with_crew: director.directorId,
+            sort_by: "popularity.desc",
+            page: 1,
+          },
+        }),
+      );
+      requestMeta.push({ type: "director-discover", mediaType });
+    }
+  }
+
+  // --- Actor combined credits ---
+  for (const actor of topActors) {
+    requests.push(tmdb.get(`/person/${actor.actorId}/combined_credits`));
+    requestMeta.push({ type: "actor-credits" });
+  }
+
+  const results = await Promise.allSettled(requests);
+
+  // ---------------------------------------------------------
+  // 4. Collect unique candidates
+  // ---------------------------------------------------------
+
+  const unique = new Map(); // key -> mapped item
+
+  results.forEach((result, i) => {
+    if (result.status !== "fulfilled") return;
+
+    const meta = requestMeta[i];
+
+    if (meta.type === "genre-discover" || meta.type === "director-discover") {
+      const items = result.value.data.results || [];
+
+      items.forEach((item) => {
+        const key = `${meta.mediaType}-${item.id}`;
+
+        if (!unique.has(key) && !excludeSet.has(key)) {
+          unique.set(key, mapTMDBItem(item, meta.mediaType, genreMap));
+        }
+      });
+    } else if (meta.type === "actor-credits") {
+      const cast = result.value.data.cast || [];
+
+      cast
+        .filter(
+          (item) => item.media_type === "movie" || item.media_type === "tv",
+        )
+        .forEach((item) => {
+          const key = `${item.media_type}-${item.id}`;
+
+          if (!unique.has(key) && !excludeSet.has(key)) {
+            unique.set(
+              key,
+              mapTMDBItem(item, item.media_type, genreMap),
+            );
+          }
+        });
+    }
+  });
+
+  // ---------------------------------------------------------
+  // 5. Score each candidate
+  // ---------------------------------------------------------
+
+  const currentYear = new Date().getFullYear();
+
+  const scored = Array.from(unique.entries()).map(([key, item]) => {
+    let score = 0;
+
+    // Genre match: sum preference scores for each matching genre
+    const itemGenreIds = item.genres
+      ? item.genres
+          .map((name) => {
+            const entry = Object.entries(genreMap).find(
+              ([, n]) => n === name,
+            );
+            return entry ? Number(entry[0]) : null;
+          })
+          .filter(Boolean)
+      : [];
+
+    itemGenreIds.forEach((gid) => {
+      if (genreScoreMap[gid]) {
+        score += genreScoreMap[gid] * 1.0;
+      }
+    });
+
+    // Quality bonus (TMDB vote_average is 0-10, avg_rating is already 0-5)
+    score += (item.avg_rating || 0) * 1.0;
+
+    // Recency bonus: movies from the last 3 years get +3
+    const releaseYear = item.release_year;
+    if (releaseYear && currentYear - releaseYear <= 3) {
+      score += 3;
+    }
+
+    return { ...item, _relevanceScore: score };
+  });
+
+  // ---------------------------------------------------------
+  // 6. Sort by relevance score and paginate
+  // ---------------------------------------------------------
+
+  scored.sort((a, b) => b._relevanceScore - a._relevanceScore);
+
+  // Strip internal scoring field before caching
+  const recommendations = scored.map(({ _relevanceScore, ...rest }) => rest);
 
   recommendationCache.set(cacheKey, recommendations);
 
   return recommendations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 }
+
 
 async function getBecauseYouWatched(userId, page = 1) {
   const PAGE_SIZE = 20;
@@ -254,7 +392,10 @@ async function getBecauseYouWatched(userId, page = 1) {
     );
     source = mapTMDBItem(sourceRes.data, recent.mediaType, genreMap);
   } catch (err) {
-    console.warn(`Failed to fetch TMDB info for recommendation source ${recent.tmdbId}:`, err.message);
+    console.warn(
+      `Failed to fetch TMDB info for recommendation source ${recent.tmdbId}:`,
+      err.message,
+    );
   }
 
   if (!source) {
@@ -274,7 +415,10 @@ async function getBecauseYouWatched(userId, page = 1) {
         );
         return { success: true, data: res.data, mediaType: item.mediaType };
       } catch (err) {
-        console.warn(`Failed to fetch TMDB recommendations for item ${item.tmdbId}:`, err.message);
+        console.warn(
+          `Failed to fetch TMDB recommendations for item ${item.tmdbId}:`,
+          err.message,
+        );
         return { success: false };
       }
     }),
@@ -332,7 +476,10 @@ async function getContinueWatching(userId, page = 1) {
       );
       return { success: true, data: res.data, mediaType: item.mediaType };
     } catch (err) {
-      console.warn(`Failed to fetch TMDB data for item ${item.tmdbId}:`, err.message);
+      console.warn(
+        `Failed to fetch TMDB data for item ${item.tmdbId}:`,
+        err.message,
+      );
       return { success: false };
     }
   });

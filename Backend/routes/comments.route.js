@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Comment = require("../Models/Comment.js");
 const Review = require("../Models/Review.js");
+const { isAdmin } = require("../middleware/auth");
 let { tmdb } = require("../services/tmdb.service.js");
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
@@ -204,9 +205,9 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
-// ─── DELETE /comments/:id ─────────────────────────────────────────────────────
-// Soft-delete a comment (owner only). The document is kept so threaded replies
-// remain intact; the text is replaced with "[deleted]" on the way out.
+// ─── DELETE /comments/:id ────────────────────────────────────────────────
+// Admin: hard-delete any comment.
+// Owner: soft-delete (keeps thread intact, text replaced with "[deleted]").
 router.delete("/:id", async (req, res) => {
   try {
     if (!req.user) {
@@ -218,15 +219,24 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Comment not found" });
     }
 
-    // Only the author may delete
-    if (comment.userId.toString() !== req.user._id.toString()) {
+    const isAdminUser = req.user.role === "admin";
+    const isOwner =
+      comment.userId.toString() === req.user._id.toString();
+
+    if (!isAdminUser && !isOwner) {
       return res
         .status(403)
         .json({ error: "Not authorised to delete this comment" });
     }
 
-    comment.isDeleted = true;
-    await comment.save();
+    if (isAdminUser) {
+      // Admin: hard-delete so moderators can remove harmful content entirely
+      await comment.deleteOne();
+    } else {
+      // Owner: soft-delete so threaded replies remain intact
+      comment.isDeleted = true;
+      await comment.save();
+    }
 
     res.json({ success: true, message: "Comment deleted" });
   } catch (err) {

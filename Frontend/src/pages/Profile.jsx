@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { ShieldOff, ShieldCheck } from "lucide-react";
 
 import ProfileBanner from "../components/profile/ProfileBanner";
 import ProfileHeader from "../components/profile/ProfileHeader";
@@ -32,6 +34,7 @@ export default function Profile() {
   const [activity, setActivity] = useState(null);
   const [activityLoading, setActivityLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Overview");
+  const [banLoading, setBanLoading] = useState(false);
 
   // If no username param is provided, it's the personal profile. Otherwise compare it with current user.
   const isOwnProfile = !username || user?.username === username;
@@ -81,6 +84,32 @@ export default function Profile() {
       isMounted = false;
     };
   }, [username]);
+
+  // ── Admin ban/unban handler ────────────────────────────────────────────────
+  const handleBanToggle = async () => {
+    if (!profile) return;
+    const action = profile.isBanned ? "unban" : "ban";
+    if (action === "ban") {
+      if (!window.confirm(`Ban ${profile.username}? They will no longer be able to log in.`))
+        return;
+    }
+    setBanLoading(true);
+    try {
+      await api.patch(`/profile/${profile.id}/${action}`);
+      setProfile((prev) => ({ ...prev, isBanned: !prev.isBanned }));
+      toast.success(
+        action === "ban"
+          ? `${profile.username} has been banned.`
+          : `${profile.username} has been unbanned.`,
+      );
+    } catch (e) {
+      toast.error(
+        e.response?.data?.message || `Failed to ${action} user.`,
+      );
+    } finally {
+      setBanLoading(false);
+    }
+  };
 
   if (loading || !profile) {
     return (
@@ -136,6 +165,33 @@ export default function Profile() {
             onViewContent={() => setActiveTab("Posts")}
             profileUsername={profile.username}
           />
+
+          {/* Admin Moderation Panel */}
+          {user?.role === "admin" && !isOwnProfile && (
+            <div className="mt-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-5 py-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-red-400">
+                Admin
+              </span>
+              <span className="text-xs text-neutral-500">
+                {profile.isBanned ? "This user is currently banned." : "This user is active."}
+              </span>
+              <button
+                onClick={handleBanToggle}
+                disabled={banLoading}
+                className={`ml-auto flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
+                  profile.isBanned
+                    ? "border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                    : "border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                }`}
+              >
+                {profile.isBanned ? (
+                  <><ShieldCheck className="h-3.5 w-3.5" /> Unban User</>
+                ) : (
+                  <><ShieldOff className="h-3.5 w-3.5" /> Ban User</>
+                )}
+              </button>
+            </div>
+          )}
 
           <ProfileStats stats={profile.stats} />
           <ProfileTabs

@@ -2,6 +2,7 @@ const router = require("express").Router();
 const mongoose = require("mongoose");
 const Review = require("../Models/Review.js");
 const reviewContent = require("../Models/reviewContent.js");
+const { isAuthenticated, isAdmin } = require("../middleware/auth");
 let { tmdb } = require("../services/tmdb.service.js");
 // get all reviews for one item
 router.get("/", async (req, res) => {
@@ -194,6 +195,41 @@ router.post("/", async (req, res) => {
     res.status(500).json({
       error: "Something went wrong",
     });
+  }
+});
+
+// ─── DELETE /reviews/:id (admin only) ─────────────────────────────────────────
+// Hard-deletes a review and recalculates the reviewContent aggregate.
+router.delete("/:id", isAuthenticated, isAdmin, async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    const { tmdbId, mediaType, rating } = review;
+    await review.deleteOne();
+
+    // Recalculate aggregate
+    const remaining = await Review.find({ tmdbId });
+    const content = await reviewContent.findOne({ tmdbId, mediaType });
+    if (content) {
+      if (remaining.length === 0) {
+        await content.deleteOne();
+      } else {
+        const newTotal = remaining.length;
+        const newAvg =
+          remaining.reduce((sum, r) => sum + r.rating, 0) / newTotal;
+        content.totalReviews = newTotal;
+        content.averageRating = Number(newAvg.toFixed(1));
+        await content.save();
+      }
+    }
+
+    res.json({ success: true, message: "Review deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 

@@ -82,11 +82,16 @@ async function getRecentlyPlayedTracks(refreshToken, limit = 20) {
         playedAt: item.played_at,
       }));
   } catch (err) {
-    console.error(
-      "Failed to get recently played Spotify tracks:",
-      err.response?.data || err.message,
+    console.warn(
+      "Failed to get recently played Spotify tracks, attempting fallback to top tracks:",
+      err.response?.data?.error?.message || err.message,
     );
-    return [];
+    try {
+      return await getUserTopTracks(refreshToken, limit);
+    } catch (fallbackErr) {
+      console.error("Fallback to top tracks failed:", fallbackErr.message);
+      return [];
+    }
   }
 }
 

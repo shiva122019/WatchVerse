@@ -59,6 +59,7 @@ export default function ReviewComments({ contentId }) {
     try {
       await api.delete(`/comments/${id}`);
       toast.success("Comment deleted");
+      // Reload the full tree so reply threading stays consistent
       await loadComments();
     } catch (e) {
       toast.error(formatApiError(e.response?.data?.error) || "Failed to delete comment");
@@ -137,6 +138,15 @@ export default function ReviewComments({ contentId }) {
                       <Trash2 className="w-3 h-3" /> Delete
                     </button>
                   </>
+                )}
+                {user.role === "admin" && user.id !== c.user_id && (
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    className="ml-auto flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-red-400 hover:bg-red-500/20 transition"
+                    title="Admin: Delete comment"
+                  >
+                    <Trash2 className="w-3 h-3" /> Mod Delete
+                  </button>
                 )}
               </div>
             )}

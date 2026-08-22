@@ -56,6 +56,7 @@ async function buildProfile(userId) {
     displayName: user.displayName || user.username,
     username: user.username,
     role: user.role || "member",
+    isBanned: user.isBanned || false,
     verified: user.verified || false,
     bio: user.bio || "",
     location: user.location || "",
