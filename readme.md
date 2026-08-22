@@ -1,326 +1,519 @@
 <div align="center">
 
-![WatchVerse](./banner.svg)
+<!-- Animated typing header using capsule-render -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:00F0FF,50:8E75F7,100:FF0055&height=220&section=header&text=🎬%20WatchVerse&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Where%20Entertainment%20Meets%20Community&descSize=20&descAlignY=55&descColor=ffffff" width="100%"/>
 
-**A premium, next-generation full-stack MERN media discovery and social interaction platform.**
+<br/>
 
-[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](#)
-[![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](#)
-[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#)
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](#)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](#)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](#)
-[![TMDB](https://img.shields.io/badge/TMDB-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white)](#)
-[![Spotify](https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white)](#)
-[![Gemini](https://img.shields.io/badge/Gemini-8E75F7?style=for-the-badge&logo=googlegemini&logoColor=white)](#)
+<!-- Animated typing effect -->
+<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=00F0FF&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=80&lines=%F0%9F%8E%AC+Stream+%E2%80%A2+%F0%9F%8E%B5+Listen+%E2%80%A2+%F0%9F%8E%A4+Sing+%E2%80%A2+%F0%9F%91%A5+Connect;AI+Chatbot+%E2%80%A2+Watch+Parties+%E2%80%A2+Karaoke+%E2%80%A2+Creator+Studio" alt="Typing SVG" /></a>
+
+<br/><br/>
+
+<!-- Tech stack badges -->
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![React](https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://socket.io/)
+
+<br/>
+
+[![TMDB](https://img.shields.io/badge/TMDB_API-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org/)
+[![Spotify](https://img.shields.io/badge/Spotify_API-1DB954?style=for-the-badge&logo=spotify&logoColor=white)](https://developer.spotify.com/)
+[![Google Gemini](https://img.shields.io/badge/Gemini_AI-8E75F7?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
+[![Google OAuth](https://img.shields.io/badge/Google_OAuth-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com/identity)
+[![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)](https://cloudinary.com/)
+
+<br/><br/>
+
+<!-- Dynamic stats -->
+![GitHub repo size](https://img.shields.io/github/repo-size/shiva122019/WatchVerse?style=flat-square&color=00F0FF&label=Repo%20Size)
+![GitHub last commit](https://img.shields.io/github/last-commit/shiva122019/WatchVerse?style=flat-square&color=8E75F7&label=Last%20Commit)
+![GitHub stars](https://img.shields.io/github/stars/shiva122019/WatchVerse?style=flat-square&color=FFB300&label=Stars)
+
+</div>
+
+<br/>
+
+---
+
+<div align="center">
+
+## 🌌 What is WatchVerse?
+
+</div>
+
+> **WatchVerse** is a next-generation **full-stack MERN entertainment ecosystem** that merges movie/TV discovery, music streaming, AI-powered recommendations, real-time social features, and creator tools into one cinematic experience.
+
+It's not just another streaming site — it's a **living, breathing community** where you can discover content through AI conversations, watch movies together in synchronized rooms, sing karaoke with your friends, create posts as a content creator, and build your entertainment identity.
+
+<div align="center">
+
+```
+🎬 Discover  →  🤖 AI Recommends  →  👥 Watch Together  →  ⭐ Review  →  🎤 Sing Along  →  📝 Create
+```
 
 </div>
 
 ---
 
-## 📖 Table of Contents
+## 🗺️ Table of Contents
 
-- [About](#-about)
-- [Key Features](#-key-features)
-- [Architecture](#-architecture)
+<details>
+<summary>📖 Click to expand</summary>
+
+- [What is WatchVerse?](#-what-is-watchverse)
+- [Feature Highlights](#-feature-highlights)
+- [Feature Deep Dive](#-feature-deep-dive)
+- [System Architecture](#-system-architecture)
 - [Data Model](#-data-model)
-- [AI Chatbot Flow](#-ai-chatbot-flow)
-- [Screenshots](#-screenshots)
+- [AI Chatbot Pipeline](#-ai-chatbot-pipeline)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
+- [Environment Variables](#-environment-variables)
+- [API Endpoints](#-api-endpoints)
+- [Contributing](#-contributing)
+- [Team](#-team)
+
+</details>
 
 ---
 
-## 📌 About
+## ⚡ Feature Highlights
 
-**WatchVerse** is a modern entertainment hub enabling users to seamlessly discover movies and TV series, explore rich metadata, write interactive reviews, swipe through content recommendations, discuss in real-time chat rooms, and sing in a fully integrated Karaoke Studio.
+<div align="center">
 
-Powered by [The Movie Database (TMDB)](https://www.themoviedb.org/) and [Spotify Web API](https://developer.spotify.com/), WatchVerse blends high-fidelity media metadata with community-focused features and advanced Gemini AI assistants.
+| Feature | Description | Tech |
+|:---:|:---|:---:|
+| 🏠 **Dynamic Home** | Hero banners, trending rows, genre collections with infinite scroll | React + TMDB |
+| 🔐 **Google OAuth** | One-click sign-in with Google, session persistence | Passport.js |
+| 🎵 **Spotify Integration** | Link Spotify → Get movie recs based on your music taste | Spotify Web API |
+| 🤖 **AI Chatbot** | Natural language: *"Find me a thriller like Inception"* | Gemini AI |
+| 🎉 **Watch Parties** | Create rooms, invite friends, sync video playback in real-time | Socket.IO |
+| 🎤 **Karaoke Studio** | Sing along with synced lyrics, record & share vocal covers | Web Audio API |
+| 📝 **Creator Hub** | Write posts, build following, creator analytics dashboard | MongoDB + Cloudinary |
+| ⭐ **Reviews & Ratings** | 1-5 star ratings, threaded comments, community averages | MongoDB |
+| 📋 **Smart Watchlist** | Track: *Want to Watch* → *Watching* → *Watched* | MongoDB |
+| 👤 **Rich Profiles** | Activity feed, favorites, stats, follower system | Aggregation Pipeline |
+| 🔍 **Advanced Filters** | Filter by genre, year, rating, type with real-time results | TMDB + Custom |
+| 🃏 **Swipe Discovery** | Tinder-style swipe cards for quick content decisions | Framer Motion |
 
----
-
-## ✨ Key Features
-
-### 🎤 Karaoke Studio & Voice Recorder (NEW!)
-
-Sing along to your favorite tracks directly inside the app:
-
-- **Synced Lyrics Player**: Real-time scrolling and highlighting of transliterated (Romanized) lyrics for regional and Hindi tracks, making them accessible to read.
-- **Auto-Play Backing Music**: Interactive HTML5 audio player and YouTube video integrations that trigger automatically when you start recording.
-- **Web Audio API voice visualizer**: Smooth canvas visualizer showing real-time frequency waves of your voice.
-- **Vocal Cover Mixer**: Automatically mixes your recorded microphone audio with the backing instrumental track, letting you preview your vocal cover inside the studio.
-- **Community Submissions**: Save your covers directly to Cloudinary and share them in the Community Recordings catalog!
-
-### 🤖 AI Entertainment Chatbot
-
-Conversational media recommendations powered by the Gemini API:
-
-- Ask natural-language questions like _"Recommend some thriller movies"_ or _"Suggest good Hindi songs for karaoke"_.
-- Understands search context and returns interactive movie/TV title cards.
-
-### 🏠 Home Page
-
-Browse curated, horizontally scrollable collections inspired by modern streaming platforms:
-
-- Featured hero movie banner.
-- Trending, popular & top-rated movies.
-- Popular & top-rated TV series.
-- Custom recommended feed.
-
-### 🃏 Swipe-Based Discovery
-
-A Tinder-style content discovery experience:
-
-- Interactive swipe cards with fluid Framer Motion animations.
-- Quick like/skip decisions to build recommendation algorithms.
-
-### 🔐 User Authentication
-
-- Secure registration and login with Passport.js.
-- Secure password hashing using `bcrypt`.
-- Persistent session storage in MongoDB using `connect-mongo`.
-
-### 🔎 Browse & Search
-
-- Smart lookup by title, actor, or creator.
-- Filter by genre and media type.
-- Duplicate result removal, sorted by rating, with smooth infinite scrolling.
-
-### 🎞️ Content Detail Page
-
-- Dedicated high-resolution posters & backdrops.
-- Interactive cast list, creator metadata, and average community ratings.
-- Watchlist management and user review statistics.
-
-### ⭐ Reviews & Ratings
-
-- 1–5 star ratings with written reviews (one review per user per title).
-- Cached community average rating and comments thread on user reviews.
-
-### 📝 Personal Watchlist
-
-Track content across custom states:
-
-- **Want to Watch** · **Watching** · **Watched**
-
-### 💬 Chat Rooms
-
-- Join real-time entertainment rooms to discuss suggestions with other users.
+</div>
 
 ---
 
-## 🏗️ Architecture
+## 🎯 Feature Deep Dive
 
-High-level view of how the frontend, backend, and external services fit together — colored by layer.
+<details>
+<summary><b>🏠 Dynamic Homepage</b></summary>
+<br/>
+
+The homepage is a cinematic experience inspired by premium streaming platforms:
+
+- **🎬 Hero Banner** — Features a highlighted movie/show with backdrop, rating, and quick-action buttons
+- **📊 Top 10 Trending** — Real-time trending content with numbered ranking badges
+- **🎯 Recommended For You** — Personalized suggestions based on watch history and preferences
+- **🎵 Spotify Mood Row** — Movies that match the vibe of your recent Spotify listens
+- **📂 Genre Collections** — Action, Comedy, Drama, Sci-Fi, Horror, and more
+- **♾️ Infinite Scroll** — Seamless pagination that loads more content as you scroll
+- **💀 Skeleton Loading** — Beautiful shimmer animations while content loads
+
+</details>
+
+<details>
+<summary><b>🔐 Authentication & Onboarding</b></summary>
+<br/>
+
+- **Google OAuth 2.0** — Secure, one-click Google sign-in via Passport.js
+- **Local Auth** — Traditional email/password registration with bcrypt hashing
+- **Session Management** — Persistent sessions stored in MongoDB via connect-mongo
+- **Smart Onboarding** — New users pick favorite genres and interests to seed recommendations
+- **Protected Routes** — Automatic redirects for unauthenticated users
+
+</details>
+
+<details>
+<summary><b>🎵 Spotify Integration</b></summary>
+<br/>
+
+WatchVerse bridges the gap between music and movies:
+
+```
+🎧 Your Spotify → 🧠 Mood Analysis → 🎬 Movie Recommendations
+```
+
+- **OAuth Flow** — Connect/disconnect Spotify with a single click
+- **Listening Analysis** — Analyzes your top tracks, artists, and audio features
+- **Cross-Media Recs** — If you listen to dark, atmospheric music → get thriller/noir movie suggestions
+- **Music Row** — Dedicated "Songs for your mood" row on the homepage
+- **Profile Integration** — Your Spotify connection status visible on your profile
+
+</details>
+
+<details>
+<summary><b>🤖 AI Media Assistant Chatbot</b></summary>
+<br/>
+
+A conversational AI that understands entertainment like a film-buff friend:
+
+- **Natural Language** — Ask anything: *"What's a good movie for date night?"*
+- **Intent Classification** — Automatically detects if you want recommendations, cast info, ratings, or storylines
+- **Contextual Memory** — Remembers conversation context within a session
+- **Rich Cards** — Returns interactive movie/show cards with posters, ratings, and direct links
+- **Library Sync** — Optionally syncs your watchlist so it knows what you've already seen
+- **Animated UI** — Features a glowing animated orb that pulses while thinking
+
+</details>
+
+<details>
+<summary><b>🎉 Watch Parties & Watch Rooms</b></summary>
+<br/>
+
+Watch movies together, no matter where you are:
+
+- **Create Rooms** — Generate a unique room with a shareable link
+- **Synchronized Playback** — Play/pause/seek syncs across all viewers in real-time
+- **Live Chat** — Built-in real-time chat sidebar powered by Socket.IO
+- **Participant Tracking** — See who's in the room with live avatars
+- **Immersive Mode** — Full-screen experience with hidden navbar for cinematic viewing
+
+</details>
+
+<details>
+<summary><b>🎤 Karaoke Studio</b></summary>
+<br/>
+
+A full-featured karaoke experience built right into the platform:
+
+- **🎵 Synced Lyrics** — Real-time scrolling and highlighting of lyrics (including transliterated/Romanized for Hindi tracks)
+- **🎶 Auto-Play Backing Music** — HTML5 audio player + YouTube video integration
+- **📊 Voice Visualizer** — Canvas-based real-time frequency visualization using Web Audio API
+- **🎙️ Recording** — Record your vocals using the browser's MediaRecorder API
+- **🎚️ Vocal Mixer** — Automatically mix your recorded voice with the backing track
+- **☁️ Community Submissions** — Save covers to Cloudinary and share in the Community Recordings gallery
+
+</details>
+
+<details>
+<summary><b>📝 Creator Hub & Studio</b></summary>
+<br/>
+
+Turn consumers into creators:
+
+- **Creator Studio** — Rich text editor for writing posts about movies, series, and music
+- **Media Attachments** — Upload images via Cloudinary integration
+- **Creator Feed** — Scrollable feed of all creator posts with engagement metrics
+- **Analytics Dashboard** — Track views, likes, and engagement on your posts
+- **Follow System** — Follow creators and see their content in your feed
+- **Comments & Discussions** — Threaded comment system on every post
+
+</details>
+
+<details>
+<summary><b>👤 Profiles & Social</b></summary>
+<br/>
+
+Your entertainment identity:
+
+- **Profile Page** — Avatar, display name, stats banner, and activity feed
+- **Favorites Collection** — Curated list of favorite movies, shows, and songs
+- **Review History** — All your reviews and ratings in one place
+- **Follower/Following** — Social graph with follow/unfollow functionality
+- **Activity Stats** — Reviews written, watchlist items, favorites count
+- **Public Profiles** — Click any username anywhere to view their profile
+
+</details>
+
+---
+
+## 🏗️ System Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Client["🖥️ Frontend — React + Vite"]
-        UI["Pages & Components<br/>Home · Browser · Detail · SwipeStack · Chatbot"]
+    subgraph Client["🖥️ Frontend — React 19 + Vite"]
+        direction TB
+        UI["🎨 Pages & Components"]
+        Context["🔗 AuthContext + API Layer"]
+        Realtime["⚡ Socket.IO Client"]
+        UI --> Context
+        UI --> Realtime
     end
 
-    subgraph Server["⚙️ Backend — Node.js + Express"]
-        Routes["Routes<br/>auth · home · watchlist · comments · chat · onboarding"]
-        Auth["Passport.js<br/>Session Auth"]
-        Ctrl["Controllers<br/>chat.controller.js"]
-        Services["Services Layer<br/>tmdb · spotify · gemini · intent · prompt · mediaClassifier"]
-        Cache[("NodeCache")]
+    subgraph Server["⚙️ Backend — Node.js + Express 5"]
+        direction TB
+        Routes["🛣️ API Routes<br/>18 route files"]
+        Auth["🔐 Passport.js<br/>Google OAuth + Local"]
+        Controllers["🎮 Controllers"]
+        Services["📦 Service Layer<br/>15 service files"]
+        Cache[("⚡ NodeCache")]
+        SocketServer["🔌 Socket.IO Server"]
     end
 
     subgraph Data["🗄️ Data Layer"]
-        Mongo[("MongoDB<br/>Users · Reviews · Comments · Preferences")]
-        SessionStore[("connect-mongo<br/>Session Store")]
+        Mongo[("🍃 MongoDB Atlas<br/>12 Collections")]
+        Sessions[("🔑 Session Store<br/>connect-mongo")]
+        Cloud[("☁️ Cloudinary<br/>Media Storage")]
     end
 
     subgraph External["🌐 External APIs"]
-        TMDB[("TMDB API")]
-        Spotify[("Spotify API")]
-        Gemini[("Gemini API")]
+        TMDB[("🎬 TMDB API<br/>Movies & TV")]
+        Spotify[("🎵 Spotify API<br/>Music Data")]
+        Gemini[("🤖 Gemini AI<br/>Recommendations")]
+        YouTube[("📺 YouTube<br/>Karaoke Audio")]
     end
 
-    UI -- "Axios / REST" --> Routes
+    Client -- "REST API (Axios)" --> Routes
+    Realtime -- "WebSocket" --> SocketServer
     Routes --> Auth
-    Routes --> Ctrl
-    Ctrl --> Services
-    Auth --> SessionStore
+    Routes --> Controllers
+    Controllers --> Services
+    Auth --> Sessions
     Services --> Cache
     Services --> Mongo
-    Services -- "movie & TV metadata" --> TMDB
-    Services -- "music data" --> Spotify
-    Services -- "AI responses" --> Gemini
-    Routes --> Mongo
+    Services --> Cloud
+    Services -- "Movie metadata" --> TMDB
+    Services -- "Music data" --> Spotify
+    Services -- "AI inference" --> Gemini
+    Services -- "Audio/Video" --> YouTube
 
-    classDef client fill:#60a5fa,stroke:#1d4ed8,stroke-width:2px,color:#0b0e14
-    classDef server fill:#e8b84b,stroke:#8a6f2e,stroke-width:2px,color:#0b0e14
-    classDef data fill:#a78bfa,stroke:#5b3fa0,stroke-width:2px,color:#0b0e14
-    classDef tmdb fill:#01b4e4,stroke:#016a86,stroke-width:2px,color:#ffffff
-    classDef spotify fill:#1db954,stroke:#0f7a34,stroke-width:2px,color:#ffffff
-    classDef gemini fill:#8e75f7,stroke:#4c2fb0,stroke-width:2px,color:#ffffff
+    classDef client fill:#00F0FF,stroke:#0099AA,stroke-width:2px,color:#000
+    classDef server fill:#FFB300,stroke:#AA7700,stroke-width:2px,color:#000
+    classDef data fill:#a78bfa,stroke:#5b3fa0,stroke-width:2px,color:#fff
+    classDef external fill:#FF0055,stroke:#AA0033,stroke-width:2px,color:#fff
 
-    class UI client
-    class Routes,Auth,Ctrl,Services,Cache server
-    class Mongo,SessionStore data
-    class TMDB tmdb
-    class Spotify spotify
-    class Gemini gemini
+    class UI,Context,Realtime client
+    class Routes,Auth,Controllers,Services,Cache,SocketServer server
+    class Mongo,Sessions,Cloud data
+    class TMDB,Spotify,Gemini,YouTube external
 ```
 
 ---
 
 ## 🗃️ Data Model
 
-Core entities and how they relate, based on the Mongoose models in `Backend/Models/`.
-
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': {
-  'primaryColor': '#e8b84b',
-  'primaryTextColor': '#0b0e14',
-  'primaryBorderColor': '#8a6f2e',
-  'secondaryColor': '#3ec6b6',
+  'primaryColor': '#00F0FF',
+  'primaryTextColor': '#000',
+  'primaryBorderColor': '#0099AA',
+  'secondaryColor': '#FFB300',
   'tertiaryColor': '#a78bfa',
-  'lineColor': '#3ec6b6',
-  'fontFamily': 'Arial'
+  'lineColor': '#00F0FF',
+  'fontFamily': 'monospace'
 }}}%%
 erDiagram
     USER ||--o{ REVIEW : writes
     USER ||--o{ COMMENT : posts
     USER ||--|| USERPREFERENCE : has
-    REVIEW ||--o{ COMMENT : "receives"
-    REVIEW }o--|| REVIEWCONTENT : "rates"
+    USER ||--o{ WATCHLIST : manages
+    USER ||--o{ USERFAVORITE : curates
+    USER ||--o{ CREATORPOST : publishes
+    USER ||--o{ FOLLOW : "follows/followed_by"
+    USER ||--o| SPOTIFYCONNECTION : links
+    USER ||--o{ KARAOKERECORDING : records
+    REVIEW ||--o{ COMMENT : receives
+    REVIEW }o--|| REVIEWCONTENT : rates
+    CREATORPOST ||--o{ POSTANALYTIC : tracks
 
     USER {
         string username
+        string email
+        string displayName
+        string googleId
         string passwordHash
+        string avatar
         date createdAt
     }
     REVIEW {
-        string userId
+        ObjectId userId FK
         string mediaId
         int rating
         string text
+        date createdAt
     }
     COMMENT {
-        string reviewId
-        string userId
+        ObjectId reviewId FK
+        ObjectId userId FK
+        ObjectId parentId FK
         string text
+        date createdAt
+    }
+    WATCHLIST {
+        ObjectId userId FK
+        string mediaId
+        string mediaType
+        string status
+        date addedAt
     }
     USERPREFERENCE {
-        string userId
+        ObjectId userId FK
         array genres
         array interests
+        boolean onboardingCompleted
+    }
+    USERFAVORITE {
+        ObjectId userId FK
+        string mediaId
+        string mediaType
+        string title
+        string posterUrl
+    }
+    CREATORPOST {
+        ObjectId authorId FK
+        string title
+        string content
+        string mediaType
+        array images
+        int likes
+        date createdAt
+    }
+    FOLLOW {
+        ObjectId followerId FK
+        ObjectId followingId FK
+        date createdAt
+    }
+    SPOTIFYCONNECTION {
+        ObjectId userId FK
+        string accessToken
+        string refreshToken
+        boolean connected
+    }
+    KARAOKERECORDING {
+        ObjectId userId FK
+        string songTitle
+        string audioUrl
+        date createdAt
     }
     REVIEWCONTENT {
         string mediaId
         float averageRating
         int reviewCount
     }
+    POSTANALYTIC {
+        ObjectId postId FK
+        int views
+        int likes
+        int comments
+    }
 ```
 
 ---
 
-## 🤖 AI Chatbot Flow
+## 🤖 AI Chatbot Pipeline
 
-How a natural-language question turns into a recommendation.
+How a natural-language question becomes a personalized recommendation:
 
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': {
-  'actorBkg': '#191f2c',
-  'actorBorder': '#e8b84b',
-  'actorTextColor': '#edeae0',
-  'actorLineColor': '#3ec6b6',
-  'signalColor': '#3ec6b6',
-  'signalTextColor': '#edeae0',
-  'labelBoxBkgColor': '#a78bfa',
-  'labelBoxBorderColor': '#5b3fa0',
-  'labelTextColor': '#0b0e14',
-  'noteBkgColor': '#e8b84b',
-  'noteTextColor': '#0b0e14',
-  'noteBorderColor': '#8a6f2e',
-  'sequenceNumberColor': '#0b0e14'
+  'actorBkg': '#0a0a0f',
+  'actorBorder': '#00F0FF',
+  'actorTextColor': '#ffffff',
+  'signalColor': '#00F0FF',
+  'signalTextColor': '#ffffff',
+  'noteBkgColor': '#FFB300',
+  'noteTextColor': '#000000',
+  'noteBorderColor': '#AA7700'
 }}}%%
 sequenceDiagram
     participant U as 👤 User
     participant FE as 💬 Chatbot UI
-    participant R as chat.route.js
-    participant C as chat.controller.js
-    participant I as intent.service.js
-    participant P as prompt.service.js
-    participant G as ✨ Gemini API
-    participant T as tmdb.service.js
+    participant R as 🛣️ chat.route
+    participant C as 🎮 chat.controller
+    participant I as 🧠 intent.service
+    participant P as 📝 prompt.service
+    participant G as ✨ Gemini AI
+    participant T as 🎬 tmdb.service
 
     U->>FE: "What should I watch if I liked Interstellar?"
-    FE->>R: POST /chat
-    R->>C: handle message
-    C->>I: classify intent
-    I-->>C: recommendation intent
-    C->>P: build contextual prompt
-    P->>G: generate suggestions
-    G-->>P: AI-generated titles & reasoning
-    C->>T: fetch matching metadata
-    T-->>C: posters, ratings, genres
-    C-->>FE: reply + enriched title cards
-    FE-->>U: conversational response
+    FE->>R: POST /api/chat
+    R->>C: handle(message, sessionId)
+    C->>I: classifyIntent(message)
+    I-->>C: { intent: "recommendation", context: "sci-fi" }
+    C->>P: buildPrompt(intent, history, library)
+    P->>G: generateContent(prompt)
+    G-->>P: AI-generated titles + reasoning
+    C->>T: fetchMetadata(titles[])
+    T-->>C: posters, ratings, genres, overviews
+    C-->>FE: { reply, cards: [...enrichedResults] }
+    FE-->>U: 🎬 Interactive movie cards + explanation
 ```
-
----
-
-## 📸 Screenshots
-
-<div align="center">
-
-|                    Home                    |                 Content Detail                 |               Swipe Discovery                |
-| :----------------------------------------: | :--------------------------------------------: | :------------------------------------------: |
-| ![Home screenshot](./screenshots/home.png) | ![Detail screenshot](./screenshots/detail.png) | ![Swipe screenshot](./screenshots/swipe.png) |
-
-|                    AI Chatbot                    |                      Watchlist                       |                      Chat Rooms                       |
-| :----------------------------------------------: | :--------------------------------------------------: | :---------------------------------------------------: |
-| ![Chatbot screenshot](./screenshots/chatbot.png) | ![Watchlist screenshot](./screenshots/watchlist.png) | ![Chat rooms screenshot](./screenshots/chatrooms.png) |
-
-</div>
 
 ---
 
 ## 🛠️ Tech Stack
 
-<table>
-<tr>
-<td valign="top" width="33%">
+<div align="center">
 
-**🖥️ Frontend**
+### Frontend
 
-![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
-![React Router](https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
-![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white)
-![Tailwind](https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-EF008F?style=flat-square&logo=framer&logoColor=white)
+| Technology | Purpose |
+|:---:|:---|
+| ![React](https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black) | UI framework with hooks & context |
+| ![Vite](https://img.shields.io/badge/Vite_8-646CFF?style=flat-square&logo=vite&logoColor=white) | Lightning-fast dev server & bundler |
+| ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) | Utility-first styling with glassmorphism design |
+| ![Framer Motion](https://img.shields.io/badge/Framer_Motion-EF008F?style=flat-square&logo=framer&logoColor=white) | Fluid animations & page transitions |
+| ![React Router](https://img.shields.io/badge/React_Router_7-CA4245?style=flat-square&logo=reactrouter&logoColor=white) | Client-side routing |
+| ![Socket.IO](https://img.shields.io/badge/Socket.IO_Client-010101?style=flat-square&logo=socketdotio&logoColor=white) | Real-time watch party communication |
+| ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white) | API communication layer |
+| ![Recharts](https://img.shields.io/badge/Recharts-FF6384?style=flat-square&logo=chartdotjs&logoColor=white) | Creator analytics charts |
 
-</td>
-<td valign="top" width="33%">
+### Backend
 
-**⚙️ Backend**
+| Technology | Purpose |
+|:---:|:---|
+| ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white) | JavaScript runtime |
+| ![Express](https://img.shields.io/badge/Express_5-000000?style=flat-square&logo=express&logoColor=white) | REST API framework |
+| ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) | NoSQL database |
+| ![Mongoose](https://img.shields.io/badge/Mongoose_9-880000?style=flat-square&logo=mongoose&logoColor=white) | ODM with schema validation |
+| ![Passport](https://img.shields.io/badge/Passport.js-34E27A?style=flat-square&logo=passport&logoColor=white) | Google OAuth + Local authentication |
+| ![Socket.IO](https://img.shields.io/badge/Socket.IO_Server-010101?style=flat-square&logo=socketdotio&logoColor=white) | Real-time bidirectional events |
+| ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat-square&logo=cloudinary&logoColor=white) | Image & audio cloud storage |
+| ![Zod](https://img.shields.io/badge/Zod-3E67B1?style=flat-square&logo=zod&logoColor=white) | Runtime input validation |
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
-![Express](https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)
-![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=flat-square&logo=mongoose&logoColor=white)
-![Passport](https://img.shields.io/badge/Passport.js-34E27A?style=flat-square&logo=passport&logoColor=white)
+### External APIs & AI
 
-`Express Session` · `connect-mongo` · `bcrypt` · `NodeCache` · `retry-axios`
+| Service | Purpose |
+|:---:|:---|
+| ![TMDB](https://img.shields.io/badge/TMDB-01B4E4?style=flat-square&logo=themoviedatabase&logoColor=white) | Movie & TV metadata, posters, trending |
+| ![Spotify](https://img.shields.io/badge/Spotify-1DB954?style=flat-square&logo=spotify&logoColor=white) | Music data, user listening history, mood analysis |
+| ![Gemini](https://img.shields.io/badge/Google_Gemini-8E75F7?style=flat-square&logo=googlegemini&logoColor=white) | AI-powered chatbot & recommendations |
+| ![Google](https://img.shields.io/badge/Google_OAuth-4285F4?style=flat-square&logo=google&logoColor=white) | Secure third-party authentication |
 
-</td>
-<td valign="top" width="33%">
+</div>
 
-**🌐 External APIs**
+---
 
-![TMDB](https://img.shields.io/badge/TMDB-01B4E4?style=flat-square&logo=themoviedatabase&logoColor=white)
-![Spotify](https://img.shields.io/badge/Spotify-1DB954?style=flat-square&logo=spotify&logoColor=white)
-![Gemini](https://img.shields.io/badge/Gemini-8E75F7?style=flat-square&logo=googlegemini&logoColor=white)
+## 📊 Codebase Overview
 
-</td>
-</tr>
-</table>
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'pie1': '#00F0FF', 'pie2': '#8E75F7', 'pie3': '#FFB300', 'pie4': '#FF0055', 'pie5': '#1DB954', 'pie6': '#61DAFB', 'pie7': '#47A248'}}}%%
+pie title Codebase Composition
+    "Frontend Pages" : 15
+    "Frontend Components" : 20
+    "Backend Routes" : 18
+    "Backend Services" : 15
+    "Database Models" : 12
+    "UI Components" : 8
+    "Config & Utils" : 5
+```
+
+<div align="center">
+
+| Metric | Count |
+|:---|:---:|
+| 📄 Frontend Pages | **15** |
+| 🧩 React Components | **28+** |
+| 🛣️ API Route Files | **18** |
+| ⚙️ Service Files | **15** |
+| 🗄️ Database Models | **12** |
+| 🌐 External API Integrations | **4** |
+| 🔌 WebSocket Events | **Real-time** |
+
+</div>
 
 ---
 
@@ -329,98 +522,347 @@ sequenceDiagram
 ```
 WatchVerse/
 │
-├── Frontend/
+├── 🖥️ Frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── AnimatedOrb.jsx
-│   │   │   ├── MediaAssistantChatbot.jsx
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── ProgressBar.jsx
-│   │   │   ├── ReviewComments.jsx
-│   │   │   ├── SwipeCard.jsx
-│   │   │   └── SwipeStack.jsx
+│   │   │   ├── AnimatedOrb.jsx            # AI chatbot pulsing orb animation
+│   │   │   ├── MediaAssistantChatbot.jsx  # Full AI chatbot interface (1690 lines!)
+│   │   │   ├── MediaCard.jsx              # Movie/TV content card
+│   │   │   ├── MusicMediaCard.jsx         # Music-specific content card
+│   │   │   ├── Navbar.jsx                 # Global navigation with mobile responsive
+│   │   │   ├── PrismoLogo.jsx             # Animated brand logo
+│   │   │   ├── ReviewComments.jsx         # Threaded review & comment system
+│   │   │   ├── SpotifyRecommendations.jsx # Spotify-powered recommendation rows
+│   │   │   ├── SplashScreen.jsx           # Cinematic loading screen
+│   │   │   ├── StarRating.jsx             # Interactive star rating component
+│   │   │   ├── SwipeCard.jsx              # Tinder-style swipe card
+│   │   │   ├── SwipeStack.jsx             # Swipe discovery stack manager
+│   │   │   ├── profile/                   # Profile sub-components
+│   │   │   ├── studio/                    # Creator studio sub-components
+│   │   │   ├── ui/                        # Shared UI (ErrorBoundary, Skeleton, etc.)
+│   │   │   └── watchparty/                # Watch party components + Sonner toasts
 │   │   │
 │   │   ├── pages/
-│   │   │   ├── Home.jsx
-│   │   │   ├── Browser.jsx
-│   │   │   ├── Detail.jsx
-│   │   │   ├── Register.jsx
-│   │   │   ├── onBoarding.jsx
-│   │   │   └── Karaoke.jsx (New!)
+│   │   │   ├── Home.jsx                   # Dynamic homepage with 10+ content rows
+│   │   │   ├── Browser.jsx                # Advanced search & filter page
+│   │   │   ├── Detail.jsx                 # Movie/TV detail with reviews
+│   │   │   ├── Login.jsx                  # Auth page with Google OAuth
+│   │   │   ├── Register.jsx               # Registration with validation
+│   │   │   ├── onBoarding.jsx             # Genre & interest picker
+│   │   │   ├── Profile.jsx                # User profile with stats
+│   │   │   ├── Watchlist.jsx              # Personal watchlist manager
+│   │   │   ├── WatchParty.jsx             # Watch party lobby
+│   │   │   ├── WatchRoom.jsx              # Synchronized video room
+│   │   │   ├── Karaoke.jsx                # Full karaoke studio
+│   │   │   ├── CreatorStudio.jsx          # Content creation editor
+│   │   │   ├── CreatorFeed.jsx            # Creator post feed
+│   │   │   ├── WatchCreatorPost.jsx       # Individual post viewer
+│   │   │   └── ConnectSpotify.jsx         # Spotify OAuth flow
 │   │   │
-│   │   ├── App.jsx
-│   │   └── index.css
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx            # Global auth state management
+│   │   ├── lib/
+│   │   │   └── api.js                     # Axios instance with interceptors
+│   │   ├── App.jsx                        # Root app with routing
+│   │   └── index.css                      # Global styles + Tailwind
 │   │
-│   └── public/
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── package.json
 │
-├── Backend/
+├── ⚙️ Backend/
 │   ├── Models/
-│   │   ├── Comment.js
-│   │   ├── Review.js
-│   │   ├── User.js
-│   │   ├── UserPreference.js
-│   │   ├── reviewContent.js
-│   │   └── KaraokeRecording.js (New!)
+│   │   ├── User.js                        # User schema (Google + local auth)
+│   │   ├── Review.js                      # Movie/TV reviews
+│   │   ├── Comment.js                     # Threaded comments on reviews
+│   │   ├── WatchList.js                   # Watchlist entries
+│   │   ├── UserPreference.js              # Onboarding preferences
+│   │   ├── UserFavorite.js                # Curated favorites
+│   │   ├── CreatorPost.js                 # Creator content posts
+│   │   ├── Follow.js                      # Social follow graph
+│   │   ├── PostAnalytic.js                # Creator analytics
+│   │   ├── SpotifyConnection.js           # Spotify OAuth tokens
+│   │   ├── KaraokeRecording.js            # Saved karaoke recordings
+│   │   └── reviewContent.js               # Aggregated review stats
 │   │
 │   ├── controllers/
-│   │   └── chat.controller.js
+│   │   └── chat.controller.js             # AI chatbot orchestration
 │   │
 │   ├── routes/
-│   │   ├── auth.route.js
-│   │   ├── chat.route.js
-│   │   ├── comments.route.js
-│   │   ├── home.route.js
-│   │   ├── onboarding.route.js
-│   │   ├── watchlist.route.js
-│   │   ├── karaoke.route.js (New!)
-│   │   └── index.js
+│   │   ├── auth.route.js                  # Google OAuth + local auth
+│   │   ├── home.route.js                  # Homepage data aggregation
+│   │   ├── movieContent.route.js          # Movie/TV detail endpoints
+│   │   ├── reviews.route.js               # CRUD reviews
+│   │   ├── comments.route.js              # CRUD comments + threads
+│   │   ├── watchlist.route.js             # Watchlist management
+│   │   ├── watchparty.route.js            # Watch party CRUD + Socket.IO
+│   │   ├── chat.route.js                  # AI chatbot endpoint
+│   │   ├── creator.route.js               # Creator post CRUD
+│   │   ├── follow.route.js                # Follow/unfollow system
+│   │   ├── favorites.route.js             # User favorites management
+│   │   ├── karaoke.route.js               # Karaoke songs + recordings
+│   │   ├── profile.route.js               # Profile data aggregation
+│   │   ├── profile.activity.route.js      # Activity feed
+│   │   ├── onboarding.route.js            # Onboarding flow
+│   │   ├── spotify.personalization.route.js # Spotify mood-based recs
+│   │   ├── spotify.profile.route.js       # Spotify profile data
+│   │   └── index.js                       # Route registry
 │   │
 │   ├── services/
-│   │   ├── gemini.service.js
-│   │   ├── home.service.js
-│   │   ├── intent.service.js
-│   │   ├── mediaClassifier.service.js
-│   │   ├── prompt.service.js
-│   │   ├── spotify.service.js
-│   │   ├── tmdb.service.js
-│   │   └── lyrics.service.js (New!)
+│   │   ├── tmdb.service.js                # TMDB API wrapper (24KB!)
+│   │   ├── spotify.service.js             # Spotify API integration
+│   │   ├── spotifyPersonalization.service.js # Mood analysis engine
+│   │   ├── spotify.profile.service.js     # Spotify profile data
+│   │   ├── gemini.service.js              # Google Gemini AI wrapper
+│   │   ├── intent.service.js              # NLP intent classifier
+│   │   ├── prompt.service.js              # Dynamic prompt builder
+│   │   ├── mediaClassifier.service.js     # Media type classifier
+│   │   ├── home.service.js                # Homepage data orchestrator
+│   │   ├── lyrics.service.js              # Lyrics fetching + sync (21KB!)
+│   │   ├── creator.service.js             # Creator post service
+│   │   ├── profile.service.js             # Profile aggregation
+│   │   ├── movieContent.service.js        # Movie detail service
+│   │   ├── statistics.service.js          # User stats calculator
+│   │   └── activity.js                    # Activity tracking
 │   │
-│   ├── config/
-│   ├── lib/
-│   └── server.js
+│   ├── config/                            # Passport & DB configuration
+│   ├── lib/                               # Shared utilities
+│   └── server.js                          # Express app + Socket.IO setup
 │
-├── package.json
-├── package-lock.json
-└── README.md
+└── README.md                              # You are here! 📍
 ```
 
 ---
 
 ## 🚀 Getting Started
 
+### Prerequisites
+
+Make sure you have these installed:
+
+| Requirement | Version |
+|:---|:---|
+| ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white) | v18+ |
+| ![npm](https://img.shields.io/badge/npm-CB3837?style=flat-square&logo=npm&logoColor=white) | v9+ |
+| ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) | Atlas or Local |
+| ![Git](https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white) | Latest |
+
+### Installation
+
 ```bash
-# Clone the repository
+# 1️⃣ Clone the repository
 git clone https://github.com/shiva122019/WatchVerse.git
 cd WatchVerse
 
-# Install dependencies
-cd Frontend && npm install
-cd ../Backend && npm install
+# 2️⃣ Install backend dependencies
+cd Backend
+npm install
 
-# Set up environment variables
-# Add your TMDB, Spotify, Gemini, and MongoDB credentials to .env files
+# 3️⃣ Install frontend dependencies
+cd ../Frontend
+npm install
 
-# Run the backend
-cd Backend && npm start
+# 4️⃣ Set up environment variables (see below)
+# Create .env files in both Backend/ and Frontend/
 
-# Run the frontend
-cd Frontend && npm run dev
+# 5️⃣ Start the backend server
+cd ../Backend
+npm start
+# ✅ Server running on http://localhost:3000
+
+# 6️⃣ Start the frontend dev server
+cd ../Frontend
+npm run dev
+# ✅ App running on http://localhost:5173
 ```
+
+---
+
+## 🔑 Environment Variables
+
+### Backend `.env`
+
+```env
+# Database
+MONGODB_URI=mongodb+srv://your-connection-string
+
+# Session
+SESSION_SECRET=your-session-secret
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+
+# TMDB
+TMDB_API_KEY=your-tmdb-api-key
+
+# Spotify
+SPOTIFY_CLIENT_ID=your-spotify-client-id
+SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
+
+# Google Gemini AI
+GEMINI_API_KEY=your-gemini-api-key
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-key
+CLOUDINARY_API_SECRET=your-cloudinary-secret
+
+# Frontend URL (CORS)
+CLIENT_URL=http://localhost:5173
+```
+
+### Frontend `.env`
+
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+---
+
+## 🔌 API Endpoints
+
+<details>
+<summary><b>🔐 Authentication</b> — <code>/api/auth</code></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `GET` | `/google` | Initiate Google OAuth flow |
+| `GET` | `/google/callback` | Google OAuth callback |
+| `POST` | `/register` | Register with email/password |
+| `POST` | `/login` | Login with credentials |
+| `GET` | `/me` | Get current user session |
+| `POST` | `/logout` | Destroy session |
+
+</details>
+
+<details>
+<summary><b>🏠 Homepage</b> — <code>/api/home</code></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `GET` | `/` | Aggregated homepage data |
+| `GET` | `/section` | Paginated section data |
+
+</details>
+
+<details>
+<summary><b>🔍 Browse & Content</b> — <code>/api/content</code></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `GET` | `/search` | Search movies, TV, music |
+| `GET` | `/:type/:id` | Get content detail |
+| `GET` | `/:type/:id/credits` | Get cast & crew |
+
+</details>
+
+<details>
+<summary><b>⭐ Reviews & Comments</b></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `POST` | `/api/reviews` | Create review |
+| `GET` | `/api/reviews/:mediaId` | Get reviews for content |
+| `POST` | `/api/comments` | Add comment to review |
+| `GET` | `/api/comments/:reviewId` | Get comment thread |
+
+</details>
+
+<details>
+<summary><b>📋 Watchlist</b> — <code>/api/watchlist</code></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `POST` | `/` | Add to watchlist |
+| `GET` | `/` | Get user's watchlist |
+| `PATCH` | `/:id` | Update status |
+| `DELETE` | `/:id` | Remove from watchlist |
+
+</details>
+
+<details>
+<summary><b>🎉 Watch Party</b> — <code>/api/watchparty</code></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `POST` | `/` | Create watch party room |
+| `GET` | `/:roomId` | Get room details |
+| `WS` | `connection` | Socket.IO real-time sync |
+
+</details>
+
+<details>
+<summary><b>🤖 AI Chat</b> — <code>/api/chat</code></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `POST` | `/` | Send message to AI assistant |
+
+</details>
+
+<details>
+<summary><b>🎤 Karaoke</b> — <code>/api/karaoke</code></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `GET` | `/songs` | Browse available songs |
+| `GET` | `/songs/:id/lyrics` | Get synced lyrics |
+| `POST` | `/recordings` | Save a recording |
+| `GET` | `/recordings` | Community recordings |
+
+</details>
+
+<details>
+<summary><b>📝 Creator</b> — <code>/api/creator</code></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `POST` | `/posts` | Create a post |
+| `GET` | `/feed` | Get creator feed |
+| `GET` | `/posts/:id` | Get single post |
+| `POST` | `/posts/:id/like` | Like a post |
+
+</details>
+
+<details>
+<summary><b>🎵 Spotify</b></summary>
+
+| Method | Endpoint | Description |
+|:---:|:---|:---|
+| `GET` | `/api/spotify/personalized` | Mood-based movie recs |
+| `GET` | `/api/spotify/profile` | Spotify profile data |
+
+</details>
+
+---
+
+## 👥 Team
+
+<div align="center">
+
+Made with ❤️ and lots of ☕ by the **WatchVerse Team**
+
+<br/>
+
+[![GitHub](https://img.shields.io/badge/GitHub-shiva122019-181717?style=for-the-badge&logo=github)](https://github.com/shiva122019)
+
+</div>
 
 ---
 
 <div align="center">
 
-Built with ❤️ using the **MERN** stack
+<!-- Footer wave -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:FF0055,50:8E75F7,100:00F0FF&height=120&section=footer" width="100%"/>
+
+<br/>
+
+**⭐ Star this repo if you found it interesting!**
+
+<br/>
+
+*Built with the MERN Stack · Powered by AI · Designed for the Community*
 
 </div>
