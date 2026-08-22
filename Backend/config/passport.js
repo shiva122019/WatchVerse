@@ -28,6 +28,12 @@ const verifyCallBack = (email, password, done) => {
         //console.log("Password valid:", isValid);
 
         if (isValid) {
+          if (user.isBanned) {
+            return done(null, false, {
+              message:
+                "Your account has been banned. Please contact support.",
+            });
+          }
           return done(null, user);
         } else {
           return done(null, false, {

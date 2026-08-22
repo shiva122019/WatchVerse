@@ -70,14 +70,6 @@ export default function ProfileActions({
 
   const buttons = [
     {
-      key: "edit",
-      label: "Edit Profile",
-      icon: Pencil,
-      to: "/profile/edit",
-      variant: "primary",
-    },
-
-    {
       key: "dashboard",
       label: "Creator Dashboard",
       icon: LayoutDashboard,

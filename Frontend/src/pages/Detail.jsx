@@ -13,6 +13,7 @@ import {
   Music2,
   ExternalLink,
   Heart,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import ReviewComments from "@/components/ReviewComments";
@@ -183,6 +184,20 @@ export default function Detail() {
       setError(formatApiError(e2.response?.data?.error) || "Failed to submit");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const deleteReview = async (reviewId) => {
+    if (!window.confirm("Delete this review? This action cannot be undone."))
+      return;
+    try {
+      await api.delete(`/reviews/${reviewId}`);
+      toast.success("Review deleted");
+      setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+    } catch (e) {
+      toast.error(
+        formatApiError(e.response?.data?.error) || "Failed to delete review",
+      );
     }
   };
 
@@ -677,7 +692,19 @@ export default function Detail() {
                             </p>
                           </div>
                         </div>
-                        <StarRating value={r.rating} />
+                        <div className="flex items-center gap-3">
+                          <StarRating value={r.rating} />
+                          {user?.role === "admin" && (
+                            <button
+                              onClick={() => deleteReview(r.id)}
+                              title="Admin: Delete review"
+                              className="flex items-center gap-1 rounded-full border border-red-500/40 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400 transition hover:bg-red-500/20"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Delete
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <p className="mt-2 leading-relaxed text-neutral-300">
                         {r.text}

@@ -1,8 +1,10 @@
 const router = require("express").Router();
 const creatorService = require("../services/creator.service");
-const { isAuthenticated } = require("../middleware/auth");
+const { isAuthenticated, isAdmin } = require("../middleware/auth");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
+const CreatorPost = require("../Models/CreatorPost");
+const AppError = require("../lib/AppError");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -146,14 +148,25 @@ router.patch(
 
 /**
  * DELETE /creator/posts/:id
- * Delete a creator post. Restricted to creator role and author.
+ * Delete a creator post.
+ * - Admin: can delete any post.
+ * - Creator: can only delete their own posts (enforced by creatorService.deletePost).
  */
 router.delete(
   "/posts/:id",
   isAuthenticated,
   async (req, res, next) => {
     try {
-      await creatorService.deletePost(req.params.id, req.user._id);
+      if (req.user.role === "admin") {
+        // Admin bypass: delete directly without ownership check
+        const post = await CreatorPost.findById(req.params.id);
+        if (!post) {
+          throw new AppError("Post not found", 404);
+        }
+        await post.deleteOne();
+      } else {
+        await creatorService.deletePost(req.params.id, req.user._id);
+      }
 
       res.json({
         success: true,

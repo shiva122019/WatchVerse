@@ -4,7 +4,7 @@ const { v2: cloudinary } = require("cloudinary");
 
 const User = require("../Models/User");
 const profileService = require("../services/profile.service");
-const { isAuthenticated } = require("../middleware/auth");
+const { isAuthenticated, isAdmin } = require("../middleware/auth");
 const AppError = require("../lib/AppError");
 
 const upload = multer({
@@ -152,6 +152,71 @@ router.patch("/", isAuthenticated, async (req, res, next) => {
       success: true,
       message: "Profile updated successfully",
       profile,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * PATCH /profile/:userId/ban
+ * Admin only — ban a user by their MongoDB _id.
+ * Admin cannot ban themselves.
+ */
+router.patch("/:userId/ban", isAuthenticated, isAdmin, async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    // Prevent self-ban
+    if (userId === req.user._id.toString()) {
+      throw new AppError("Admin cannot ban themselves.", 400);
+    }
+
+    const target = await User.findById(userId);
+    if (!target) {
+      throw new AppError("User not found.", 404);
+    }
+
+    // Cannot ban another admin
+    if (target.role === "admin") {
+      throw new AppError("Cannot ban another admin account.", 403);
+    }
+
+    target.isBanned = true;
+    await target.save();
+
+    res.json({
+      success: true,
+      message: `User ${target.username} has been banned.`,
+      userId: target._id,
+      isBanned: true,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * PATCH /profile/:userId/unban
+ * Admin only — unban a user by their MongoDB _id.
+ */
+router.patch("/:userId/unban", isAuthenticated, isAdmin, async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const target = await User.findById(userId);
+    if (!target) {
+      throw new AppError("User not found.", 404);
+    }
+
+    target.isBanned = false;
+    await target.save();
+
+    res.json({
+      success: true,
+      message: `User ${target.username} has been unbanned.`,
+      userId: target._id,
+      isBanned: false,
     });
   } catch (err) {
     next(err);

@@ -21,6 +21,13 @@ const MOOD_TO_TMDB_GENRES = {
   sufi: [18],
   spiritual: [18],
 
+  classical: [10402, 36, 99], // Music, History, Documentary
+  orchestral: [10402, 12, 14], // Music, Adventure, Fantasy
+  instrumental: [10402, 9648], // Music, Mystery
+  epic: [12, 14, 10752], // Adventure, Fantasy, War
+  ambient: [9648, 878], // Mystery, Sci-Fi
+  cinematic: [10402, 12, 18], // Music, Adventure, Drama
+
   comedy: [35],
   happy: [35],
   fun: [35],
@@ -54,8 +61,8 @@ const MOOD_TO_TMDB_GENRES = {
 async function analyzeListeningMood(tracks) {
   if (!tracks || tracks.length === 0) {
     return {
-      moods: ["romantic", "emotional"],
-      label: "Romantic & Emotional",
+      moods: ["drama"],
+      label: "Drama & Cinema",
     };
   }
 
@@ -65,13 +72,18 @@ async function analyzeListeningMood(tracks) {
     .join("\n");
 
   const systemInstruction = `
-You are a music mood analyzer for a movie recommendation platform.
+You are an expert music mood and genre analyzer for a movie recommendation platform.
 
-Analyze the user's RECENTLY PLAYED songs and determine the emotional
-themes of the music they have been listening to.
+Analyze the user's RECENTLY PLAYED songs and accurately determine the sound, genre, and emotional tone.
 
 You MUST choose 1-3 tags ONLY from this list:
 
+classical
+orchestral
+instrumental
+epic
+ambient
+cinematic
 romantic
 sad
 emotional
@@ -92,24 +104,18 @@ devotional
 comedy
 drama
 
-IMPORTANT:
-- Focus on emotional/mood characteristics of the songs.
-- Do NOT return "popular".
-- Do NOT return a generic popularity label.
-- If the music appears romantic, love-related, heartbreak-related,
-  melancholic, or emotional, prefer:
-  romantic, sad, emotional.
-- For songs that suggest love/relationships/heartbreak, return
-  "romantic" and/or "sad".
-- Return ONLY a raw JSON array.
-- No markdown.
-- No explanation.
+CRITICAL GUIDELINES:
+- Be precise and unbiased. Do NOT assume romantic or emotional unless the tracks explicitly convey romance or heartbreak.
+- For western classical, symphonies, piano concertos, opera, or instrumental film scores, choose:
+  "classical", "orchestral", "instrumental", "epic", "cinematic", or "ambient".
+- Return ONLY a raw JSON array of strings.
+- No markdown formatting, no explanations.
 
-Example:
-["romantic", "sad"]
+Example for Classical/Orchestral music:
+["classical", "orchestral"]
 
-Another example:
-["romantic", "emotional"]
+Example for Action/Hip-hop music:
+["energetic", "hiphop"]
 `;
 
   const prompt = `
@@ -160,13 +166,13 @@ ${trackList}
     };
   } catch (err) {
     console.warn(
-      "Mood analysis failed, using romantic/emotional fallback:",
+      "Mood analysis failed, using drama fallback:",
       err.message,
     );
 
     return {
-      moods: ["romantic", "emotional"],
-      label: "Romantic & Emotional",
+      moods: ["drama"],
+      label: "Drama & Cinema",
     };
   }
 }
@@ -192,8 +198,8 @@ async function getMovieRecsFromMood(moods) {
      * rather than only one genre.
      */
     if (genres.size === 0) {
-      genres.add(10749);
-      genres.add(18);
+      genres.add(18); // Drama
+      genres.add(10402); // Music
     }
 
     const genreIds = Array.from(genres);

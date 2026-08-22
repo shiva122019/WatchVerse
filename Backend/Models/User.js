@@ -55,8 +55,12 @@ const userSchema = new mongoose.Schema(
     // ── Profile fields (consumed by GET /profile/me) ──────────────
     role: {
       type: String,
-      enum: ["member", "creator"],
+      enum: ["member", "creator", "admin"],
       default: "member",
+    },
+    isBanned: {
+      type: Boolean,
+      default: false,
     },
     verified: {
       type: Boolean,

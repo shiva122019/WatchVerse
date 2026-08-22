@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Eye, Clock, User } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Eye, Clock, User, Trash2 } from "lucide-react";
 import api, { formatApiError } from "../lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import DetailSkeleton from "@/components/ui/DetailSkeleton";
 export default function WatchCreatorPost() {
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,6 +49,20 @@ export default function WatchCreatorPost() {
       setError("Failed to load content.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deletePost = async () => {
+    if (!window.confirm("Delete this creator post? This action cannot be undone."))
+      return;
+    try {
+      await api.delete(`/creator/posts/${id}`);
+      toast.success("Post deleted successfully");
+      navigate("/creator-feed");
+    } catch (e) {
+      toast.error(
+        formatApiError(e.response?.data?.error) || "Failed to delete post",
+      );
     }
   };
 
@@ -180,7 +195,19 @@ export default function WatchCreatorPost() {
         {/* Post Details */}
         <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight">{post.title}</h1>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-3xl font-bold tracking-tight">{post.title}</h1>
+              {user?.role === "admin" && (
+                <button
+                  onClick={deletePost}
+                  className="flex shrink-0 items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 transition hover:bg-red-500/20"
+                  title="Admin: Delete this creator post"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Post
+                </button>
+              )}
+            </div>
             
             <div className="mt-4 flex flex-wrap gap-4 text-sm text-neutral-400">
               <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 border border-white/10">
